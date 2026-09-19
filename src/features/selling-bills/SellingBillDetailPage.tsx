@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
   ArrowLeft, Ban, CheckCircle2, Circle, HandCoins, MoreHorizontal, Package,
-  Pencil, Phone, MapPin, Plus, StickyNote, Trash2, Wrench,
+  Pencil, Phone, MapPin, Plus, Printer, StickyNote, Trash2, Truck, Wrench,
 } from 'lucide-react';
 import { PageHeader } from '@/components/common/PageHeader';
 import { StatusBadge } from '@/components/common/StatusBadge';
@@ -339,7 +339,17 @@ export function SellingBillDetailPage() {
           title={bill.client || 'Fattura'}
           description={`Vendita del ${formatDate(bill.date)} · ${bill.seller}`}
           actions={
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
+              <Button size="sm" variant="outline" asChild>
+                <Link to={`/vendite/${bill.uuid}/stampa?tipo=documento`} target="_blank">
+                  <Printer className="h-4 w-4" /> Stampa vendita
+                </Link>
+              </Button>
+              <Button size="sm" variant="outline" asChild>
+                <Link to={`/vendite/${bill.uuid}/stampa?tipo=bolla`} target="_blank">
+                  <Truck className="h-4 w-4" /> Bolla
+                </Link>
+              </Button>
               <StatusBadge status={bill.status} />
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
