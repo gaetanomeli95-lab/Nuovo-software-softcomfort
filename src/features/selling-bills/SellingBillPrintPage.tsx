@@ -112,6 +112,17 @@ export function SellingBillPrintPage() {
           tr {
             break-inside: avoid;
           }
+
+          .print-sheet {
+            color: #111 !important;
+          }
+
+          .print-sheet table,
+          .print-sheet section,
+          .print-sheet header {
+            print-color-adjust: exact;
+            -webkit-print-color-adjust: exact;
+          }
         }
       `}</style>
 
