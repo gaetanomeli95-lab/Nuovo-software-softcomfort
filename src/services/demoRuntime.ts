@@ -21,8 +21,8 @@ import type {
 let sales: SellingBill[] = structuredClone(demoSellingBills);
 let buyingBills: BuyingBill[] = structuredClone(demoBuyingBills);
 let checks: Check[] = structuredClone(demoChecks);
-let inventoryAvailable: InventoryItem[] = structuredClone(demoInventoryAvailable);
-let inventoryDelivered: InventoryItem[] = structuredClone(demoInventoryDelivered);
+const inventoryAvailable: InventoryItem[] = structuredClone(demoInventoryAvailable);
+const inventoryDelivered: InventoryItem[] = structuredClone(demoInventoryDelivered);
 let pending: PendingOrder[] = structuredClone(demoPending);
 let idCounter = 1000;
 
