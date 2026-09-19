@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Clock, Plus, Search, Trash2 } from 'lucide-react';
 import { PageHeader } from '@/components/common/PageHeader';
+import { SummaryPill } from '@/components/common/SummaryPill';
 import { ErrorState } from '@/components/common/ErrorState';
 import { EmptyState } from '@/components/common/EmptyState';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
@@ -84,27 +85,32 @@ export function PendingPage() {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <PageHeader
         title="Ordini in sospeso"
         description="Articoli da ordinare non legati a una vendita"
         actions={<AddPendingDialog />}
       />
 
-      <div className="relative w-full max-w-sm">
-        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Cerca articolo o ditta…"
-          className="pl-8"
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-        />
-      </div>
-
       <Card>
+        <CardContent className="flex flex-wrap items-center gap-3 p-3.5">
+          <div className="relative w-full max-w-md flex-1">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Cerca articolo o ditta…"
+              className="pl-9"
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+            />
+          </div>
+          <SummaryPill label="In sospeso" value={String(rows.length)} tone="gold" />
+        </CardContent>
+      </Card>
+
+      <Card className="overflow-hidden">
         <CardContent className="p-0">
           {isLoading ? (
-            <div className="space-y-2 p-4">
+            <div className="space-y-2 p-5">
               {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}
             </div>
           ) : error ? (
@@ -131,7 +137,7 @@ export function PendingPage() {
               <TableBody>
                 {rows.map((o) => (
                   <TableRow key={o.uuid}>
-                    <TableCell className="font-medium">{o.name}</TableCell>
+                    <TableCell className="font-semibold">{o.name}</TableCell>
                     <TableCell className="hidden text-muted-foreground md:table-cell">
                       {o.company || '—'}
                     </TableCell>
@@ -147,7 +153,7 @@ export function PendingPage() {
                     ))}
                     <TableCell className="hidden text-right sm:table-cell">
                       {o.price != null ? (
-                        <span className="tnum">{formatCurrency(o.price)}</span>
+                        <span className="tnum font-bold">{formatCurrency(o.price)}</span>
                       ) : (
                         <Badge variant="outline">—</Badge>
                       )}
