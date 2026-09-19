@@ -42,7 +42,7 @@ export function LoginPage() {
       if (err instanceof ApiError && (err.status === 401 || err.status === 403)) {
         setServerError('Credenziali non valide.');
       } else if (err instanceof ApiError && err.status === 0) {
-        setServerError('Server non raggiungibile.');
+        setServerError(err.message || 'Server non raggiungibile.');
       } else {
         setServerError('Accesso non riuscito. Riprova.');
       }

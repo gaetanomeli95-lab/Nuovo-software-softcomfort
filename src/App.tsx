@@ -9,6 +9,7 @@ import { LoginPage } from '@/features/auth/LoginPage';
 import { DashboardPage } from '@/features/dashboard/DashboardPage';
 import { SellingBillsPage } from '@/features/selling-bills/SellingBillsPage';
 import { SellingBillDetailPage } from '@/features/selling-bills/SellingBillDetailPage';
+import { SellingBillPrintPage } from '@/features/selling-bills/SellingBillPrintPage';
 import { DepositsPage } from '@/features/deposits/DepositsPage';
 import { ChecksPage } from '@/features/checks/ChecksPage';
 import { ProvisionsPage } from '@/features/provisions/ProvisionsPage';
@@ -41,6 +42,14 @@ export default function App() {
                   <RedirectIfAuthed>
                     <LoginPage />
                   </RedirectIfAuthed>
+                }
+              />
+              <Route
+                path="/vendite/:uuid/stampa"
+                element={
+                  <RequireAuth>
+                    <SellingBillPrintPage />
+                  </RequireAuth>
                 }
               />
               <Route
