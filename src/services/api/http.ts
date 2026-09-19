@@ -1,6 +1,6 @@
 import { API_BASE_URL, AUTOMATIC_DEMO_MODE } from './config';
 import { loadSession, clearSession, isDemoSession } from './tokenStore';
-import { handleDemoRequest } from '@/services/demoData';
+import { handleDemoRequest } from '@/services/demoRuntime';
 
 export class ApiError extends Error {
   constructor(
@@ -39,7 +39,7 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
   // Anteprima Vercel o sessione demo esplicita:
   // nessuna chiamata al backend reale.
   if (AUTOMATIC_DEMO_MODE || isDemoSession()) {
-    return handleDemoRequest<T>(path, method);
+    return handleDemoRequest<T>(path, method, body);
   }
 
   const headers: Record<string, string> = {
