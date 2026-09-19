@@ -30,7 +30,7 @@ export function StatCard({ label, value, sub, icon: Icon, to, tone = 'default', 
         to && 'transition-all duration-200 hover:-translate-y-0.5 hover:border-[#d6ccc1] hover:shadow-[var(--shadow-card-hover)]',
       )}
     >
-      <CardContent className="flex min-h-[104px] items-center gap-4 p-4.5">
+      <CardContent className="flex min-h-[104px] items-center gap-4 p-5">
         <div className={cn('grid h-11 w-11 shrink-0 place-items-center rounded-xl border', TONE_ICON[tone])}>
           <Icon className="h-5 w-5" />
         </div>
