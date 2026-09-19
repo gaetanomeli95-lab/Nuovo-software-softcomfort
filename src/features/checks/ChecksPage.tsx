@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Landmark, Plus, Search, Trash2 } from 'lucide-react';
 import { PageHeader } from '@/components/common/PageHeader';
+import { SummaryPill } from '@/components/common/SummaryPill';
 import { ErrorState } from '@/components/common/ErrorState';
 import { EmptyState } from '@/components/common/EmptyState';
 import { ConfirmDialog } from '@/components/common/ConfirmDialog';
@@ -40,7 +41,10 @@ function AddCheckDialog() {
       billNumbers: billNumbers.trim() || undefined,
     });
     setOpen(false);
-    setMake(''); setExpireDate(''); setAmount(''); setBillNumbers('');
+    setMake('');
+    setExpireDate('');
+    setAmount('');
+    setBillNumbers('');
   };
 
   return (
@@ -101,32 +105,32 @@ export function ChecksPage() {
   const total = rows.reduce((s, c) => s + c.amount, 0);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <PageHeader
         title="Assegni"
         description="Assegni ricevuti e relative scadenze"
         actions={<AddCheckDialog />}
       />
 
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="relative w-full max-w-sm">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Cerca emittente o n. fattura…"
-            className="pl-8"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-          />
-        </div>
-        <Badge variant="outline" className="ml-auto">
-          Totale: {formatCurrency(total)}
-        </Badge>
-      </div>
-
       <Card>
+        <CardContent className="flex flex-wrap items-center gap-3 p-3.5">
+          <div className="relative w-full max-w-md flex-1">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Cerca emittente o n. fattura…"
+              className="pl-9"
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+            />
+          </div>
+          <SummaryPill label="Totale assegni" value={formatCurrency(total)} tone="neutral" />
+        </CardContent>
+      </Card>
+
+      <Card className="overflow-hidden">
         <CardContent className="p-0">
           {isLoading ? (
-            <div className="space-y-2 p-4">
+            <div className="space-y-2 p-5">
               {Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}
             </div>
           ) : error ? (
@@ -153,7 +157,7 @@ export function ChecksPage() {
                     <TableRow key={c.uuid}>
                       <TableCell className="whitespace-nowrap">
                         <div className="flex items-center gap-2">
-                          {formatDate(c.expireDate)}
+                          <span className="tnum font-medium">{formatDate(c.expireDate)}</span>
                           {expired ? (
                             <Badge variant="destructive">Scaduto</Badge>
                           ) : urgent ? (
@@ -161,11 +165,11 @@ export function ChecksPage() {
                           ) : null}
                         </div>
                       </TableCell>
-                      <TableCell className="font-medium">{c.make}</TableCell>
+                      <TableCell className="font-semibold">{c.make}</TableCell>
                       <TableCell className="hidden text-muted-foreground md:table-cell">
                         {c.billNumbers || '—'}
                       </TableCell>
-                      <TableCell className="tnum text-right font-medium">{formatCurrency(c.amount)}</TableCell>
+                      <TableCell className="tnum text-right font-bold">{formatCurrency(c.amount)}</TableCell>
                       <TableCell>
                         <ConfirmDialog
                           trigger={
