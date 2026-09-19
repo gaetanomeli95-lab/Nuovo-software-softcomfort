@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight,
-  ReceiptText, RotateCcw, Search,
+  Printer, ReceiptText, RotateCcw, Search, Truck,
 } from 'lucide-react';
 import { PageHeader } from '@/components/common/PageHeader';
+import { PaymentStatusBadge } from '@/components/common/PaymentStatusBadge';
 import { SummaryPill } from '@/components/common/SummaryPill';
 import { StatusBadge } from '@/components/common/StatusBadge';
 import { ErrorState } from '@/components/common/ErrorState';
@@ -25,11 +26,13 @@ import {
   totalPages, uniqueSellers,
   type BillFilters, type SortDir, type SortKey,
 } from './billFilters';
+import { getPaymentSummary, type PaymentStatus } from './paymentStatus';
 import { SELLING_BILL_STATUSES, type SellingBillStatus } from '@/types/domain';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { cn } from '@/lib/utils';
 
 const PAGE_SIZE = 25;
+const PAYMENT_STATES: PaymentStatus[] = ['Da pagare', 'Parziale', 'Pagata'];
 
 function SortableHead({
   label, sortKey, current, dir, onSort, className,
@@ -42,6 +45,7 @@ function SortableHead({
   className?: string;
 }) {
   const active = current === sortKey;
+
   return (
     <TableHead className={className}>
       <button
@@ -67,12 +71,14 @@ function SortableHead({
 
 export function SellingBillsPage() {
   const { data, isLoading, error, refetch } = useSellingBills();
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [filters, setFilters] = useState<BillFilters>(() => ({
     ...DEFAULT_FILTERS,
     search: searchParams.get('q') ?? '',
     status: (searchParams.get('status') as SellingBillStatus) || 'all',
+    payment: (searchParams.get('payment') as PaymentStatus) || 'all',
   }));
   const [sortKey, setSortKey] = useState<SortKey>('date');
   const [sortDir, setSortDir] = useState<SortDir>('desc');
@@ -89,10 +95,12 @@ export function SellingBillsPage() {
   const updateFilters = (patch: Partial<BillFilters>) => {
     setFilters((f) => ({ ...f, ...patch }));
     setPage(0);
+
     const next = { ...filters, ...patch };
     const params = new URLSearchParams();
     if (next.search) params.set('q', next.search);
     if (next.status !== 'all') params.set('status', next.status);
+    if (next.payment !== 'all') params.set('payment', next.payment);
     setSearchParams(params, { replace: true });
   };
 
@@ -111,14 +119,22 @@ export function SellingBillsPage() {
   };
 
   const hasActiveFilters =
-    filters.search !== '' || filters.status !== 'all' ||
-    filters.seller !== 'all' || filters.dateFrom !== '' || filters.dateTo !== '';
+    filters.search !== '' ||
+    filters.status !== 'all' ||
+    filters.payment !== 'all' ||
+    filters.seller !== 'all' ||
+    filters.dateFrom !== '' ||
+    filters.dateTo !== '';
 
   return (
     <div className="space-y-5">
       <PageHeader
         title="Fatture di vendita"
-        description={data ? `${filtered.length} risultati su ${data.length} fatture` : 'Elenco delle vendite'}
+        description={
+          data
+            ? `${filtered.length} risultati su ${data.length} vendite · clicca una riga per aprirla`
+            : 'Elenco delle vendite'
+        }
       />
 
       <Card>
@@ -138,8 +154,8 @@ export function SellingBillsPage() {
             value={filters.status}
             onValueChange={(v) => updateFilters({ status: v as BillFilters['status'] })}
           >
-            <SelectTrigger className="w-[165px]" aria-label="Stato">
-              <SelectValue placeholder="Stato" />
+            <SelectTrigger className="w-[165px]" aria-label="Stato operativo">
+              <SelectValue placeholder="Stato operativo" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">Tutti gli stati</SelectItem>
@@ -149,8 +165,23 @@ export function SellingBillsPage() {
             </SelectContent>
           </Select>
 
+          <Select
+            value={filters.payment}
+            onValueChange={(v) => updateFilters({ payment: v as BillFilters['payment'] })}
+          >
+            <SelectTrigger className="w-[155px]" aria-label="Stato pagamento">
+              <SelectValue placeholder="Pagamento" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tutti i pagamenti</SelectItem>
+              {PAYMENT_STATES.map((s) => (
+                <SelectItem key={s} value={s}>{s}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
           <Select value={filters.seller} onValueChange={(v) => updateFilters({ seller: v })}>
-            <SelectTrigger className="w-[165px]" aria-label="Venditore">
+            <SelectTrigger className="w-[155px]" aria-label="Venditore">
               <SelectValue placeholder="Venditore" />
             </SelectTrigger>
             <SelectContent>
@@ -209,9 +240,11 @@ export function SellingBillsPage() {
                 ? 'Prova a modificare i filtri di ricerca.'
                 : 'Non ci sono ancora fatture di vendita.'
             }
-            action={hasActiveFilters && (
-              <Button variant="outline" size="sm" onClick={resetFilters}>Azzera filtri</Button>
-            )}
+            action={
+              hasActiveFilters ? (
+                <Button variant="outline" size="sm" onClick={resetFilters}>Azzera filtri</Button>
+              ) : undefined
+            }
           />
         ) : (
           <>
@@ -221,30 +254,84 @@ export function SellingBillsPage() {
                   <SortableHead label="Data" sortKey="date" current={sortKey} dir={sortDir} onSort={onSort} />
                   <SortableHead label="Cliente" sortKey="client" current={sortKey} dir={sortDir} onSort={onSort} />
                   <SortableHead label="Venditore" sortKey="seller" current={sortKey} dir={sortDir} onSort={onSort} />
-                  <TableHead className="hidden md:table-cell">Articoli</TableHead>
+                  <TableHead className="hidden lg:table-cell">Articoli</TableHead>
                   <SortableHead label="Stato" sortKey="status" current={sortKey} dir={sortDir} onSort={onSort} />
-                  <SortableHead label="Totale" sortKey="totalPrice" current={sortKey} dir={sortDir} onSort={onSort} className="text-right" />
+                  <TableHead>Pagamento</TableHead>
+                  <SortableHead
+                    label="Totale"
+                    sortKey="totalPrice"
+                    current={sortKey}
+                    dir={sortDir}
+                    onSort={onSort}
+                    className="text-right"
+                  />
+                  <TableHead className="text-right">Azioni</TableHead>
                 </TableRow>
               </TableHeader>
+
               <TableBody>
-                {rows.map((b) => (
-                  <TableRow key={b.uuid}>
-                    <TableCell className="tnum whitespace-nowrap">{formatDate(b.date)}</TableCell>
-                    <TableCell className="max-w-[240px] truncate">
-                      <Link to={`/vendite/${b.uuid}`} className="data-link">
+                {rows.map((b) => {
+                  const payment = getPaymentSummary(b);
+
+                  return (
+                    <TableRow
+                      key={b.uuid}
+                      role="link"
+                      tabIndex={0}
+                      onClick={() => navigate(`/vendite/${b.uuid}`)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') navigate(`/vendite/${b.uuid}`);
+                      }}
+                      className="group cursor-pointer"
+                      title="Apri vendita"
+                    >
+                      <TableCell className="tnum whitespace-nowrap">{formatDate(b.date)}</TableCell>
+                      <TableCell className="max-w-[240px] truncate font-bold text-foreground group-hover:text-primary">
                         {b.client || '—'}
-                      </Link>
-                    </TableCell>
-                    <TableCell className="font-medium">{b.seller}</TableCell>
-                    <TableCell className="hidden max-w-[260px] truncate text-muted-foreground md:table-cell">
-                      {(b.items ?? []).map((i) => i.name).join(', ') || '—'}
-                    </TableCell>
-                    <TableCell><StatusBadge status={b.status} /></TableCell>
-                    <TableCell className="tnum text-right font-bold">
-                      {formatCurrency(b.totalPrice)}
-                    </TableCell>
-                  </TableRow>
-                ))}
+                      </TableCell>
+                      <TableCell className="font-medium">{b.seller}</TableCell>
+                      <TableCell className="hidden max-w-[260px] truncate text-muted-foreground lg:table-cell">
+                        {(b.items ?? []).map((i) => i.name).join(', ') || '—'}
+                      </TableCell>
+                      <TableCell><StatusBadge status={b.status} /></TableCell>
+                      <TableCell>
+                        {b.status === 'Annullata' ? (
+                          <span className="text-xs text-muted-foreground">—</span>
+                        ) : (
+                          <PaymentStatusBadge status={payment.status} />
+                        )}
+                      </TableCell>
+                      <TableCell className="tnum text-right font-bold">
+                        {formatCurrency(b.totalPrice)}
+                      </TableCell>
+                      <TableCell
+                        className="whitespace-nowrap text-right"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <div className="inline-flex items-center gap-1.5">
+                          <Button size="sm" variant="outline" asChild>
+                            <Link
+                              to={`/vendite/${b.uuid}/stampa?tipo=documento`}
+                              aria-label={`Stampa vendita ${b.client}`}
+                            >
+                              <Printer className="h-3.5 w-3.5" />
+                              <span className="hidden xl:inline">Stampa</span>
+                            </Link>
+                          </Button>
+                          <Button size="sm" variant="outline" asChild>
+                            <Link
+                              to={`/vendite/${b.uuid}/stampa?tipo=bolla`}
+                              aria-label={`Bolla ${b.client}`}
+                            >
+                              <Truck className="h-3.5 w-3.5" />
+                              <span className="hidden xl:inline">Bolla</span>
+                            </Link>
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
 
