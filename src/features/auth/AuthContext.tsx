@@ -10,6 +10,8 @@ import { signIn } from '@/services/api/auth';
 import { setOnUnauthorized } from '@/services/api/http';
 import {
   clearSession,
+  DEMO_SESSION_TOKEN,
+  isDemoSession,
   loadSession,
   saveSession,
 } from '@/services/api/tokenStore';
@@ -18,7 +20,9 @@ import type { AuthUser } from '@/types/domain';
 interface AuthState {
   user: AuthUser | null;
   isAuthenticated: boolean;
+  isDemo: boolean;
   login: (username: string, password: string) => Promise<void>;
+  loginDemo: () => void;
   logout: () => void;
 }
 
@@ -37,10 +41,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const session = loadSession();
     return session ? toUser(session.username, session.roles) : null;
   });
+  const [demo, setDemo] = useState(() => isDemoSession());
 
   const logout = useCallback(() => {
     clearSession();
     setUser(null);
+    setDemo(false);
   }, []);
 
   const login = useCallback(async (username: string, password: string) => {
@@ -50,18 +56,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       username: res.username,
       roles: res.roles,
     });
+    setDemo(false);
     setUser(toUser(res.username, res.roles));
   }, []);
 
-  // Se una chiamata riceve 401 → sessione invalidata → logout automatico.
+  const loginDemo = useCallback(() => {
+    const username = 'Demo Soft Comfort';
+    const roles = ['ROLE_ADMIN'];
+    saveSession({
+      token: DEMO_SESSION_TOKEN,
+      username,
+      roles,
+    });
+    setDemo(true);
+    setUser(toUser(username, roles));
+  }, []);
+
   useState(() => {
     setOnUnauthorized(() => setUser(null));
     return () => setOnUnauthorized(null);
   });
 
   const value = useMemo<AuthState>(
-    () => ({ user, isAuthenticated: user !== null, login, logout }),
-    [user, login, logout],
+    () => ({
+      user,
+      isAuthenticated: user !== null,
+      isDemo: demo,
+      login,
+      loginDemo,
+      logout,
+    }),
+    [user, demo, login, loginDemo, logout],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

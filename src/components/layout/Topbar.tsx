@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { LogOut, Menu, Search, User } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -19,7 +20,7 @@ interface TopbarProps {
 }
 
 export function Topbar({ onMenuClick, onSearch }: TopbarProps) {
-  const { user, logout } = useAuth();
+  const { user, isDemo, logout } = useAuth();
   const navigate = useNavigate();
   const [q, setQ] = useState('');
 
@@ -56,10 +57,15 @@ export function Topbar({ onMenuClick, onSearch }: TopbarProps) {
       </form>
 
       <div className="ml-auto flex items-center gap-2">
+        {isDemo && (
+          <Badge variant="warning" className="hidden sm:inline-flex">
+            Modalità demo
+          </Badge>
+        )}
         <div className="hidden text-right md:block">
           <p className="text-xs font-semibold text-foreground">{user?.username}</p>
           <p className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
-            {user?.isAdmin ? 'Amministratore' : 'Utente'}
+            {isDemo ? 'Dati dimostrativi' : user?.isAdmin ? 'Amministratore' : 'Utente'}
           </p>
         </div>
 
@@ -77,7 +83,11 @@ export function Topbar({ onMenuClick, onSearch }: TopbarProps) {
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>
               {user?.username}
-              {user?.isAdmin && <span className="ml-1 text-primary">· admin</span>}
+              {isDemo ? (
+                <span className="ml-1 text-[#8a6123]">· demo</span>
+              ) : user?.isAdmin ? (
+                <span className="ml-1 text-primary">· admin</span>
+              ) : null}
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem
