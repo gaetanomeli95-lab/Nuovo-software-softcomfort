@@ -61,14 +61,7 @@ export default function App() {
                 }
               >
                 <Route index element={<HomePage />} />
-                <Route
-                  path="dashboard"
-                  element={
-                    <RequireAdmin>
-                      <DashboardPage />
-                    </RequireAdmin>
-                  }
-                />
+                <Route path="dashboard" element={<DashboardPage />} />
                 <Route path="vendite" element={<SellingBillsPage />} />
                 <Route path="vendite/:uuid" element={<SellingBillDetailPage />} />
                 <Route path="ordini" element={<PendingPage />} />
