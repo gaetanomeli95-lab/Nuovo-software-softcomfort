@@ -301,8 +301,9 @@ export async function handleDemoRequest<T>(
 
   if (path === '/provisions/setPayed' && method === 'PATCH') {
     for (const sale of sales) {
-      if (sale.provision?.uuid === data.uuid) {
-        sale.provision.payed = true;
+      const provision = sale.provision;
+      if (provision?.uuid === data.uuid) {
+        provision.payed = true;
         break;
       }
     }
