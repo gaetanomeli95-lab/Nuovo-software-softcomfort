@@ -71,7 +71,7 @@ export function Topbar({ onMenuClick, onSearch }: TopbarProps) {
               className="rounded-full border-[#d9d0c6] bg-white"
               aria-label="Account"
             >
-              <User className="h-4.5 w-4.5" />
+              <User className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">

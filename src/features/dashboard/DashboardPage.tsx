@@ -104,7 +104,7 @@ export function DashboardPage() {
               <div className="absolute right-[-30px] top-[-56px] h-40 w-40 rounded-full bg-primary/[0.055]" />
               <div className="absolute right-10 top-[-70px] h-44 w-44 rounded-full bg-[#d9a858]/[0.07]" />
               <CardContent className="relative flex min-h-[128px] items-center gap-5 p-6">
-                <div className="grid h-13 w-13 shrink-0 place-items-center rounded-2xl border border-[#f4c9cc] bg-[#fff0f1] text-primary">
+                <div className="grid h-12 w-12 shrink-0 place-items-center rounded-2xl border border-[#f4c9cc] bg-[#fff0f1] text-primary">
                   <Banknote className="h-6 w-6" />
                 </div>
                 <div className="min-w-0">
