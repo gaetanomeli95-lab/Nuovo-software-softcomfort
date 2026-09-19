@@ -5,6 +5,7 @@ import { useSellingBill } from '@/hooks/useQueries';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { SOFT_COMFORT_COMPANY } from '@/config/company';
 import { getPaymentSummary } from './paymentStatus';
+import { LegacyDeliveryNote } from './LegacyDeliveryNote';
 
 type PrintType = 'documento' | 'bolla';
 
@@ -100,9 +101,19 @@ export function SellingBillPrintPage() {
     );
   }
 
+  if (type === 'bolla') {
+    return (
+      <div className="min-h-screen bg-[#ece7e1] text-[#251f1d]">
+        <style>{`\n          @page { size: A4; margin: 8mm; }\n          .print-sheet { -webkit-print-color-adjust: exact; print-color-adjust: exact; }\n          @media print {\n            html, body, #root { background: white !important; }\n            .print-toolbar { display: none !important; }\n            .print-sheet { width: auto !important; min-height: auto !important; margin: 0 !important; padding: 0 !important; box-shadow: none !important; }\n            tr { break-inside: avoid; }\n          }\n        `}</style>
+        <PrintToolbar type={type} uuid={uuid} />
+        <LegacyDeliveryNote bill={bill} />
+      </div>
+    );
+  }
+
   const payment = getPaymentSummary(bill);
   const ref = bill.uuid.slice(0, 8).toUpperCase();
-  const documentTitle = type === 'bolla' ? 'Bolla di consegna' : 'Documento di vendita';
+  const documentTitle = 'Documento di vendita';
 
   return (
     <div className="min-h-screen bg-[#ece7e1] text-[#251f1d]">
