@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { sellingBillsApi } from '@/services/api/sellingBills';
+import { sellingBillsApi, type CreateSellingBillInput } from '@/services/api/sellingBills';
 import { buyingBillsApi } from '@/services/api/buyingBills';
 import { checksApi } from '@/services/api/checks';
 import { depositsApi } from '@/services/api/deposits';
@@ -33,6 +33,20 @@ function useInvalidateBill(uuid: string) {
     void qc.invalidateQueries({ queryKey: queryKeys.sellingBill(uuid) });
     void qc.invalidateQueries({ queryKey: queryKeys.sellingBills });
   };
+}
+
+export function useCreateSellingBill() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (bill: CreateSellingBillInput) => sellingBillsApi.create(bill),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: queryKeys.sellingBills });
+      void qc.invalidateQueries({ queryKey: queryKeys.depositsToCollect });
+      void qc.invalidateQueries({ queryKey: queryKeys.depositsCollected });
+      ok('Fattura creata');
+    },
+    onError: ko,
+  });
 }
 
 export function useSetItemOrdered(uuid: string) {

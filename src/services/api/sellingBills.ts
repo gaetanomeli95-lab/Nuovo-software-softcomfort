@@ -1,6 +1,20 @@
 import { http } from './http';
 import type { SellingBill } from '@/types/domain';
 
+export interface CreateSellingBillInput {
+  date: string;
+  seller: string;
+  client: string;
+  address: string;
+  phone: string;
+  items: Array<{ name: string; price: number }>;
+  method: string;
+  transport: number;
+  itemsPrice: number;
+  totalPrice: number;
+  settlement: number;
+}
+
 /**
  * Adapter fatture di vendita. Mappa gli endpoint legacy
  * (/sellingBill/*) su un'interfaccia pulita per la UI.
@@ -11,6 +25,9 @@ export const sellingBillsApi = {
 
   getById: (uuid: string, signal?: AbortSignal) =>
     http.get<SellingBill>(`/sellingBill/${uuid}`, signal),
+
+  create: (bill: CreateSellingBillInput) =>
+    http.post<SellingBill | undefined>('/sellingBill/add', bill),
 
   /* --- operazioni di scrittura (fasi successive) --- */
 

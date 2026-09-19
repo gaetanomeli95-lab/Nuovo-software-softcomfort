@@ -144,6 +144,60 @@ export async function handleDemoRequest<T>(
 
   const data = bodyObject(body);
 
+  if (path === '/sellingBill/add' && method === 'POST') {
+    const rawItems = Array.isArray(data.items) ? data.items : [];
+    const items: SellingBillItem[] = rawItems.map((raw) => {
+      const item = bodyObject(raw);
+      return {
+        uuid: nextId('demo-item'),
+        name: String(item.name ?? 'Articolo'),
+        price: Number(item.price ?? 0),
+        ordered: false,
+        company: '',
+        arrived: false,
+        delivered: false,
+      };
+    });
+
+    const itemsPrice = Number(
+      data.itemsPrice ?? items.reduce((sum, item) => sum + item.price, 0),
+    );
+    const transport = Number(data.transport ?? 0);
+    const settlement = Number(data.settlement ?? 0);
+    const seller = String(data.seller ?? 'Demo');
+    const created: SellingBill = {
+      uuid: nextId('demo-sale'),
+      date: String(data.date ?? new Date().toISOString().slice(0, 10)),
+      seller,
+      client: String(data.client ?? ''),
+      address: String(data.address ?? ''),
+      phone: String(data.phone ?? ''),
+      status: 'Da Ordinare',
+      delivered: false,
+      items,
+      transport,
+      itemsPrice,
+      totalPrice: Number(data.totalPrice ?? itemsPrice + transport),
+      settlement,
+      assistance: false,
+      notes: '',
+      deposits: settlement > 0
+        ? [{
+            uuid: nextId('demo-dep'),
+            date: String(data.date ?? new Date().toISOString().slice(0, 10)),
+            seller,
+            method: String(data.method ?? 'Contanti'),
+            amount: settlement,
+            collected: true,
+          }]
+        : [],
+      provision: null,
+    };
+
+    sales.unshift(created);
+    return structuredClone(created) as T;
+  }
+
   if (path === '/sellingBill/addItem' && method === 'PATCH') {
     const sale = getSale(data.uuid);
     if (sale) {
