@@ -117,6 +117,31 @@ export function SellingBillPrintPage() {
             color: #111 !important;
           }
 
+          .print-brand-logo-wrap {
+            min-height: 31mm;
+            align-items: center;
+          }
+
+          .print-brand-logo {
+            width: 158mm !important;
+            max-width: 158mm !important;
+            height: 34mm !important;
+            filter: grayscale(1) contrast(2.25) !important;
+            opacity: 1 !important;
+          }
+
+          .print-brand-rule {
+            height: 2px !important;
+            background: #111 !important;
+          }
+
+          .print-brand-company {
+            border-color: #111 !important;
+            color: #111 !important;
+            font-size: 9.5px !important;
+            font-weight: 700 !important;
+          }
+
           .print-sheet table,
           .print-sheet section,
           .print-sheet header {
