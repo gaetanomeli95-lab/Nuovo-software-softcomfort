@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 
-const LOGO_URL =
-  'https://raw.githubusercontent.com/gaetanomeli95-lab/SITO-SOFT-COMFORT/main/ChatGPT%20Image%2014%20mag%202026%2C%2018_40_10.png';
+const LOGO_URL = '/softcomfort-logo.png';
 
 interface SoftComfortBrandProps {
   compact?: boolean;
