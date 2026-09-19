@@ -1,8 +1,9 @@
-import { useNavigate } from 'react-router-dom';
-import { LogOut, Menu, Search, User } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Home, LogOut, Search, User } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { SoftComfortBrand } from '@/components/common/SoftComfortBrand';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,29 +16,44 @@ import { useAuth } from '@/features/auth/AuthContext';
 import { useState } from 'react';
 
 interface TopbarProps {
-  onMenuClick: () => void;
   onSearch: (q: string) => void;
 }
 
-export function Topbar({ onMenuClick, onSearch }: TopbarProps) {
+export function Topbar({ onSearch }: TopbarProps) {
   const { user, isDemo, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [q, setQ] = useState('');
+  const isHome = location.pathname === '/';
 
   return (
-    <header className="flex h-[68px] shrink-0 items-center gap-3 border-b border-[#ddd5cc] bg-[#fffefd]/95 px-4 shadow-[0_1px_0_rgba(64,47,38,0.02)] backdrop-blur-xl sm:px-6">
-      <Button
-        variant="ghost"
-        size="icon"
-        className="lg:hidden"
-        onClick={onMenuClick}
-        aria-label="Menu"
+    <header className="flex min-h-[68px] shrink-0 items-center gap-3 border-b border-[#ddd5cc] bg-[#fffefd]/95 px-4 py-2.5 shadow-[0_1px_0_rgba(64,47,38,0.02)] backdrop-blur-xl sm:px-6">
+      <button
+        type="button"
+        onClick={() => navigate('/')}
+        className="hidden rounded-xl text-left transition-opacity hover:opacity-80 sm:block"
+        aria-label="Torna alla home"
       >
-        <Menu className="h-5 w-5" />
-      </Button>
+        <SoftComfortBrand
+          className="text-[#272120]"
+          imageClassName="h-10 w-10 rounded-[12px]"
+          showTagline={false}
+        />
+      </button>
+
+      {!isHome && (
+        <Button
+          variant="outline"
+          className="shrink-0 border-[#d9d0c6] bg-white"
+          onClick={() => navigate('/')}
+        >
+          <Home className="h-4 w-4" />
+          <span className="hidden md:inline">Home</span>
+        </Button>
+      )}
 
       <form
-        className="relative w-full max-w-xl"
+        className="relative ml-0 w-full max-w-xl sm:ml-2"
         onSubmit={(e) => {
           e.preventDefault();
           onSearch(q);
@@ -62,7 +78,7 @@ export function Topbar({ onMenuClick, onSearch }: TopbarProps) {
             Modalità demo
           </Badge>
         )}
-        <div className="hidden text-right md:block">
+        <div className="hidden text-right lg:block">
           <p className="text-xs font-semibold text-foreground">{user?.username}</p>
           <p className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
             {isDemo ? 'Dati dimostrativi' : user?.isAdmin ? 'Amministratore' : 'Utente'}

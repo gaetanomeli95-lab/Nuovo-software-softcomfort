@@ -6,6 +6,7 @@ import { AuthProvider } from '@/features/auth/AuthContext';
 import { RedirectIfAuthed, RequireAdmin, RequireAuth } from '@/app/guards';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { LoginPage } from '@/features/auth/LoginPage';
+import { HomePage } from '@/features/home/HomePage';
 import { DashboardPage } from '@/features/dashboard/DashboardPage';
 import { SellingBillsPage } from '@/features/selling-bills/SellingBillsPage';
 import { SellingBillDetailPage } from '@/features/selling-bills/SellingBillDetailPage';
@@ -59,7 +60,15 @@ export default function App() {
                   </RequireAuth>
                 }
               >
-                <Route index element={<DashboardPage />} />
+                <Route index element={<HomePage />} />
+                <Route
+                  path="dashboard"
+                  element={
+                    <RequireAdmin>
+                      <DashboardPage />
+                    </RequireAdmin>
+                  }
+                />
                 <Route path="vendite" element={<SellingBillsPage />} />
                 <Route path="vendite/:uuid" element={<SellingBillDetailPage />} />
                 <Route path="ordini" element={<PendingPage />} />
