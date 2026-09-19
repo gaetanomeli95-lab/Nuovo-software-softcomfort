@@ -341,12 +341,12 @@ export function SellingBillDetailPage() {
           actions={
             <div className="flex flex-wrap items-center gap-2">
               <Button size="sm" variant="outline" asChild>
-                <Link to={`/vendite/${bill.uuid}/stampa?tipo=documento`} target="_blank">
+                <Link to={`/vendite/${bill.uuid}/stampa?tipo=documento`}>
                   <Printer className="h-4 w-4" /> Stampa vendita
                 </Link>
               </Button>
               <Button size="sm" variant="outline" asChild>
-                <Link to={`/vendite/${bill.uuid}/stampa?tipo=bolla`} target="_blank">
+                <Link to={`/vendite/${bill.uuid}/stampa?tipo=bolla`}>
                   <Truck className="h-4 w-4" /> Bolla
                 </Link>
               </Button>
