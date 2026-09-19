@@ -7,6 +7,7 @@ import {
   type ReactNode,
 } from 'react';
 import { signIn } from '@/services/api/auth';
+import { AUTOMATIC_DEMO_MODE } from '@/services/api/config';
 import { setOnUnauthorized } from '@/services/api/http';
 import {
   clearSession,
@@ -28,6 +29,9 @@ interface AuthState {
 
 const AuthContext = createContext<AuthState | null>(null);
 
+const DEMO_USERNAME = 'Demo Soft Comfort';
+const DEMO_ROLES = ['ROLE_ADMIN'];
+
 function toUser(username: string, roles: string[]): AuthUser {
   return {
     username,
@@ -36,15 +40,29 @@ function toUser(username: string, roles: string[]): AuthUser {
   };
 }
 
+function automaticDemoUser(): AuthUser | null {
+  return AUTOMATIC_DEMO_MODE ? toUser(DEMO_USERNAME, DEMO_ROLES) : null;
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(() => {
+    if (AUTOMATIC_DEMO_MODE) return automaticDemoUser();
     const session = loadSession();
     return session ? toUser(session.username, session.roles) : null;
   });
-  const [demo, setDemo] = useState(() => isDemoSession());
+  const [demo, setDemo] = useState(() => AUTOMATIC_DEMO_MODE || isDemoSession());
 
   const logout = useCallback(() => {
     clearSession();
+
+    // In anteprima Vercel la demo è volutamente sempre disponibile:
+    // "Esci" non deve lasciare l'app in uno stato senza backend/login.
+    if (AUTOMATIC_DEMO_MODE) {
+      setUser(automaticDemoUser());
+      setDemo(true);
+      return;
+    }
+
     setUser(null);
     setDemo(false);
   }, []);
@@ -61,19 +79,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const loginDemo = useCallback(() => {
-    const username = 'Demo Soft Comfort';
-    const roles = ['ROLE_ADMIN'];
     saveSession({
       token: DEMO_SESSION_TOKEN,
-      username,
-      roles,
+      username: DEMO_USERNAME,
+      roles: DEMO_ROLES,
     });
     setDemo(true);
-    setUser(toUser(username, roles));
+    setUser(toUser(DEMO_USERNAME, DEMO_ROLES));
   }, []);
 
   useState(() => {
-    setOnUnauthorized(() => setUser(null));
+    setOnUnauthorized(() => {
+      if (AUTOMATIC_DEMO_MODE) {
+        setUser(automaticDemoUser());
+        setDemo(true);
+      } else {
+        setUser(null);
+      }
+    });
     return () => setOnUnauthorized(null);
   });
 

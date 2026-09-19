@@ -1,4 +1,4 @@
-import { API_BASE_URL } from './config';
+import { API_BASE_URL, AUTOMATIC_DEMO_MODE } from './config';
 import { loadSession, clearSession, isDemoSession } from './tokenStore';
 import { handleDemoRequest } from '@/services/demoData';
 
@@ -36,8 +36,9 @@ export function setOnUnauthorized(cb: (() => void) | null) {
 async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const { method = 'GET', body, signal } = options;
 
-  // Modalità demo: nessuna chiamata di rete e nessun dato reale.
-  if (isDemoSession()) {
+  // Anteprima Vercel o sessione demo esplicita:
+  // nessuna chiamata al backend reale.
+  if (AUTOMATIC_DEMO_MODE || isDemoSession()) {
     return handleDemoRequest<T>(path, method);
   }
 
