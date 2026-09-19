@@ -1,5 +1,4 @@
 import {
-  LayoutDashboard,
   ReceiptText,
   ShoppingCart,
   Package,
@@ -14,44 +13,90 @@ import {
 export interface NavItem {
   to: string;
   label: string;
+  description: string;
   icon: LucideIcon;
   /** Solo admin */
   adminOnly?: boolean;
 }
 
 export interface NavSection {
-  title?: string;
+  title: string;
+  description: string;
   items: NavItem[];
 }
 
 export const NAV_SECTIONS: NavSection[] = [
   {
-    items: [{ to: '/', label: 'Dashboard', icon: LayoutDashboard }],
-  },
-  {
     title: 'Vendite',
+    description: 'Bolle, vendite e ordini da seguire.',
     items: [
-      { to: '/vendite', label: 'Fatture vendita', icon: ReceiptText },
-      { to: '/ordini', label: 'Ordini in sospeso', icon: Clock },
+      {
+        to: '/vendite',
+        label: 'Fatture vendita',
+        description: 'Consulta, cerca e gestisci tutte le vendite.',
+        icon: ReceiptText,
+      },
+      {
+        to: '/ordini',
+        label: 'Ordini in sospeso',
+        description: 'Controlla ordini, arrivi e consegne ancora aperte.',
+        icon: Clock,
+      },
     ],
   },
   {
     title: 'Acquisti e magazzino',
+    description: 'Fornitori, merce e disponibilità.',
     items: [
-      { to: '/acquisti', label: 'Fatture acquisto', icon: ShoppingCart },
-      { to: '/magazzino', label: 'Giacenze', icon: Package },
+      {
+        to: '/acquisti',
+        label: 'Fatture acquisto',
+        description: 'Consulta i documenti di acquisto dai fornitori.',
+        icon: ShoppingCart,
+      },
+      {
+        to: '/magazzino',
+        label: 'Giacenze',
+        description: 'Controlla articoli, disponibilità e ubicazioni.',
+        icon: Package,
+      },
     ],
   },
   {
     title: 'Contabilità',
+    description: 'Incassi, scadenze e provvigioni.',
     items: [
-      { to: '/acconti', label: 'Acconti', icon: PiggyBank },
-      { to: '/assegni', label: 'Assegni', icon: Landmark },
-      { to: '/provvigioni', label: 'Provvigioni', icon: HandCoins },
+      {
+        to: '/acconti',
+        label: 'Acconti',
+        description: 'Gestisci gli acconti incassati e quelli da incassare.',
+        icon: PiggyBank,
+      },
+      {
+        to: '/assegni',
+        label: 'Assegni',
+        description: 'Controlla importi, riferimenti e scadenze.',
+        icon: Landmark,
+      },
+      {
+        to: '/provvigioni',
+        label: 'Provvigioni',
+        description: 'Gestisci le provvigioni dei venditori.',
+        icon: HandCoins,
+      },
     ],
   },
   {
     title: 'Sistema',
-    items: [{ to: '/amministrazione', label: 'Amministrazione', icon: Settings, adminOnly: true }],
+    description: 'Funzioni riservate e configurazione.',
+    items: [
+      {
+        to: '/amministrazione',
+        label: 'Amministrazione',
+        description: 'Impostazioni e funzioni riservate agli amministratori.',
+        icon: Settings,
+        adminOnly: true,
+      },
+    ],
   },
 ];
