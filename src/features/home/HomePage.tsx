@@ -138,7 +138,7 @@ export function HomePage() {
           return (
             <section
               key={section.title}
-              className="rounded-[28px] border border-[#e3dad2] bg-white/45 p-4 shadow-[0_8px_30px_rgba(73,57,48,0.035)] sm:p-5"
+              className="rounded-[28px] border border-[#d5c8bd] bg-[#efe7df]/80 p-4 shadow-[0_12px_34px_rgba(73,57,48,0.055)] backdrop-blur-[2px] sm:p-5"
             >
               <div className="mb-4 flex items-end justify-between gap-4 px-1">
                 <div>
