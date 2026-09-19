@@ -3,6 +3,7 @@ import { SOFT_COMFORT_COMPANY } from '@/config/company';
 import { getPaymentSummary } from './paymentStatus';
 import { PrintBrandHeader } from './PrintBrandHeader';
 import type { SellingBill } from '@/types/domain';
+import { parseCommissionNotes } from './commissionMetadata';
 
 function SectionLabel({ children }: { children: string }) {
   return (
@@ -17,6 +18,7 @@ export function FamiliarSalesDocument({ bill }: { bill: SellingBill }) {
   const payment = getPaymentSummary(bill);
   const deposits = bill.deposits ?? [];
   const ref = bill.uuid.slice(0, 8).toUpperCase();
+  const commissionNotes = parseCommissionNotes(bill.notes);
 
   return (
     <main className="print-sheet mx-auto my-6 min-h-[297mm] w-[210mm] bg-white px-[13mm] py-[10mm] text-[#202020] shadow-[0_24px_70px_rgba(50,37,31,0.14)]">
@@ -108,7 +110,7 @@ export function FamiliarSalesDocument({ bill }: { bill: SellingBill }) {
           NOTE:
         </div>
         <div className="min-h-[32px] flex-1 bg-white px-3 py-2 text-[9px] font-medium uppercase tracking-[0.01em]">
-          {bill.notes || '—'}
+          {commissionNotes.visibleNotes || '—'}
         </div>
       </section>
 

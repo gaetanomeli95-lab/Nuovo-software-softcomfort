@@ -13,6 +13,8 @@ export interface CreateSellingBillInput {
   itemsPrice: number;
   totalPrice: number;
   settlement: number;
+  /** Note operative da salvare dopo la creazione senza alterare il contratto legacy di /sellingBill/add. */
+  notes?: string;
 }
 
 /**
@@ -26,8 +28,23 @@ export const sellingBillsApi = {
   getById: (uuid: string, signal?: AbortSignal) =>
     http.get<SellingBill>(`/sellingBill/${uuid}`, signal),
 
-  create: (bill: CreateSellingBillInput) =>
-    http.post<SellingBill | undefined>('/sellingBill/add', bill),
+  create: async (bill: CreateSellingBillInput) => {
+    const { notes, ...legacyPayload } = bill;
+    const created = await http.post<SellingBill | undefined>('/sellingBill/add', legacyPayload);
+
+    // Il backend legacy non espone i nuovi campi logistici come proprietà dedicate.
+    // Li conserviamo nel campo note con un formato compatibile e reversibile,
+    // senza inviare proprietà sconosciute al DTO di creazione.
+    if (created?.uuid && notes) {
+      await http.patch<void>('/sellingBill/updateNotes', {
+        uuid: created.uuid,
+        notes,
+      });
+      return { ...created, notes };
+    }
+
+    return created;
+  },
 
   /* --- operazioni di scrittura (fasi successive) --- */
 
