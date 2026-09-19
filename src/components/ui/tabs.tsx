@@ -34,7 +34,7 @@ export function TabsList({ children, className }: { children: ReactNode; classNa
     <div
       role="tablist"
       className={cn(
-        'inline-flex h-9 items-center justify-center rounded-lg border border-white/8 bg-black/30 p-1 text-muted-foreground',
+        'inline-flex h-9 items-center justify-center rounded-lg border border-white/[0.08] bg-black/30 p-1 text-muted-foreground',
         className,
       )}
     >

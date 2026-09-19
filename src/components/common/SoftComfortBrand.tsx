@@ -50,7 +50,7 @@ export function SoftComfortBrand({
             Soft Comfort
           </p>
           {showTagline && (
-            <p className="mt-0.5 truncate text-[9px] font-semibold uppercase tracking-[0.18em] text-brand-gold/85">
+            <p className="mt-0.5 truncate text-[9px] font-semibold uppercase tracking-[0.18em] text-brand-gold/[0.85]">
               Design · Comfort · Innovazione
             </p>
           )}

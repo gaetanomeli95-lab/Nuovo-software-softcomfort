@@ -24,13 +24,13 @@ export function Topbar({ onMenuClick, onSearch }: TopbarProps) {
   const [q, setQ] = useState('');
 
   return (
-    <header className="flex h-16 shrink-0 items-center gap-3 border-b border-white/10 bg-[#090909]/88 px-4 backdrop-blur-xl sm:px-5">
+    <header className="flex h-16 shrink-0 items-center gap-3 border-b border-white/10 bg-[#090909]/[0.88] px-4 backdrop-blur-xl sm:px-5">
       <Button variant="ghost" size="icon" className="lg:hidden" onClick={onMenuClick} aria-label="Menu">
         <Menu className="h-5 w-5" />
       </Button>
 
       <div className="hidden xl:block">
-        <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-brand-gold/65">
+        <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-brand-gold/[0.65]">
           Soft Comfort · Operations
         </p>
         <p className="mt-0.5 text-xs text-muted-foreground">Vendite, logistica e contabilità</p>
@@ -43,7 +43,7 @@ export function Topbar({ onMenuClick, onSearch }: TopbarProps) {
           onSearch(q);
         }}
       >
-        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-gold/55" />
+        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-brand-gold/[0.55]" />
         <Input
           value={q}
           onChange={(e) => {
@@ -62,7 +62,7 @@ export function Topbar({ onMenuClick, onSearch }: TopbarProps) {
             <Button
               variant="ghost"
               size="icon"
-              className="border border-white/8 bg-white/[0.025]"
+              className="border border-white/[0.08] bg-white/[0.025]"
               aria-label="Account"
             >
               <User className="h-5 w-5" />

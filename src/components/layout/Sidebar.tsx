@@ -22,7 +22,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
           return (
             <div key={i} className={cn(i > 0 && 'mt-5')}>
               {section.title && (
-                <p className="mb-1.5 px-3 text-[10px] font-bold uppercase tracking-[0.18em] text-brand-gold/65">
+                <p className="mb-1.5 px-3 text-[10px] font-bold uppercase tracking-[0.18em] text-brand-gold/[0.65]">
                   {section.title}
                 </p>
               )}
@@ -64,7 +64,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
 
       <div className="mx-4 h-px bg-white/10" />
       <div className="p-3">
-        <div className="rounded-xl border border-white/8 bg-white/[0.025] px-3 py-2.5">
+        <div className="rounded-xl border border-white/[0.08] bg-white/[0.025] px-3 py-2.5">
           <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-brand-gold/70">
             Sessione attiva
           </p>

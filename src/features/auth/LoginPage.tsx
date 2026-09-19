@@ -73,7 +73,7 @@ export function LoginPage() {
           </p>
         </div>
 
-        <Card className="border-white/10 bg-card/82 shadow-[0_32px_90px_rgba(0,0,0,0.48)] backdrop-blur-xl">
+        <Card className="border-white/10 bg-card/[0.82] shadow-[0_32px_90px_rgba(0,0,0,0.48)] backdrop-blur-xl">
           <div className="brand-divider h-px w-full" />
           <CardHeader className="pb-3">
             <CardTitle className="font-display text-lg">Accesso riservato</CardTitle>
@@ -123,7 +123,7 @@ export function LoginPage() {
           </CardContent>
         </Card>
 
-        <p className="mt-5 text-center text-[10px] uppercase tracking-[0.16em] text-muted-foreground/65">
+        <p className="mt-5 text-center text-[10px] uppercase tracking-[0.16em] text-muted-foreground/[0.65]">
           Soft Comfort · Palermo &amp; Bagheria
         </p>
       </div>
