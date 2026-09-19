@@ -34,7 +34,7 @@ export function TabsList({ children, className }: { children: ReactNode; classNa
     <div
       role="tablist"
       className={cn(
-        'inline-flex h-9 items-center justify-center rounded-lg border border-white/[0.08] bg-black/30 p-1 text-muted-foreground',
+        'inline-flex h-10 items-center justify-center rounded-xl border border-[#e0d8cf] bg-[#f1ece6] p-1 text-muted-foreground',
         className,
       )}
     >
@@ -62,11 +62,11 @@ export function TabsTrigger({
       aria-selected={active}
       onClick={() => ctx.setValue(value)}
       className={cn(
-        'inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium transition-all',
+        'inline-flex h-8 items-center justify-center whitespace-nowrap rounded-lg px-3 text-sm font-semibold transition-all',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
         active
-          ? 'bg-primary/12 text-foreground shadow-[inset_0_0_0_1px_rgba(242,15,31,0.22)]'
-          : 'hover:bg-white/[0.035] hover:text-foreground',
+          ? 'bg-white text-foreground shadow-[0_1px_4px_rgba(60,45,36,0.09)]'
+          : 'hover:bg-white/45 hover:text-foreground',
         className,
       )}
     >

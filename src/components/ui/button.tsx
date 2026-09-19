@@ -4,24 +4,28 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0',
+  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0',
   {
     variants: {
       variant: {
         default:
-          'bg-primary text-primary-foreground shadow-[0_8px_24px_rgba(242,15,31,0.20)] hover:bg-[#ff2432] hover:shadow-[0_10px_30px_rgba(242,15,31,0.28)]',
-        destructive: 'bg-destructive text-destructive-foreground hover:bg-destructive/90',
+          'bg-primary text-primary-foreground shadow-[0_7px_18px_rgba(242,15,31,0.16)] hover:bg-brand-red-dark hover:shadow-[0_9px_24px_rgba(156,6,16,0.20)]',
+        destructive:
+          'bg-destructive text-destructive-foreground shadow-sm hover:bg-[#a92d36]',
         outline:
-          'border border-white/[0.12] bg-white/[0.025] text-foreground hover:border-brand-gold/25 hover:bg-brand-gold/[0.06]',
-        secondary: 'bg-secondary text-secondary-foreground hover:bg-[#211e20]',
-        ghost: 'text-muted-foreground hover:bg-white/[0.05] hover:text-foreground',
-        link: 'text-brand-gold underline-offset-4 hover:text-[#ebbd72] hover:underline',
+          'border border-[#d9d0c7] bg-white text-foreground shadow-[0_1px_2px_rgba(55,42,34,0.03)] hover:border-[#cbbfb4] hover:bg-[#faf7f3]',
+        secondary:
+          'border border-[#e4ddd5] bg-secondary text-secondary-foreground hover:bg-[#e8e1d8]',
+        ghost:
+          'text-[#665d58] hover:bg-[#eee8e0] hover:text-foreground',
+        link:
+          'text-primary underline-offset-4 hover:text-brand-red-dark hover:underline',
       },
       size: {
-        default: 'h-9 px-4 py-2',
+        default: 'h-10 px-4 py-2',
         sm: 'h-8 rounded-lg px-3 text-xs',
-        lg: 'h-10 rounded-lg px-6',
-        icon: 'h-9 w-9',
+        lg: 'h-11 rounded-xl px-6',
+        icon: 'h-10 w-10',
       },
     },
     defaultVariants: { variant: 'default', size: 'default' },
@@ -37,9 +41,7 @@ export interface ButtonProps
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, asChild = false, ...props }, ref) => {
     const Comp = asChild ? Slot : 'button';
-    return (
-      <Comp className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...props} />
-    );
+    return <Comp className={cn(buttonVariants({ variant, size, className }))} ref={ref} {...props} />;
   },
 );
 Button.displayName = 'Button';
