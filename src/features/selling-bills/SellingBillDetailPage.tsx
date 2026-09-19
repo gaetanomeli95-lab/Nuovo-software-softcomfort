@@ -44,6 +44,12 @@ import { formatCurrency, formatDate } from '@/lib/format';
 import { SELLING_BILL_WORKFLOW, type SellingBillItem, type SellingBillStatus } from '@/types/domain';
 import { cn } from '@/lib/utils';
 import { getPaymentSummary } from './paymentStatus';
+import {
+  composeCommissionNotes,
+  measureSourceLabel,
+  parseCommissionNotes,
+  yesNoLabel,
+} from './commissionMetadata';
 
 function WorkflowStepper({ status }: { status: SellingBillStatus }) {
   if (status === 'Annullata') {
@@ -258,11 +264,15 @@ function AddDepositDialog({ billUuid, seller }: { billUuid: string; seller: stri
 
 function EditNotesDialog({ billUuid, notes }: { billUuid: string; notes: string }) {
   const update = useUpdateNotes(billUuid);
+  const parsed = parseCommissionNotes(notes);
   const [open, setOpen] = useState(false);
-  const [text, setText] = useState(notes);
+  const [text, setText] = useState(parsed.visibleNotes);
 
   const submit = async () => {
-    await update.mutateAsync(text);
+    const nextNotes = parsed.metadata
+      ? composeCommissionNotes(parsed.metadata, text)
+      : text;
+    await update.mutateAsync(nextNotes);
     setOpen(false);
   };
 
@@ -329,6 +339,8 @@ export function SellingBillDetailPage() {
 
   const payment = getPaymentSummary(bill);
   const { paidTotal, balance } = payment;
+  const commissionNotes = parseCommissionNotes(bill.notes);
+  const commission = commissionNotes.metadata;
 
   return (
     <div className="space-y-5">
@@ -449,6 +461,61 @@ export function SellingBillDetailPage() {
             </CardContent>
           </Card>
 
+          {commission && (
+            <Card className="overflow-hidden">
+              <CardHeader className="border-b border-[#eee6de] bg-[#fffefd]">
+                <CardTitle className="flex items-center gap-2">
+                  <Truck className="h-4 w-4 text-primary" />
+                  Dati consegna e rilievo
+                </CardTitle>
+                <CardDescription>Informazioni operative raccolte nella proposta di commissione.</CardDescription>
+              </CardHeader>
+              <CardContent className="grid gap-x-6 gap-y-4 pt-5 text-sm sm:grid-cols-2 lg:grid-cols-3">
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground">Città</p>
+                  <p className="mt-1 font-semibold">{commission.city || '—'}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground">Piano / scala</p>
+                  <p className="mt-1 font-semibold">
+                    {[commission.floor ? `Piano ${commission.floor}` : '', commission.staircase ? `Scala ${commission.staircase}` : '']
+                      .filter(Boolean).join(' · ') || '—'}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground">Ascensore</p>
+                  <p className="mt-1 font-semibold">{yesNoLabel(commission.elevator)}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground">Misure</p>
+                  <p className="mt-1 font-semibold">{measureSourceLabel(commission.measureSource)}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground">Autoscala</p>
+                  <p className="mt-1 font-semibold">{yesNoLabel(commission.hoist)}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground">Allegati / disegni</p>
+                  <p className="mt-1 font-semibold">
+                    {yesNoLabel(commission.attachments)}
+                    {commission.attachments === 'yes' && commission.attachmentPages !== null
+                      ? ` · ${commission.attachmentPages} pag.`
+                      : ''}
+                  </p>
+                </div>
+                <div className="sm:col-span-2 lg:col-span-3">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground">Consegna programmata</p>
+                  <p className="mt-1 font-semibold">
+                    {[
+                      commission.scheduledDate ? formatDate(commission.scheduledDate) : '',
+                      commission.scheduledTime ? `ore ${commission.scheduledTime}` : '',
+                    ].filter(Boolean).join(' · ') || 'Da programmare'}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           <Card className="overflow-hidden">
             <CardHeader className="flex-row items-center justify-between space-y-0 border-b border-[#eee6de] bg-[#fffefd]">
               <CardTitle className="flex items-center gap-2">
@@ -512,8 +579,8 @@ export function SellingBillDetailPage() {
               <EditNotesDialog billUuid={bill.uuid} notes={bill.notes ?? ''} />
             </CardHeader>
             <CardContent className="pt-5">
-              {bill.notes ? (
-                <p className="whitespace-pre-wrap text-sm leading-relaxed text-[#5d5550]">{bill.notes}</p>
+              {commissionNotes.visibleNotes ? (
+                <p className="whitespace-pre-wrap text-sm leading-relaxed text-[#5d5550]">{commissionNotes.visibleNotes}</p>
               ) : (
                 <p className="text-sm text-muted-foreground">Nessuna nota.</p>
               )}
@@ -537,7 +604,7 @@ export function SellingBillDetailPage() {
               </div>
               {bill.settlement !== 0 && (
                 <div className="flex justify-between gap-4">
-                  <span className="text-muted-foreground">Saldo/Conguaglio</span>
+                  <span className="text-muted-foreground">Acconto iniziale</span>
                   <span className="tnum font-semibold">{formatCurrency(bill.settlement)}</span>
                 </div>
               )}
