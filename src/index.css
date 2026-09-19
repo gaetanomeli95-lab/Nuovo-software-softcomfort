@@ -7,7 +7,7 @@
  * shell scura + workspace caldo e luminoso.
  */
 @theme {
-  --color-background: #f5f2ed;
+  --color-background: #ebe3da;
   --color-foreground: #272120;
 
   --color-card: #fffefd;
@@ -67,16 +67,16 @@
   html {
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
-    background: #f5f2ed;
+    background: #ebe3da;
   }
 
   body {
     min-height: 100vh;
     margin: 0;
     background:
-      radial-gradient(circle at 14% -10%, rgba(217, 168, 88, 0.10), transparent 34rem),
-      radial-gradient(circle at 88% 0%, rgba(242, 15, 31, 0.055), transparent 30rem),
-      linear-gradient(180deg, #f8f5f1 0%, #f4f0ea 100%);
+      radial-gradient(circle at 12% -8%, rgba(217, 168, 88, 0.14), transparent 34rem),
+      radial-gradient(circle at 88% 2%, rgba(242, 15, 31, 0.045), transparent 30rem),
+      linear-gradient(180deg, #eee6de 0%, #e8dfd6 52%, #e4dbd2 100%);
     color: var(--color-foreground);
     font-family: var(--font-sans);
     font-size: 0.875rem;
@@ -106,9 +106,9 @@
 
   .softcomfort-workspace {
     background:
-      radial-gradient(circle at 18% 0%, rgba(217, 168, 88, 0.07), transparent 26rem),
-      radial-gradient(circle at 90% 10%, rgba(242, 15, 31, 0.04), transparent 28rem),
-      #f5f2ed;
+      radial-gradient(circle at 14% -2%, rgba(217, 168, 88, 0.12), transparent 28rem),
+      radial-gradient(circle at 92% 8%, rgba(242, 15, 31, 0.04), transparent 30rem),
+      linear-gradient(180deg, #eee7df 0%, #e8dfd7 58%, #e4dbd2 100%);
   }
 
   .softcomfort-panel {
