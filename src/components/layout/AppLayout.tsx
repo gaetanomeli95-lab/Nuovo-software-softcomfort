@@ -4,10 +4,6 @@ import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
 import { cn } from '@/lib/utils';
 
-/**
- * Shell applicativa Soft Comfort: sidebar fissa su desktop, drawer su mobile,
- * topbar con ricerca globale (reindirizza alla lista vendite filtrata).
- */
 export function AppLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const navigate = useNavigate();
@@ -25,7 +21,7 @@ export function AppLayout() {
 
       <div
         className={cn(
-          'fixed inset-0 z-40 bg-black/70 backdrop-blur-sm transition-opacity lg:hidden',
+          'fixed inset-0 z-40 bg-[#191313]/55 backdrop-blur-sm transition-opacity lg:hidden',
           mobileOpen ? 'opacity-100' : 'pointer-events-none opacity-0',
         )}
         onClick={() => setMobileOpen(false)}
@@ -41,10 +37,9 @@ export function AppLayout() {
 
       <div className="flex min-w-0 flex-1 flex-col">
         <Topbar onMenuClick={() => setMobileOpen(true)} onSearch={handleGlobalSearch} />
-        <main className="relative flex-1 overflow-y-auto scrollbar-thin">
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-52 bg-gradient-to-b from-primary/[0.035] via-brand-gold/[0.018] to-transparent" />
-          <div className="softcomfort-grid pointer-events-none absolute inset-0 opacity-35" />
-          <div className="relative mx-auto w-full max-w-[1440px] p-4 sm:p-6 lg:p-7">
+        <main className="softcomfort-workspace relative flex-1 overflow-y-auto scrollbar-thin">
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-44 bg-gradient-to-b from-white/55 to-transparent" />
+          <div className="relative mx-auto w-full max-w-[1480px] p-4 sm:p-6 lg:px-8 lg:py-7">
             <Outlet />
           </div>
         </main>

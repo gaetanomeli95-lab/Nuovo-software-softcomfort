@@ -1,48 +1,65 @@
 # Soft Comfort — Design System del gestionale
 
-Questo documento definisce la fonte visiva del gestionale.
-
 ## Source of truth
 
-Il branding deriva dal repository ufficiale del sito:
+Brand e logo derivano dal repository ufficiale:
 
 `gaetanomeli95-lab/SITO-SOFT-COMFORT`
 
-In particolare da `styles.css` e dall'asset logo:
+Il logo locale è:
 
-`ChatGPT Image 14 mag 2026, 18_40_10.png`
+`public/softcomfort-logo.png`
 
-Non sostituire il logo con ricostruzioni, icone generiche o versioni inventate.
+Non ridisegnare o reinterpretare il logo.
 
-## Palette ufficiale
+## UI V2 — principio fondamentale
 
-- Background: `#050505`
-- Text / ivory: `#f8f4ee`
-- Primary red: `#f20f1f`
-- Dark red: `#9c0610`
-- Gold: `#d9a858`
-- Panel: superfici nere / charcoal con bordi chiari traslucidi
+Il gestionale usa una doppia superficie:
+
+1. **Shell scura Soft Comfort** — sidebar e ingresso/login.
+2. **Workspace caldo e luminoso** — dashboard, moduli, tabelle, form e operatività.
+
+Il brand resta nero/rosso/oro, ma il workspace non deve sembrare una dashboard fintech o cyber.
+
+## Brand ufficiale
+
+- Nero: `#050505`
+- Rosso: `#f20f1f`
+- Rosso scuro: `#9c0610`
+- Oro: `#d9a858`
+- Avorio: `#f8f4ee`
+
+## Workspace V2
+
+- Background: `#f5f2ed`
+- Card: `#fffefd`
+- Surface soft: `#f7f2eb`
+- Text: `#272120`
+- Muted text: `#7b726c`
+- Border: `#e1d9d0`
 
 ## Typography
 
-- UI/body: Inter
-- Titoli e accenti editoriali: Playfair Display
+- UI e dati: Inter
+- Titoli principali: Playfair Display
 
-## Principi UI
+Playfair non va usato in tabelle, input, badge o microtesti.
 
-Il gestionale deve restare leggibile e operativo, ma deve essere immediatamente riconoscibile come Soft Comfort.
+## Uso dei colori
 
-- fondo scuro premium;
-- rosso per azioni primarie e stato attivo;
-- oro per micro-label, gerarchia e dettagli;
-- pannelli sobri con bordi sottili;
-- niente palette indigo/blu SaaS generica;
-- niente reinterpretazioni del logo;
-- evitare eccessi decorativi nelle tabelle e nei flussi operativi;
-- mantenere contrasto elevato, densità informativa e velocità d'uso.
+- Rosso: CTA, stato attivo, firma del brand, alert importanti.
+- Oro: dettagli premium e accenti secondari, non testo operativo piccolo.
+- Testi anagrafici e dati: quasi-nero, non rosso.
+- Stati: usare tinte semantiche leggere e leggibili.
+- Card e tabelle: bianche/avorio con ombre molto leggere.
 
-## Asset logo
+## Principi
 
-Il componente `SoftComfortBrand` usa temporaneamente lo stesso asset ufficiale tramite URL raw del repository del sito, con fallback testuale `SC` se l'asset non è raggiungibile.
-
-Quando possibile, copiare lo stesso file in `public/softcomfort-logo.png` e aggiornare il componente a `/softcomfort-logo.png` per eliminare la dipendenza esterna, senza modificare l'immagine.
+- leggibilità prima di decorazione;
+- gerarchia visiva forte;
+- spazio e respiro nelle dashboard;
+- densità alta ma ordinata nelle tabelle;
+- niente grandi distese nere nel workspace;
+- niente eccesso di rosso;
+- niente look SaaS generico;
+- mantenere l'identità Soft Comfort senza imitare un sito vetrina.

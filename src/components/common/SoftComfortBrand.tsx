@@ -25,7 +25,7 @@ export function SoftComfortBrand({
           src={LOGO_URL}
           alt="Soft Comfort"
           className={cn(
-            'h-10 w-10 shrink-0 rounded-xl object-cover shadow-[0_0_0_1px_rgba(255,255,255,0.12),0_10px_30px_rgba(242,15,31,0.16)]',
+            'h-10 w-10 shrink-0 rounded-xl object-cover shadow-[0_0_0_1px_rgba(255,255,255,0.10),0_10px_30px_rgba(0,0,0,0.16)]',
             imageClassName,
           )}
           loading="eager"
@@ -34,7 +34,7 @@ export function SoftComfortBrand({
       ) : (
         <div
           className={cn(
-            'grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-primary/35 bg-primary/10 font-display text-sm font-bold text-primary',
+            'grid h-10 w-10 shrink-0 place-items-center rounded-xl border border-primary/30 bg-primary/10 font-display text-sm font-bold text-primary',
             imageClassName,
           )}
           aria-label="Soft Comfort"
@@ -45,11 +45,11 @@ export function SoftComfortBrand({
 
       {!compact && (
         <div className="min-w-0 leading-tight">
-          <p className="font-display truncate text-[15px] font-bold tracking-tight text-foreground">
+          <p className="font-display truncate text-[15px] font-bold tracking-tight text-current">
             Soft Comfort
           </p>
           {showTagline && (
-            <p className="mt-0.5 truncate text-[9px] font-semibold uppercase tracking-[0.18em] text-brand-gold/[0.85]">
+            <p className="mt-0.5 truncate text-[9px] font-semibold uppercase tracking-[0.18em] text-[#d9a858]">
               Design · Comfort · Innovazione
             </p>
           )}
