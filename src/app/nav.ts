@@ -1,4 +1,5 @@
 import {
+  LayoutDashboard,
   ReceiptText,
   ShoppingCart,
   Package,
@@ -26,6 +27,18 @@ export interface NavSection {
 }
 
 export const NAV_SECTIONS: NavSection[] = [
+  {
+    title: 'Panoramica',
+    description: 'Controllo generale dell’attività.',
+    items: [
+      {
+        to: '/dashboard',
+        label: 'Dashboard',
+        description: 'Numeri, vendite, scadenze e andamento dell’attività in un’unica vista.',
+        icon: LayoutDashboard,
+      },
+    ],
+  },
   {
     title: 'Vendite',
     description: 'Bolle, vendite e ordini da seguire.',

@@ -123,6 +123,13 @@
       linear-gradient(180deg, #181313 0%, #110e0e 100%);
   }
 
+  .softcomfort-home-hero {
+    background:
+      radial-gradient(circle at 10% -25%, rgba(242, 15, 31, 0.30), transparent 23rem),
+      radial-gradient(circle at 94% 4%, rgba(217, 168, 88, 0.13), transparent 20rem),
+      linear-gradient(135deg, #1d1615 0%, #120f0f 58%, #171210 100%);
+  }
+
   .brand-divider {
     background: linear-gradient(90deg, #f20f1f 0%, #d9a858 52%, transparent 100%);
   }
