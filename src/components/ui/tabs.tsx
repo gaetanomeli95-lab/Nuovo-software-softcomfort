@@ -1,10 +1,6 @@
 import { createContext, useContext, useState, type ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 
-/**
- * Tabs leggere in stile shadcn, senza dipendenza Radix.
- * Supporta uso controllato (value/onValueChange) o non controllato (defaultValue).
- */
 interface TabsCtx {
   value: string;
   setValue: (v: string) => void;
@@ -38,7 +34,7 @@ export function TabsList({ children, className }: { children: ReactNode; classNa
     <div
       role="tablist"
       className={cn(
-        'inline-flex h-9 items-center justify-center rounded-lg bg-muted p-1 text-muted-foreground',
+        'inline-flex h-9 items-center justify-center rounded-lg border border-white/8 bg-black/30 p-1 text-muted-foreground',
         className,
       )}
     >
@@ -68,7 +64,9 @@ export function TabsTrigger({
       className={cn(
         'inline-flex items-center justify-center whitespace-nowrap rounded-md px-3 py-1 text-sm font-medium transition-all',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
-        active ? 'bg-background text-foreground shadow' : 'hover:text-foreground',
+        active
+          ? 'bg-primary/12 text-foreground shadow-[inset_0_0_0_1px_rgba(242,15,31,0.22)]'
+          : 'hover:bg-white/[0.035] hover:text-foreground',
         className,
       )}
     >

@@ -1,66 +1,91 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700;800&display=swap');
 @import "tailwindcss";
 
 /*
- * Design tokens — tema gestionale premium.
- * Palette: neutri slate + accento indigo. Variabili semantiche stile shadcn/ui.
+ * Soft Comfort Design System
+ * Fonte visiva ufficiale: repo SITO-SOFT-COMFORT / styles.css
+ * Brand: fondo #050505, rosso #f20f1f, rosso scuro #9c0610,
+ * oro #d9a858, testo caldo #f8f4ee.
  */
 @theme {
-  --color-background: oklch(0.985 0.002 247);
-  --color-foreground: oklch(0.21 0.02 260);
-  --color-card: oklch(1 0 0);
-  --color-card-foreground: oklch(0.21 0.02 260);
-  --color-popover: oklch(1 0 0);
-  --color-popover-foreground: oklch(0.21 0.02 260);
-  --color-primary: oklch(0.45 0.17 264);
-  --color-primary-foreground: oklch(0.98 0.005 247);
-  --color-secondary: oklch(0.96 0.005 247);
-  --color-secondary-foreground: oklch(0.3 0.03 260);
-  --color-muted: oklch(0.96 0.005 247);
-  --color-muted-foreground: oklch(0.5 0.02 260);
-  --color-accent: oklch(0.95 0.02 255);
-  --color-accent-foreground: oklch(0.35 0.08 264);
-  --color-destructive: oklch(0.55 0.2 25);
-  --color-destructive-foreground: oklch(0.98 0.005 247);
-  --color-border: oklch(0.91 0.008 250);
-  --color-input: oklch(0.91 0.008 250);
-  --color-ring: oklch(0.45 0.17 264);
+  --color-background: #050505;
+  --color-foreground: #f8f4ee;
 
-  /* Stati semantici del dominio */
-  --color-success: oklch(0.62 0.17 155);
-  --color-success-foreground: oklch(0.98 0.01 155);
-  --color-warning: oklch(0.72 0.16 75);
-  --color-warning-foreground: oklch(0.25 0.03 75);
-  --color-info: oklch(0.6 0.15 230);
-  --color-info-foreground: oklch(0.98 0.005 230);
+  --color-card: #0d0d0e;
+  --color-card-foreground: #f8f4ee;
+  --color-popover: #111112;
+  --color-popover-foreground: #f8f4ee;
 
-  --radius-sm: 0.375rem;
-  --radius-md: 0.5rem;
-  --radius-lg: 0.625rem;
-  --radius-xl: 0.875rem;
+  --color-primary: #f20f1f;
+  --color-primary-foreground: #fff9f4;
+  --color-secondary: #181719;
+  --color-secondary-foreground: #f8f4ee;
+  --color-muted: #171719;
+  --color-muted-foreground: #aaa39b;
+  --color-accent: #251315;
+  --color-accent-foreground: #f8f4ee;
+
+  --color-destructive: #d83a46;
+  --color-destructive-foreground: #fff9f4;
+  --color-border: #292426;
+  --color-input: #342d2f;
+  --color-ring: #f20f1f;
+
+  --color-brand-red: #f20f1f;
+  --color-brand-red-dark: #9c0610;
+  --color-brand-gold: #d9a858;
+  --color-brand-ivory: #f8f4ee;
+
+  --color-success: #4fba79;
+  --color-success-foreground: #f5fff8;
+  --color-warning: #d9a858;
+  --color-warning-foreground: #2a1d0c;
+  --color-info: #72a8d8;
+  --color-info-foreground: #f5fbff;
+
+  --radius-sm: 0.45rem;
+  --radius-md: 0.65rem;
+  --radius-lg: 0.85rem;
+  --radius-xl: 1.15rem;
 
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
     Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Playfair Display", Georgia, serif;
 
-  --shadow-card: 0 1px 2px 0 rgb(0 0 0 / 0.04), 0 1px 3px 0 rgb(0 0 0 / 0.05);
-  --shadow-pop: 0 8px 24px -6px rgb(0 0 0 / 0.12), 0 2px 6px -2px rgb(0 0 0 / 0.08);
+  --shadow-card: 0 1px 0 rgba(255, 255, 255, 0.035), 0 14px 42px rgba(0, 0, 0, 0.26);
+  --shadow-pop: 0 24px 70px -16px rgba(0, 0, 0, 0.72), 0 0 0 1px rgba(255, 255, 255, 0.04);
 }
 
 @layer base {
   * {
     border-color: var(--color-border);
   }
+
   html {
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+    background: var(--color-background);
   }
+
   body {
-    background-color: var(--color-background);
+    min-height: 100vh;
+    margin: 0;
+    background:
+      radial-gradient(circle at 8% -8%, rgba(242, 15, 31, 0.14), transparent 31rem),
+      radial-gradient(circle at 96% 2%, rgba(217, 168, 88, 0.09), transparent 34rem),
+      linear-gradient(180deg, #080707 0%, #050505 52%, #070606 100%);
+    background-attachment: fixed;
     color: var(--color-foreground);
     font-family: var(--font-sans);
     font-size: 0.875rem;
     line-height: 1.45;
   }
-  /* Numeri tabellari per importi e tabelle */
+
+  ::selection {
+    background: rgba(242, 15, 31, 0.34);
+    color: #fff9f4;
+  }
+
   .tnum {
     font-variant-numeric: tabular-nums;
     font-feature-settings: "tnum";
@@ -68,8 +93,31 @@
 }
 
 @layer utilities {
+  .font-display {
+    font-family: var(--font-display);
+  }
+
   .scrollbar-thin {
     scrollbar-width: thin;
-    scrollbar-color: var(--color-border) transparent;
+    scrollbar-color: #3b3335 transparent;
+  }
+
+  .softcomfort-grid {
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
+    background-size: 34px 34px;
+  }
+
+  .softcomfort-panel {
+    background:
+      linear-gradient(145deg, rgba(255, 255, 255, 0.035), transparent 42%),
+      rgba(13, 13, 14, 0.9);
+    box-shadow: var(--shadow-card);
+    backdrop-filter: blur(14px);
+  }
+
+  .brand-divider {
+    background: linear-gradient(90deg, #f20f1f 0%, #d9a858 56%, transparent 100%);
   }
 }
