@@ -222,17 +222,8 @@ export function SellingBillPrintPage() {
             <dl className="grid grid-cols-2 gap-x-4 gap-y-3">
               <MetaBox label="Venditore" value={bill.seller || '—'} />
               <MetaBox label="Stato vendita" value={bill.status} />
-              {type === 'documento' ? (
-                <>
-                  <MetaBox label="Pagamento" value={payment.status} accent={payment.status !== 'Pagata'} />
-                  <MetaBox label="Residuo" value={formatCurrency(payment.balance)} accent={payment.balance > 0} />
-                </>
-              ) : (
-                <>
-                  <MetaBox label="Causale" value="Consegna merce" />
-                  <MetaBox label="Destinazione" value={bill.address || 'Come cliente'} />
-                </>
-              )}
+              <MetaBox label="Pagamento" value={payment.status} accent={payment.status !== 'Pagata'} />
+              <MetaBox label="Residuo" value={formatCurrency(payment.balance)} accent={payment.balance > 0} />
             </dl>
           </div>
         </section>
@@ -244,7 +235,7 @@ export function SellingBillPrintPage() {
                 Dettaglio articoli
               </p>
               <h3 className="mt-0.5 font-display text-[17px] font-bold">
-                {type === 'bolla' ? 'Merce in consegna' : 'Composizione vendita'}
+                Composizione vendita
               </h3>
             </div>
             <p className="text-[9px] text-[#81766f]">
@@ -259,9 +250,7 @@ export function SellingBillPrintPage() {
                   <th className="w-[7%] px-3 py-2.5 text-center">N.</th>
                   <th className="px-3 py-2.5">Descrizione</th>
                   <th className="w-[24%] px-3 py-2.5">Ditta</th>
-                  {type === 'documento' && (
-                    <th className="w-[18%] px-3 py-2.5 text-right">Importo</th>
-                  )}
+                  <th className="w-[18%] px-3 py-2.5 text-right">Importo</th>
                 </tr>
               </thead>
               <tbody>
@@ -270,11 +259,9 @@ export function SellingBillPrintPage() {
                     <td className="px-3 py-3 text-center font-bold text-[#83776f]">{index + 1}</td>
                     <td className="px-3 py-3 font-semibold">{item.name}</td>
                     <td className="px-3 py-3 text-[#6c625d]">{item.company || '—'}</td>
-                    {type === 'documento' && (
-                      <td className="px-3 py-3 text-right font-bold">
-                        {formatCurrency(item.price)}
-                      </td>
-                    )}
+                    <td className="px-3 py-3 text-right font-bold">
+                      {formatCurrency(item.price)}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -282,8 +269,7 @@ export function SellingBillPrintPage() {
           </div>
         </section>
 
-        {type === 'documento' ? (
-          <section className="avoid-break mt-5 grid grid-cols-[1fr_0.78fr] gap-4">
+        <section className="avoid-break mt-5 grid grid-cols-[1fr_0.78fr] gap-4">
             <div className="space-y-4">
               <div className="rounded-[11px] border border-[#ddd5ce] p-4">
                 <p className="text-[7.5px] font-bold uppercase tracking-[0.16em] text-[#988c85]">
@@ -375,30 +361,6 @@ export function SellingBillPrintPage() {
               </div>
             </div>
           </section>
-        ) : (
-          <section className="avoid-break mt-5">
-            <div className="grid grid-cols-4 gap-3">
-              {['Colli', 'Ora partenza', 'Ora consegna', 'Addetto consegna'].map((label) => (
-                <div key={label} className="rounded-[10px] border border-[#ddd5ce] p-3">
-                  <p className="text-[7px] font-bold uppercase tracking-[0.13em] text-[#988c85]">{label}</p>
-                  <div className="mt-7 border-b border-[#968981]" />
-                </div>
-              ))}
-            </div>
-
-            {bill.notes && (
-              <div className="mt-4 rounded-[11px] border border-[#ddd5ce] bg-[#fbf9f6] p-4">
-                <p className="text-[7.5px] font-bold uppercase tracking-[0.16em] text-[#988c85]">
-                  Note di consegna
-                </p>
-                <p className="mt-2 whitespace-pre-wrap text-[9.5px] leading-relaxed text-[#5f5752]">
-                  {bill.notes}
-                </p>
-              </div>
-            )}
-          </section>
-        )}
-
         <section className="avoid-break mt-8 grid grid-cols-2 gap-10">
           <div>
             <p className="text-[7.5px] font-bold uppercase tracking-[0.14em] text-[#8f837b]">
@@ -417,9 +379,8 @@ export function SellingBillPrintPage() {
         <footer className="mt-7 border-t border-[#ded6cf] pt-3 text-[7.5px] leading-relaxed text-[#81766f]">
           <div className="flex items-start justify-between gap-6">
             <p className="max-w-[62%]">
-              {type === 'documento'
-                ? "Documento gestionale riepilogativo della vendita. L'eventuale documento fiscale/elettronico emesso secondo la normativa applicabile resta separato."
-                : 'Documento gestionale di consegna merce collegato alla vendita indicata.'}
+              Documento gestionale riepilogativo della vendita. L'eventuale documento
+              fiscale/elettronico emesso secondo la normativa applicabile resta separato.
             </p>
             <p className="text-right">
               {SOFT_COMFORT_COMPANY.name}<br />
