@@ -5,6 +5,7 @@ import {
   Pencil, Phone, MapPin, Plus, Printer, StickyNote, Trash2, Truck, Wrench,
 } from 'lucide-react';
 import { PageHeader } from '@/components/common/PageHeader';
+import { PaymentStatusBadge } from '@/components/common/PaymentStatusBadge';
 import { StatusBadge } from '@/components/common/StatusBadge';
 import { ErrorState } from '@/components/common/ErrorState';
 import { EmptyState } from '@/components/common/EmptyState';
@@ -42,6 +43,7 @@ import { useAuth } from '@/features/auth/AuthContext';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { SELLING_BILL_WORKFLOW, type SellingBillItem, type SellingBillStatus } from '@/types/domain';
 import { cn } from '@/lib/utils';
+import { getPaymentSummary } from './paymentStatus';
 
 function WorkflowStepper({ status }: { status: SellingBillStatus }) {
   if (status === 'Annullata') {
@@ -325,9 +327,8 @@ export function SellingBillDetailPage() {
     );
   }
 
-  const paidDeposits = (bill.deposits ?? []).filter((d) => d.collected);
-  const paidTotal = paidDeposits.reduce((s, d) => s + d.amount, 0);
-  const balance = (bill.totalPrice ?? 0) - paidTotal;
+  const payment = getPaymentSummary(bill);
+  const { paidTotal, balance } = payment;
 
   return (
     <div className="space-y-5">
@@ -351,6 +352,7 @@ export function SellingBillDetailPage() {
                 </Link>
               </Button>
               <StatusBadge status={bill.status} />
+              {bill.status !== 'Annullata' && <PaymentStatusBadge status={payment.status} />}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="icon" aria-label="Azioni fattura">
@@ -545,6 +547,10 @@ export function SellingBillDetailPage() {
                 <p className="tnum mt-1.5 text-2xl font-extrabold tracking-[-0.03em] text-[#8d0f17]">
                   {formatCurrency(bill.totalPrice)}
                 </p>
+              </div>
+              <div className="flex items-center justify-between gap-4">
+                <span className="text-muted-foreground">Stato pagamento</span>
+                <PaymentStatusBadge status={payment.status} />
               </div>
               <div className="flex justify-between gap-4">
                 <span className="text-muted-foreground">Versato</span>
