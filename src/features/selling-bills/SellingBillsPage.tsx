@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight,
-  Printer, ReceiptText, RotateCcw, Search, Truck,
+  Plus, Printer, ReceiptText, RotateCcw, Search, Truck,
 } from 'lucide-react';
 import { PageHeader } from '@/components/common/PageHeader';
 import { PaymentStatusBadge } from '@/components/common/PaymentStatusBadge';
@@ -134,6 +134,14 @@ export function SellingBillsPage() {
           data
             ? `${filtered.length} risultati su ${data.length} vendite · clicca una riga per aprirla`
             : 'Elenco delle vendite'
+        }
+        actions={
+          <Button asChild className="shadow-[0_8px_22px_rgba(242,15,31,0.18)]">
+            <Link to="/vendite/nuova">
+              <Plus className="h-4 w-4" />
+              Nuova fattura
+            </Link>
+          </Button>
         }
       />
 

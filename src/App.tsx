@@ -9,6 +9,7 @@ import { LoginPage } from '@/features/auth/LoginPage';
 import { HomePage } from '@/features/home/HomePage';
 import { DashboardPage } from '@/features/dashboard/DashboardPage';
 import { SellingBillsPage } from '@/features/selling-bills/SellingBillsPage';
+import { NewSellingBillPage } from '@/features/selling-bills/NewSellingBillPage';
 import { SellingBillDetailPage } from '@/features/selling-bills/SellingBillDetailPage';
 import { SellingBillPrintPage } from '@/features/selling-bills/SellingBillPrintPage';
 import { DepositsPage } from '@/features/deposits/DepositsPage';
@@ -63,6 +64,7 @@ export default function App() {
                 <Route index element={<HomePage />} />
                 <Route path="dashboard" element={<DashboardPage />} />
                 <Route path="vendite" element={<SellingBillsPage />} />
+                <Route path="vendite/nuova" element={<NewSellingBillPage />} />
                 <Route path="vendite/:uuid" element={<SellingBillDetailPage />} />
                 <Route path="ordini" element={<PendingPage />} />
                 <Route path="acquisti" element={<BuyingBillsPage />} />
