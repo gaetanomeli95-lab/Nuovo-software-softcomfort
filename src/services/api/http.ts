@@ -1,5 +1,6 @@
 import { API_BASE_URL } from './config';
-import { loadSession, clearSession } from './tokenStore';
+import { loadSession, clearSession, isDemoSession } from './tokenStore';
+import { handleDemoRequest } from '@/services/demoData';
 
 export class ApiError extends Error {
   constructor(
@@ -27,7 +28,6 @@ interface RequestOptions {
   signal?: AbortSignal;
 }
 
-/** Callback invocata su 401 per permettere logout/reindirizzamento. */
 let onUnauthorized: (() => void) | null = null;
 export function setOnUnauthorized(cb: (() => void) | null) {
   onUnauthorized = cb;
@@ -35,6 +35,11 @@ export function setOnUnauthorized(cb: (() => void) | null) {
 
 async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const { method = 'GET', body, signal } = options;
+
+  // Modalità demo: nessuna chiamata di rete e nessun dato reale.
+  if (isDemoSession()) {
+    return handleDemoRequest<T>(path, method);
+  }
 
   const headers: Record<string, string> = {
     Accept: 'application/json',
@@ -76,7 +81,6 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
     throw new ApiError(res.status, message, parsed);
   }
 
-  // Risposte vuote (204 o body assente)
   if (res.status === 204) return undefined as T;
   const text = await res.text();
   if (!text) return undefined as T;

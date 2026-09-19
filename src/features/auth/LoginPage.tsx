@@ -3,7 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { Loader2 } from 'lucide-react';
+import { Eye, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -20,7 +20,7 @@ const loginSchema = z.object({
 type LoginForm = z.infer<typeof loginSchema>;
 
 export function LoginPage() {
-  const { login } = useAuth();
+  const { login, loginDemo } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [serverError, setServerError] = useState<string | null>(null);
@@ -47,6 +47,11 @@ export function LoginPage() {
         setServerError('Accesso non riuscito. Riprova.');
       }
     }
+  };
+
+  const enterDemo = () => {
+    loginDemo();
+    navigate('/', { replace: true });
   };
 
   return (
@@ -118,6 +123,28 @@ export function LoginPage() {
                 Accedi al gestionale
               </Button>
             </form>
+
+            <div className="my-5 flex items-center gap-3">
+              <div className="h-px flex-1 bg-[#e8e0d8]" />
+              <span className="text-[10px] font-bold uppercase tracking-[0.14em] text-muted-foreground">
+                oppure
+              </span>
+              <div className="h-px flex-1 bg-[#e8e0d8]" />
+            </div>
+
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full border-[#e1cda9] bg-[#fffaf0] text-[#6f4d19] hover:bg-[#fbf2df]"
+              onClick={enterDemo}
+            >
+              <Eye className="h-4 w-4" />
+              Entra in modalità demo
+            </Button>
+            <p className="mt-2.5 text-center text-[11px] leading-relaxed text-muted-foreground">
+              Per vedere il nuovo gestionale senza collegamento al server aziendale.
+              I dati mostrati sono dimostrativi.
+            </p>
           </CardContent>
         </Card>
 
