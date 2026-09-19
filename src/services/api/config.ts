@@ -1,10 +1,12 @@
 /**
  * Configurazione API centralizzata.
- * Nessun URL hardcoded nel resto dell'app: tutto passa da qui.
  *
- * - Produzione: VITE_API_BASE_URL vuoto → stessa origine (il backend
- *   Spring Boot serve i file statici, com'era per il frontend Angular).
- * - Sviluppo: il proxy Vite inoltra i path API al legacy, oppure si può
- *   impostare VITE_API_BASE_URL se CORS è abilitato.
+ * - Sviluppo locale: VITE_API_BASE_URL può restare vuoto e Vite usa il proxy legacy.
+ * - Produzione reale: impostare VITE_API_BASE_URL con l'URL HTTPS del backend pubblico.
+ * - Anteprima Vercel senza backend pubblico: il gestionale entra automaticamente
+ *   in modalità demo e non esegue chiamate verso dati reali.
  */
 export const API_BASE_URL: string = import.meta.env.VITE_API_BASE_URL ?? '';
+
+export const AUTOMATIC_DEMO_MODE =
+  import.meta.env.PROD && API_BASE_URL.trim().length === 0;
