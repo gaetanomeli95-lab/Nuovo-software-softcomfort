@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { CheckCircle2, PiggyBank, Search } from 'lucide-react';
 import { PageHeader } from '@/components/common/PageHeader';
+import { SummaryPill } from '@/components/common/SummaryPill';
 import { ErrorState } from '@/components/common/ErrorState';
 import { EmptyState } from '@/components/common/EmptyState';
 import { Badge } from '@/components/ui/badge';
@@ -28,16 +29,19 @@ function matches(d: DepositResponse, q: string): boolean {
   );
 }
 
-function DepositsTable({
-  rows, actionable,
-}: {
-  rows: DepositResponse[];
-  actionable?: boolean;
-}) {
+function DepositsTable({ rows, actionable }: { rows: DepositResponse[]; actionable?: boolean }) {
   const collect = useSetDepositCollected();
+
   if (rows.length === 0) {
-    return <EmptyState icon={PiggyBank} title="Nessun acconto" description="Non ci sono acconti in questa categoria." />;
+    return (
+      <EmptyState
+        icon={PiggyBank}
+        title="Nessun acconto"
+        description="Non ci sono acconti in questa categoria."
+      />
+    );
   }
+
   return (
     <Table>
       <TableHeader>
@@ -47,18 +51,15 @@ function DepositsTable({
           <TableHead className="hidden md:table-cell">Venditore</TableHead>
           <TableHead className="hidden sm:table-cell">Metodo</TableHead>
           <TableHead className="text-right">Importo</TableHead>
-          {actionable && <TableHead className="w-[110px]" />}
+          {actionable && <TableHead className="w-[120px]" />}
         </TableRow>
       </TableHeader>
       <TableBody>
         {rows.map((r) => (
           <TableRow key={r.deposit.uuid}>
-            <TableCell className="whitespace-nowrap">{formatDate(r.deposit.date)}</TableCell>
+            <TableCell className="whitespace-nowrap tnum">{formatDate(r.deposit.date)}</TableCell>
             <TableCell>
-              <Link
-                to={`/vendite/${r.uuid}`}
-                className="font-medium text-primary hover:underline"
-              >
+              <Link to={`/vendite/${r.uuid}`} className="data-link">
                 {r.client}
               </Link>
             </TableCell>
@@ -66,7 +67,7 @@ function DepositsTable({
             <TableCell className="hidden sm:table-cell">
               <Badge variant="outline">{r.deposit.method}</Badge>
             </TableCell>
-            <TableCell className="tnum text-right font-medium">{formatCurrency(r.deposit.amount)}</TableCell>
+            <TableCell className="tnum text-right font-bold">{formatCurrency(r.deposit.amount)}</TableCell>
             {actionable && (
               <TableCell className="text-right">
                 <Button
@@ -105,45 +106,38 @@ export function DepositsPage() {
   const error = toCollect.error ?? collected.error;
 
   return (
-    <div className="space-y-4">
-      <PageHeader
-        title="Acconti"
-        description="Versamenti dei clienti sulle vendite"
-      />
-
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="relative w-full max-w-sm">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Cerca cliente, venditore, metodo…"
-            className="pl-8"
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-          />
-        </div>
-        <Badge variant="warning" className="ml-auto">
-          Da incassare: {formatCurrency(totalToCollect)}
-        </Badge>
-      </div>
+    <div className="space-y-5">
+      <PageHeader title="Acconti" description="Versamenti dei clienti sulle vendite" />
 
       <Card>
+        <CardContent className="flex flex-wrap items-center gap-3 p-3.5">
+          <div className="relative w-full max-w-md flex-1">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Cerca cliente, venditore, metodo…"
+              className="pl-9"
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+            />
+          </div>
+          <SummaryPill label="Da incassare" value={formatCurrency(totalToCollect)} tone="gold" />
+        </CardContent>
+      </Card>
+
+      <Card className="overflow-hidden">
         <CardContent className="p-0">
           {isLoading ? (
-            <div className="space-y-2 p-4">
+            <div className="space-y-2 p-5">
               {Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}
             </div>
           ) : error ? (
             <ErrorState error={error} onRetry={() => { toCollect.refetch(); collected.refetch(); }} />
           ) : (
             <Tabs defaultValue="toCollect">
-              <div className="border-b px-4 pt-3">
+              <div className="border-b border-[#eee6de] bg-[#fffefd] px-4 py-3">
                 <TabsList>
-                  <TabsTrigger value="toCollect">
-                    Da incassare ({toCollectRows.length})
-                  </TabsTrigger>
-                  <TabsTrigger value="collected">
-                    Incassati ({collectedRows.length})
-                  </TabsTrigger>
+                  <TabsTrigger value="toCollect">Da incassare ({toCollectRows.length})</TabsTrigger>
+                  <TabsTrigger value="collected">Incassati ({collectedRows.length})</TabsTrigger>
                 </TabsList>
               </div>
               <TabsContent value="toCollect" className="mt-0">

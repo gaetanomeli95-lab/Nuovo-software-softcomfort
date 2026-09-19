@@ -43,32 +43,34 @@ import { formatCurrency, formatDate } from '@/lib/format';
 import { SELLING_BILL_WORKFLOW, type SellingBillItem, type SellingBillStatus } from '@/types/domain';
 import { cn } from '@/lib/utils';
 
-/** Stepper del workflow vendita. */
 function WorkflowStepper({ status }: { status: SellingBillStatus }) {
   if (status === 'Annullata') {
     return <Badge variant="destructive">Fattura annullata</Badge>;
   }
+
   const currentIdx = SELLING_BILL_WORKFLOW.indexOf(status);
+
   return (
-    <ol className="flex flex-wrap items-center gap-1">
+    <ol className="flex flex-wrap items-center gap-1.5">
       {SELLING_BILL_WORKFLOW.map((step, i) => {
         const done = i < currentIdx;
         const current = i === currentIdx;
+
         return (
-          <li key={step} className="flex items-center gap-1">
-            {i > 0 && <span className="mx-1 h-px w-4 bg-border" />}
+          <li key={step} className="flex items-center gap-1.5">
+            {i > 0 && <span className="mx-0.5 h-px w-5 bg-[#ddd5cd]" />}
             <span
               className={cn(
-                'flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium',
-                current && 'bg-primary/10 text-primary',
-                done && 'text-success',
-                !done && !current && 'text-muted-foreground',
+                'flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[11px] font-semibold transition-colors',
+                current && 'border-[#f1c7ca] bg-[#fff0f1] text-[#a40d16]',
+                done && 'border-[#c7e0d1] bg-[#eff7f2] text-success',
+                !done && !current && 'border-[#e3dcd4] bg-[#f7f3ee] text-muted-foreground',
               )}
             >
               {done ? (
                 <CheckCircle2 className="h-3.5 w-3.5" />
               ) : (
-                <Circle className={cn('h-3.5 w-3.5', current && 'fill-primary/20')} />
+                <Circle className={cn('h-3.5 w-3.5', current && 'fill-primary/10')} />
               )}
               {step}
             </span>
@@ -79,7 +81,6 @@ function WorkflowStepper({ status }: { status: SellingBillStatus }) {
   );
 }
 
-/** Avanzamento articolo interattivo: click per togglare lo stato. */
 function ItemProgress({ billUuid, item }: { billUuid: string; item: SellingBillItem }) {
   const setOrdered = useSetItemOrdered(billUuid);
   const setArrived = useSetItemArrived(billUuid);
@@ -91,20 +92,22 @@ function ItemProgress({ billUuid, item }: { billUuid: string; item: SellingBillI
     { label: 'Arrivato', done: item.arrived, run: () => setArrived.mutate({ itemUUID: item.uuid, arrived: !item.arrived }) },
     { label: 'Consegnato', done: item.delivered, run: () => setDelivered.mutate({ itemUUID: item.uuid, delivered: !item.delivered }) },
   ];
+
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex flex-wrap items-center gap-1">
       {steps.map((s, i) => (
         <span key={s.label} className="flex items-center gap-1">
-          {i > 0 && <span className="mx-0.5 h-px w-3 bg-border" />}
+          {i > 0 && <span className="mx-0.5 h-px w-3 bg-[#ddd5cd]" />}
           <button
             type="button"
             disabled={busy}
             onClick={s.run}
             title={`Clicca per ${s.done ? 'rimuovere' : 'impostare'} "${s.label}"`}
             className={cn(
-              'rounded-full px-2 py-0.5 text-[11px] font-medium transition-colors',
-              'hover:ring-1 hover:ring-ring disabled:opacity-50',
-              s.done ? 'bg-success/15 text-success' : 'bg-muted text-muted-foreground',
+              'rounded-full border px-2.5 py-1 text-[10px] font-semibold transition-all disabled:opacity-50',
+              s.done
+                ? 'border-[#c7e0d1] bg-[#eff7f2] text-success hover:border-[#a8d2b9]'
+                : 'border-[#e2dad2] bg-[#f7f3ee] text-muted-foreground hover:border-[#d3c8bd] hover:bg-white',
             )}
           >
             {s.label}
@@ -115,8 +118,6 @@ function ItemProgress({ billUuid, item }: { billUuid: string; item: SellingBillI
   );
 }
 
-/* ---------- Dialoghi ---------- */
-
 function AddItemDialog({ billUuid }: { billUuid: string }) {
   const add = useAddBillItem(billUuid);
   const [open, setOpen] = useState(false);
@@ -125,7 +126,9 @@ function AddItemDialog({ billUuid }: { billUuid: string }) {
 
   const submit = async () => {
     await add.mutateAsync({ name: name.trim(), price: Number(price) });
-    setOpen(false); setName(''); setPrice('');
+    setOpen(false);
+    setName('');
+    setPrice('');
   };
 
   return (
@@ -170,7 +173,11 @@ function EditCompanyDialog({ billUuid, item }: { billUuid: string; item: Selling
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <button type="button" className="inline-flex items-center gap-1 text-left hover:text-primary" title="Modifica ditta">
+        <button
+          type="button"
+          className="inline-flex items-center gap-1 text-left font-medium text-[#625954] hover:text-primary"
+          title="Modifica ditta"
+        >
           {item.company || '—'} <Pencil className="h-3 w-3 opacity-50" />
         </button>
       </DialogTrigger>
@@ -203,7 +210,8 @@ function AddDepositDialog({ billUuid, seller }: { billUuid: string; seller: stri
 
   const submit = async () => {
     await add.mutateAsync({ date, seller, method, amount: Number(amount) });
-    setOpen(false); setAmount('');
+    setOpen(false);
+    setAmount('');
   };
 
   return (
@@ -290,11 +298,11 @@ export function SellingBillDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="space-y-4">
-        <Skeleton className="h-8 w-64" />
-        <div className="grid gap-4 lg:grid-cols-3">
-          <Skeleton className="h-64 lg:col-span-2" />
-          <Skeleton className="h-64" />
+      <div className="space-y-5">
+        <Skeleton className="h-9 w-72" />
+        <div className="grid gap-5 lg:grid-cols-3">
+          <Skeleton className="h-72 lg:col-span-2" />
+          <Skeleton className="h-72" />
         </div>
       </div>
     );
@@ -322,9 +330,9 @@ export function SellingBillDetailPage() {
   const balance = (bill.totalPrice ?? 0) - paidTotal;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" asChild aria-label="Indietro">
+        <Button variant="outline" size="icon" asChild aria-label="Indietro" className="rounded-full bg-white">
           <Link to="/vendite"><ArrowLeft className="h-4 w-4" /></Link>
         </Button>
         <PageHeader
@@ -394,30 +402,31 @@ export function SellingBillDetailPage() {
         />
       </div>
 
-      <Card>
+      <Card className="border-[#e5dbd1] bg-[#fffaf7]">
         <CardContent className="p-4">
+          <div className="mb-2 text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+            Avanzamento vendita
+          </div>
           <WorkflowStepper status={bill.status} />
         </CardContent>
       </Card>
 
-      <div className="grid gap-4 lg:grid-cols-3">
-        {/* Colonna principale */}
-        <div className="space-y-4 lg:col-span-2">
-          {/* Cliente */}
-          <Card>
-            <CardHeader>
+      <div className="grid gap-5 lg:grid-cols-3">
+        <div className="space-y-5 lg:col-span-2">
+          <Card className="overflow-hidden">
+            <CardHeader className="border-b border-[#eee6de] bg-[#fffefd]">
               <CardTitle>Cliente</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2 text-sm">
-              <p className="text-base font-medium">{bill.client || '—'}</p>
+            <CardContent className="space-y-2.5 pt-5 text-sm">
+              <p className="text-lg font-bold tracking-[-0.02em] text-foreground">{bill.client || '—'}</p>
               {bill.address && (
                 <p className="flex items-center gap-2 text-muted-foreground">
-                  <MapPin className="h-4 w-4 shrink-0" /> {bill.address}
+                  <MapPin className="h-4 w-4 shrink-0 text-[#9a8e86]" /> {bill.address}
                 </p>
               )}
               {bill.phone && (
                 <p className="flex items-center gap-2 text-muted-foreground">
-                  <Phone className="h-4 w-4 shrink-0" /> {bill.phone}
+                  <Phone className="h-4 w-4 shrink-0 text-[#9a8e86]" /> {bill.phone}
                 </p>
               )}
               {bill.assistance && (
@@ -428,11 +437,13 @@ export function SellingBillDetailPage() {
             </CardContent>
           </Card>
 
-          {/* Articoli */}
-          <Card>
-            <CardHeader className="flex-row items-center justify-between space-y-0">
+          <Card className="overflow-hidden">
+            <CardHeader className="flex-row items-center justify-between space-y-0 border-b border-[#eee6de] bg-[#fffefd]">
               <CardTitle className="flex items-center gap-2">
-                <Package className="h-4 w-4" /> Articoli ({bill.items?.length ?? 0})
+                <span className="grid h-8 w-8 place-items-center rounded-lg bg-[#fff0f1] text-primary">
+                  <Package className="h-4 w-4" />
+                </span>
+                Articoli ({bill.items?.length ?? 0})
               </CardTitle>
               <AddItemDialog billUuid={bill.uuid} />
             </CardHeader>
@@ -453,12 +464,12 @@ export function SellingBillDetailPage() {
                   <TableBody>
                     {bill.items.map((item) => (
                       <TableRow key={item.uuid}>
-                        <TableCell className="font-medium">{item.name}</TableCell>
+                        <TableCell className="font-semibold">{item.name}</TableCell>
                         <TableCell className="hidden text-muted-foreground md:table-cell">
                           <EditCompanyDialog billUuid={bill.uuid} item={item} />
                         </TableCell>
                         <TableCell><ItemProgress billUuid={bill.uuid} item={item} /></TableCell>
-                        <TableCell className="tnum text-right">{formatCurrency(item.price)}</TableCell>
+                        <TableCell className="tnum text-right font-bold">{formatCurrency(item.price)}</TableCell>
                         <TableCell>
                           <ConfirmDialog
                             trigger={
@@ -481,17 +492,16 @@ export function SellingBillDetailPage() {
             </CardContent>
           </Card>
 
-          {/* Note */}
-          <Card>
-            <CardHeader className="flex-row items-center justify-between space-y-0">
+          <Card className="overflow-hidden">
+            <CardHeader className="flex-row items-center justify-between space-y-0 border-b border-[#eee6de] bg-[#fffefd]">
               <CardTitle className="flex items-center gap-2">
-                <StickyNote className="h-4 w-4" /> Note
+                <StickyNote className="h-4 w-4 text-[#8f8178]" /> Note
               </CardTitle>
               <EditNotesDialog billUuid={bill.uuid} notes={bill.notes ?? ''} />
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-5">
               {bill.notes ? (
-                <p className="whitespace-pre-wrap text-sm text-muted-foreground">{bill.notes}</p>
+                <p className="whitespace-pre-wrap text-sm leading-relaxed text-[#5d5550]">{bill.notes}</p>
               ) : (
                 <p className="text-sm text-muted-foreground">Nessuna nota.</p>
               )}
@@ -499,64 +509,66 @@ export function SellingBillDetailPage() {
           </Card>
         </div>
 
-        {/* Colonna laterale */}
-        <div className="space-y-4">
-          {/* Riepilogo economico */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Riepilogo</CardTitle>
+        <div className="space-y-5">
+          <Card className="overflow-hidden border-[#e7ddd3]">
+            <CardHeader className="border-b border-[#eee6de] bg-[#fbf7f2]">
+              <CardTitle>Riepilogo economico</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-2 text-sm">
-              <div className="flex justify-between">
+            <CardContent className="space-y-3 pt-5 text-sm">
+              <div className="flex justify-between gap-4">
                 <span className="text-muted-foreground">Articoli</span>
-                <span className="tnum">{formatCurrency(bill.itemsPrice)}</span>
+                <span className="tnum font-semibold">{formatCurrency(bill.itemsPrice)}</span>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between gap-4">
                 <span className="text-muted-foreground">Trasporto</span>
-                <span className="tnum">{formatCurrency(bill.transport)}</span>
+                <span className="tnum font-semibold">{formatCurrency(bill.transport)}</span>
               </div>
               {bill.settlement !== 0 && (
-                <div className="flex justify-between">
+                <div className="flex justify-between gap-4">
                   <span className="text-muted-foreground">Saldo/Conguaglio</span>
-                  <span className="tnum">{formatCurrency(bill.settlement)}</span>
+                  <span className="tnum font-semibold">{formatCurrency(bill.settlement)}</span>
                 </div>
               )}
               <Separator />
-              <div className="flex justify-between text-base font-semibold">
-                <span>Totale</span>
-                <span className="tnum">{formatCurrency(bill.totalPrice)}</span>
+              <div className="rounded-xl border border-[#f0d2d4] bg-[#fff2f2] p-3.5">
+                <p className="text-[9px] font-bold uppercase tracking-[0.12em] text-[#9e5c60]">Totale vendita</p>
+                <p className="tnum mt-1.5 text-2xl font-extrabold tracking-[-0.03em] text-[#8d0f17]">
+                  {formatCurrency(bill.totalPrice)}
+                </p>
               </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Versato (acconti)</span>
-                <span className="tnum text-success">{formatCurrency(paidTotal)}</span>
+              <div className="flex justify-between gap-4">
+                <span className="text-muted-foreground">Versato</span>
+                <span className="tnum font-bold text-success">{formatCurrency(paidTotal)}</span>
               </div>
-              <div className="flex justify-between text-sm font-medium">
-                <span>Residuo</span>
-                <span className={cn('tnum', balance > 0 ? 'text-warning-foreground' : 'text-success')}>
+              <div className="flex justify-between gap-4 border-t border-[#eee6de] pt-3">
+                <span className="font-semibold">Residuo</span>
+                <span className={cn('tnum font-extrabold', balance > 0 ? 'text-[#8a6123]' : 'text-success')}>
                   {formatCurrency(balance)}
                 </span>
               </div>
             </CardContent>
           </Card>
 
-          {/* Acconti */}
-          <Card>
-            <CardHeader className="flex-row items-start justify-between space-y-0">
+          <Card className="overflow-hidden">
+            <CardHeader className="flex-row items-start justify-between space-y-0 border-b border-[#eee6de] bg-[#fffefd]">
               <div>
                 <CardTitle>Acconti ({bill.deposits?.length ?? 0})</CardTitle>
                 <CardDescription>Versamenti registrati sulla vendita</CardDescription>
               </div>
               <AddDepositDialog billUuid={bill.uuid} seller={bill.seller} />
             </CardHeader>
-            <CardContent className="space-y-2">
+            <CardContent className="space-y-2.5 pt-5">
               {(bill.deposits ?? []).length === 0 ? (
                 <p className="text-sm text-muted-foreground">Nessun acconto.</p>
               ) : (
                 bill.deposits.map((d) => (
-                  <div key={d.uuid} className="flex items-center justify-between gap-2 rounded-md border px-3 py-2 text-sm">
+                  <div
+                    key={d.uuid}
+                    className="flex items-center justify-between gap-3 rounded-xl border border-[#e8e0d8] bg-[#fcfaf7] px-3.5 py-3 text-sm"
+                  >
                     <div>
-                      <p className="tnum font-medium">{formatCurrency(d.amount)}</p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="tnum font-bold text-foreground">{formatCurrency(d.amount)}</p>
+                      <p className="mt-0.5 text-xs text-muted-foreground">
                         {formatDate(d.date)} · {d.method} · {d.seller}
                       </p>
                     </div>
@@ -566,7 +578,7 @@ export function SellingBillDetailPage() {
                       </Badge>
                       <ConfirmDialog
                         trigger={
-                          <Button variant="ghost" size="icon" className="h-7 w-7" aria-label="Rimuovi acconto">
+                          <Button variant="ghost" size="icon" className="h-8 w-8" aria-label="Rimuovi acconto">
                             <Trash2 className="h-3.5 w-3.5 text-destructive" />
                           </Button>
                         }
@@ -583,26 +595,25 @@ export function SellingBillDetailPage() {
             </CardContent>
           </Card>
 
-          {/* Provvigione */}
-          <Card>
-            <CardHeader>
+          <Card className="overflow-hidden">
+            <CardHeader className="border-b border-[#eee6de] bg-[#fffefd]">
               <CardTitle className="flex items-center gap-2">
-                <HandCoins className="h-4 w-4" /> Provvigione
+                <HandCoins className="h-4 w-4 text-[#9a6b24]" /> Provvigione
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-5">
               {bill.provision ? (
                 <div className="flex items-center justify-between text-sm">
                   <div>
-                    <p className="tnum font-medium">{formatCurrency(bill.provision.amount)}</p>
-                    <p className="text-xs text-muted-foreground">{bill.provision.seller}</p>
+                    <p className="tnum font-bold text-foreground">{formatCurrency(bill.provision.amount)}</p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">{bill.provision.seller}</p>
                   </div>
                   <Badge variant={bill.provision.payed ? 'success' : 'warning'}>
                     {bill.provision.payed ? 'Pagata' : 'Da pagare'}
                   </Badge>
                 </div>
               ) : (
-                <div className="space-y-2">
+                <div className="space-y-3">
                   <p className="text-sm text-muted-foreground">Nessuna provvigione.</p>
                   <Button
                     size="sm"

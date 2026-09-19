@@ -8,9 +8,12 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   const { user } = useAuth();
 
   return (
-    <aside className="flex h-full w-64 flex-col border-r border-white/10 bg-[#070707]/95 shadow-[18px_0_55px_rgba(0,0,0,0.28)] backdrop-blur-xl">
+    <aside className="softcomfort-shell flex h-full w-64 flex-col border-r border-black/20 text-[#f8f4ee] shadow-[16px_0_45px_rgba(58,39,31,0.10)]">
       <div className="px-4 pb-3 pt-4">
-        <SoftComfortBrand imageClassName="h-11 w-11 rounded-[14px]" />
+        <SoftComfortBrand
+          className="text-[#f8f4ee]"
+          imageClassName="h-11 w-11 rounded-[14px]"
+        />
         <div className="brand-divider mt-4 h-px w-full opacity-80" />
       </div>
 
@@ -22,7 +25,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
           return (
             <div key={i} className={cn(i > 0 && 'mt-5')}>
               {section.title && (
-                <p className="mb-1.5 px-3 text-[10px] font-bold uppercase tracking-[0.18em] text-brand-gold/[0.65]">
+                <p className="mb-1.5 px-3 text-[10px] font-bold uppercase tracking-[0.18em] text-[#d9a858]/80">
                   {section.title}
                 </p>
               )}
@@ -35,10 +38,10 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                       onClick={onNavigate}
                       className={({ isActive }) =>
                         cn(
-                          'group flex items-center gap-2.5 rounded-lg border px-3 py-2.5 text-sm transition-all duration-200',
+                          'group flex items-center gap-2.5 rounded-xl border px-3 py-2.5 text-sm transition-all duration-200',
                           isActive
-                            ? 'border-primary/25 bg-primary/10 font-semibold text-foreground shadow-[inset_3px_0_0_#f20f1f]'
-                            : 'border-transparent text-muted-foreground hover:border-white/5 hover:bg-white/[0.035] hover:text-foreground',
+                            ? 'border-white/10 bg-white/[0.075] font-semibold text-white shadow-[inset_3px_0_0_#f20f1f,0_6px_20px_rgba(0,0,0,0.08)]'
+                            : 'border-transparent text-[#c8bfba] hover:border-white/[0.06] hover:bg-white/[0.045] hover:text-white',
                         )
                       }
                     >
@@ -47,7 +50,9 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
                           <item.icon
                             className={cn(
                               'h-4 w-4 shrink-0 transition-colors',
-                              isActive ? 'text-primary' : 'text-muted-foreground group-hover:text-brand-gold',
+                              isActive
+                                ? 'text-[#ff3946]'
+                                : 'text-[#9d938e] group-hover:text-[#d9a858]',
                             )}
                           />
                           <span className="truncate">{item.label}</span>
@@ -62,15 +67,15 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         })}
       </nav>
 
-      <div className="mx-4 h-px bg-white/10" />
+      <div className="mx-4 h-px bg-white/[0.08]" />
       <div className="p-3">
-        <div className="rounded-xl border border-white/[0.08] bg-white/[0.025] px-3 py-2.5">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-brand-gold/70">
+        <div className="rounded-xl border border-white/[0.08] bg-white/[0.035] px-3 py-2.5">
+          <p className="text-[9px] font-bold uppercase tracking-[0.16em] text-[#d9a858]/75">
             Sessione attiva
           </p>
-          <p className="mt-1 truncate text-xs font-medium text-foreground">
+          <p className="mt-1 truncate text-xs font-semibold text-[#f8f4ee]">
             {user?.username}
-            {user?.isAdmin && <span className="ml-1.5 text-primary">· admin</span>}
+            {user?.isAdmin && <span className="ml-1.5 text-[#ff4652]">· admin</span>}
           </p>
         </div>
       </div>

@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { CheckCircle2, Package, Search } from 'lucide-react';
 import { PageHeader } from '@/components/common/PageHeader';
+import { SummaryPill } from '@/components/common/SummaryPill';
 import { ErrorState } from '@/components/common/ErrorState';
 import { EmptyState } from '@/components/common/EmptyState';
 import { Badge } from '@/components/ui/badge';
@@ -30,9 +31,11 @@ function matches(i: InventoryItem, q: string): boolean {
 
 function InventoryTable({ rows, actionable }: { rows: InventoryItem[]; actionable?: boolean }) {
   const deliver = useSetInventoryDelivered();
+
   if (rows.length === 0) {
     return <EmptyState icon={Package} title="Nessun articolo" description="Il magazzino è vuoto in questa categoria." />;
   }
+
   return (
     <Table>
       <TableHeader>
@@ -48,13 +51,13 @@ function InventoryTable({ rows, actionable }: { rows: InventoryItem[]; actionabl
       <TableBody>
         {rows.map((i) => (
           <TableRow key={i.uuid}>
-            <TableCell className="font-medium">{i.name}</TableCell>
+            <TableCell className="font-semibold">{i.name}</TableCell>
             <TableCell className="hidden text-muted-foreground md:table-cell">{i.make || '—'}</TableCell>
             <TableCell className="hidden text-muted-foreground lg:table-cell">{i.ref || '—'}</TableCell>
             <TableCell className="hidden sm:table-cell">
               {i.location ? <Badge variant="outline">{i.location}</Badge> : '—'}
             </TableCell>
-            <TableCell className="tnum text-right">{formatCurrency(i.bPrice)}</TableCell>
+            <TableCell className="tnum text-right font-bold">{formatCurrency(i.bPrice)}</TableCell>
             {actionable && (
               <TableCell className="text-right">
                 <Button
@@ -92,30 +95,35 @@ export function InventoryPage() {
   const error = available.error ?? delivered.error;
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <PageHeader title="Giacenze di magazzino" description="Articoli disponibili e consegnati" />
 
-      <div className="relative w-full max-w-sm">
-        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Cerca articolo, marca, rif., posizione…"
-          className="pl-8"
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-        />
-      </div>
-
       <Card>
+        <CardContent className="flex flex-wrap items-center gap-3 p-3.5">
+          <div className="relative w-full max-w-md flex-1">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Cerca articolo, marca, rif., posizione…"
+              className="pl-9"
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+            />
+          </div>
+          <SummaryPill label="Disponibili" value={String(availableRows.length)} tone="green" />
+        </CardContent>
+      </Card>
+
+      <Card className="overflow-hidden">
         <CardContent className="p-0">
           {isLoading ? (
-            <div className="space-y-2 p-4">
+            <div className="space-y-2 p-5">
               {Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}
             </div>
           ) : error ? (
             <ErrorState error={error} onRetry={() => { available.refetch(); delivered.refetch(); }} />
           ) : (
             <Tabs defaultValue="available">
-              <div className="border-b px-4 pt-3">
+              <div className="border-b border-[#eee6de] bg-[#fffefd] px-4 py-3">
                 <TabsList>
                   <TabsTrigger value="available">Disponibili ({availableRows.length})</TabsTrigger>
                   <TabsTrigger value="delivered">Consegnati ({deliveredRows.length})</TabsTrigger>

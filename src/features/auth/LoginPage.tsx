@@ -50,33 +50,31 @@ export function LoginPage() {
   };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-background p-4">
-      <div className="pointer-events-none absolute inset-0 softcomfort-grid opacity-30" />
-      <div className="pointer-events-none absolute -left-40 -top-48 h-[34rem] w-[34rem] rounded-full bg-primary/15 blur-[110px]" />
-      <div className="pointer-events-none absolute -bottom-56 -right-32 h-[36rem] w-[36rem] rounded-full bg-brand-gold/10 blur-[120px]" />
+    <div className="softcomfort-shell relative flex min-h-screen items-center justify-center overflow-hidden p-4 text-[#f8f4ee]">
+      <div className="pointer-events-none absolute -left-40 -top-48 h-[34rem] w-[34rem] rounded-full bg-primary/15 blur-[120px]" />
+      <div className="pointer-events-none absolute -bottom-56 -right-32 h-[36rem] w-[36rem] rounded-full bg-[#d9a858]/10 blur-[125px]" />
 
       <div className="relative w-full max-w-md">
         <div className="mb-7 flex flex-col items-center text-center">
           <SoftComfortBrand
-            className="justify-center"
+            className="justify-center text-[#f8f4ee]"
             imageClassName="h-16 w-16 rounded-[20px]"
             showTagline={false}
           />
-          <p className="mt-4 text-[10px] font-bold uppercase tracking-[0.22em] text-brand-gold">
+          <p className="mt-4 text-[10px] font-bold uppercase tracking-[0.22em] text-[#d9a858]">
             Design · Comfort · Innovazione
           </p>
-          <h1 className="mt-2 font-display text-3xl font-bold tracking-tight text-foreground">
+          <h1 className="mt-2 font-display text-3xl font-bold tracking-tight text-[#f8f4ee]">
             Gestionale Soft Comfort
           </h1>
-          <p className="mt-2 max-w-sm text-sm leading-relaxed text-muted-foreground">
+          <p className="mt-2 max-w-sm text-sm leading-relaxed text-[#c9c0bb]">
             Controllo operativo di vendite, magazzino, ordini e contabilità.
           </p>
         </div>
 
-        <Card className="border-white/10 bg-card/[0.82] shadow-[0_32px_90px_rgba(0,0,0,0.48)] backdrop-blur-xl">
-          <div className="brand-divider h-px w-full" />
+        <Card className="border-white/10 bg-[#fffefd] shadow-[0_32px_90px_rgba(0,0,0,0.34)]">
           <CardHeader className="pb-3">
-            <CardTitle className="font-display text-lg">Accesso riservato</CardTitle>
+            <CardTitle className="font-display text-xl">Accesso riservato</CardTitle>
             <CardDescription>Inserisci le credenziali aziendali</CardDescription>
           </CardHeader>
           <CardContent>
@@ -110,7 +108,7 @@ export function LoginPage() {
               </div>
 
               {serverError && (
-                <p role="alert" className="rounded-lg border border-destructive/25 bg-destructive/10 px-3 py-2 text-xs text-destructive">
+                <p role="alert" className="rounded-xl border border-destructive/20 bg-[#fff0f2] px-3 py-2.5 text-xs text-destructive">
                   {serverError}
                 </p>
               )}
@@ -123,7 +121,7 @@ export function LoginPage() {
           </CardContent>
         </Card>
 
-        <p className="mt-5 text-center text-[10px] uppercase tracking-[0.16em] text-muted-foreground/[0.65]">
+        <p className="mt-5 text-center text-[10px] uppercase tracking-[0.16em] text-[#978b84]">
           Soft Comfort · Palermo &amp; Bagheria
         </p>
       </div>

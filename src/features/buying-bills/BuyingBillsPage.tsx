@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Search, ShoppingCart } from 'lucide-react';
 import { PageHeader } from '@/components/common/PageHeader';
+import { SummaryPill } from '@/components/common/SummaryPill';
 import { ErrorState } from '@/components/common/ErrorState';
 import { EmptyState } from '@/components/common/EmptyState';
 import { Badge } from '@/components/ui/badge';
@@ -39,23 +40,28 @@ export function BuyingBillsPage() {
   }, [data, q]);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <PageHeader title="Fatture di acquisto" description="Ordini e acquisti dai fornitori" />
 
-      <div className="relative w-full max-w-sm">
-        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="Cerca fornitore, stato, articolo…"
-          className="pl-8"
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-        />
-      </div>
-
       <Card>
+        <CardContent className="flex flex-wrap items-center gap-3 p-3.5">
+          <div className="relative w-full max-w-md flex-1">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Cerca fornitore, stato, articolo…"
+              className="pl-9"
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+            />
+          </div>
+          <SummaryPill label="Fatture visibili" value={String(rows.length)} tone="neutral" />
+        </CardContent>
+      </Card>
+
+      <Card className="overflow-hidden">
         <CardContent className="p-0">
           {isLoading ? (
-            <div className="space-y-2 p-4">
+            <div className="space-y-2 p-5">
               {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}
             </div>
           ) : error ? (
@@ -79,12 +85,9 @@ export function BuyingBillsPage() {
               <TableBody>
                 {rows.map((b) => (
                   <TableRow key={b.uuid}>
-                    <TableCell className="whitespace-nowrap">{formatDate(b.date)}</TableCell>
+                    <TableCell className="tnum whitespace-nowrap">{formatDate(b.date)}</TableCell>
                     <TableCell>
-                      <Link
-                        to={`/acquisti/${b.uuid}`}
-                        className="font-medium text-primary hover:underline"
-                      >
+                      <Link to={`/acquisti/${b.uuid}`} className="data-link">
                         {b.make || '—'}
                       </Link>
                     </TableCell>

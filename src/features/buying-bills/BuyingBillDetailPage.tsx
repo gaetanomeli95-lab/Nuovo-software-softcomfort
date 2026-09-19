@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Package, Plus, Trash2 } from 'lucide-react';
 import { PageHeader } from '@/components/common/PageHeader';
 import { ErrorState } from '@/components/common/ErrorState';
@@ -22,7 +22,6 @@ import { useBuyingBill } from '@/hooks/useQueries';
 import { useAddBuyingPayment, useDeleteBuyingBill } from '@/hooks/useMutations';
 import { useAuth } from '@/features/auth/AuthContext';
 import { formatCurrency, formatDate } from '@/lib/format';
-import { useNavigate } from 'react-router-dom';
 
 function AddPaymentDialog({ uuid }: { uuid: string }) {
   const add = useAddBuyingPayment();
@@ -48,8 +47,12 @@ function AddPaymentDialog({ uuid }: { uuid: string }) {
         <div className="space-y-1.5">
           <Label htmlFor="bp-amt">Importo (€)</Label>
           <Input
-            id="bp-amt" type="number" min="0" step="0.01"
-            value={amount} onChange={(e) => setAmount(e.target.value)}
+            id="bp-amt"
+            type="number"
+            min="0"
+            step="0.01"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
           />
         </div>
         <DialogFooter>
@@ -70,9 +73,9 @@ export function BuyingBillDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="space-y-4">
-        <Skeleton className="h-8 w-64" />
-        <Skeleton className="h-64" />
+      <div className="space-y-5">
+        <Skeleton className="h-9 w-72" />
+        <Skeleton className="h-72" />
       </div>
     );
   }
@@ -94,17 +97,19 @@ export function BuyingBillDetailPage() {
   const itemsTotal = items.reduce((s, i) => s + (i.price ?? 0), 0);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" asChild aria-label="Indietro">
+        <Button variant="outline" size="icon" asChild aria-label="Indietro" className="rounded-full bg-white">
           <Link to="/acquisti"><ArrowLeft className="h-4 w-4" /></Link>
         </Button>
         <PageHeader
           title={bill.make || 'Fattura di acquisto'}
-          description={`Del ${formatDate(bill.date)}`}
+          description={`Documento del ${formatDate(bill.date)}`}
           actions={
-            <div className="flex items-center gap-2">
-              <Badge variant={bill.status === 'Aperta' ? 'warning' : 'outline'}>{bill.status}</Badge>
+            <div className="flex flex-wrap items-center gap-2">
+              <Badge variant={bill.status === 'Aperta' ? 'warning' : bill.status === 'Chiusa' ? 'success' : 'outline'}>
+                {bill.status}
+              </Badge>
               <AddPaymentDialog uuid={bill.uuid} />
               {user?.isAdmin && (
                 <ConfirmDialog
@@ -129,43 +134,59 @@ export function BuyingBillDetailPage() {
         />
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Package className="h-4 w-4" /> Articoli ({items.length})
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-0">
-          {items.length === 0 ? (
-            <EmptyState title="Nessun articolo" />
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Articolo</TableHead>
-                  <TableHead className="text-right">Prezzo</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {items.map((i) => (
-                  <TableRow key={i.uuid}>
-                    <TableCell className="font-medium">{i.name}</TableCell>
-                    <TableCell className="tnum text-right">
-                      {i.price != null ? formatCurrency(i.price) : '—'}
-                    </TableCell>
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_280px]">
+        <Card className="overflow-hidden">
+          <CardHeader className="border-b border-[#eee6de] bg-[#fffefd]">
+            <CardTitle className="flex items-center gap-2">
+              <span className="grid h-8 w-8 place-items-center rounded-lg bg-[#fff0f1] text-primary">
+                <Package className="h-4 w-4" />
+              </span>
+              Articoli ({items.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            {items.length === 0 ? (
+              <EmptyState title="Nessun articolo" />
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Articolo</TableHead>
+                    <TableHead className="text-right">Prezzo</TableHead>
                   </TableRow>
-                ))}
-                <TableRow>
-                  <TableCell className="font-semibold">Totale articoli</TableCell>
-                  <TableCell className="tnum text-right font-semibold">
-                    {formatCurrency(itemsTotal)}
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
+                </TableHeader>
+                <TableBody>
+                  {items.map((i) => (
+                    <TableRow key={i.uuid}>
+                      <TableCell className="font-semibold">{i.name}</TableCell>
+                      <TableCell className="tnum text-right font-bold">
+                        {i.price != null ? formatCurrency(i.price) : '—'}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="h-fit overflow-hidden border-[#e7ddd3]">
+          <CardHeader className="border-b border-[#eee6de] bg-[#fbf7f2]">
+            <CardTitle>Riepilogo acquisto</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-5">
+            <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+              Totale articoli
+            </p>
+            <p className="tnum mt-2 text-2xl font-extrabold tracking-[-0.03em] text-foreground">
+              {formatCurrency(itemsTotal)}
+            </p>
+            <p className="mt-2 text-xs text-muted-foreground">
+              {items.length} {items.length === 1 ? 'articolo registrato' : 'articoli registrati'}
+            </p>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

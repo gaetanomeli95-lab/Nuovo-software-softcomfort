@@ -5,11 +5,12 @@ import {
   ReceiptText, RotateCcw, Search,
 } from 'lucide-react';
 import { PageHeader } from '@/components/common/PageHeader';
+import { SummaryPill } from '@/components/common/SummaryPill';
 import { StatusBadge } from '@/components/common/StatusBadge';
 import { ErrorState } from '@/components/common/ErrorState';
 import { EmptyState } from '@/components/common/EmptyState';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
@@ -47,15 +48,17 @@ function SortableHead({
         type="button"
         onClick={() => onSort(sortKey)}
         className={cn(
-          'inline-flex items-center gap-1 uppercase tracking-wide',
-          active ? 'text-foreground' : 'text-muted-foreground hover:text-foreground',
+          'inline-flex items-center gap-1 uppercase tracking-[0.08em] transition-colors',
+          active ? 'text-[#3d3532]' : 'text-[#766c66] hover:text-foreground',
         )}
       >
         {label}
         {active ? (
-          dir === 'asc' ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />
+          dir === 'asc'
+            ? <ArrowUp className="h-3 w-3 text-primary" />
+            : <ArrowDown className="h-3 w-3 text-primary" />
         ) : (
-          <ArrowUpDown className="h-3 w-3 opacity-40" />
+          <ArrowUpDown className="h-3 w-3 opacity-35" />
         )}
       </button>
     </TableHead>
@@ -66,7 +69,6 @@ export function SellingBillsPage() {
   const { data, isLoading, error, refetch } = useSellingBills();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // Filtri inizializzati dai query param (persistenza via URL)
   const [filters, setFilters] = useState<BillFilters>(() => ({
     ...DEFAULT_FILTERS,
     search: searchParams.get('q') ?? '',
@@ -77,7 +79,6 @@ export function SellingBillsPage() {
   const [page, setPage] = useState(0);
 
   const sellers = useMemo(() => uniqueSellers(data ?? []), [data]);
-
   const filtered = useMemo(() => filterBills(data ?? [], filters), [data, filters]);
   const sorted = useMemo(() => sortBills(filtered, sortKey, sortDir), [filtered, sortKey, sortDir]);
   const pages = totalPages(sorted.length, PAGE_SIZE);
@@ -88,7 +89,6 @@ export function SellingBillsPage() {
   const updateFilters = (patch: Partial<BillFilters>) => {
     setFilters((f) => ({ ...f, ...patch }));
     setPage(0);
-    // Persistenza filtri principali in URL
     const next = { ...filters, ...patch };
     const params = new URLSearchParams();
     if (next.search) params.set('q', next.search);
@@ -115,21 +115,16 @@ export function SellingBillsPage() {
     filters.seller !== 'all' || filters.dateFrom !== '' || filters.dateTo !== '';
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <PageHeader
         title="Fatture di vendita"
-        description={
-          data
-            ? `${filtered.length} di ${data.length} fatture · totale ${formatCurrency(total)}`
-            : 'Elenco delle vendite'
-        }
+        description={data ? `${filtered.length} risultati su ${data.length} fatture` : 'Elenco delle vendite'}
       />
 
-      {/* Barra filtri */}
-      <Card className="p-3">
-        <div className="flex flex-wrap items-center gap-2">
-          <div className="relative min-w-[220px] flex-1">
-            <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+      <Card>
+        <CardContent className="flex flex-wrap items-center gap-2.5 p-3.5">
+          <div className="relative min-w-[230px] flex-1">
+            <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={filters.search}
               onChange={(e) => updateFilters({ search: e.target.value })}
@@ -143,7 +138,7 @@ export function SellingBillsPage() {
             value={filters.status}
             onValueChange={(v) => updateFilters({ status: v as BillFilters['status'] })}
           >
-            <SelectTrigger className="w-[160px]" aria-label="Stato">
+            <SelectTrigger className="w-[165px]" aria-label="Stato">
               <SelectValue placeholder="Stato" />
             </SelectTrigger>
             <SelectContent>
@@ -154,11 +149,8 @@ export function SellingBillsPage() {
             </SelectContent>
           </Select>
 
-          <Select
-            value={filters.seller}
-            onValueChange={(v) => updateFilters({ seller: v })}
-          >
-            <SelectTrigger className="w-[160px]" aria-label="Venditore">
+          <Select value={filters.seller} onValueChange={(v) => updateFilters({ seller: v })}>
+            <SelectTrigger className="w-[165px]" aria-label="Venditore">
               <SelectValue placeholder="Venditore" />
             </SelectTrigger>
             <SelectContent>
@@ -169,34 +161,37 @@ export function SellingBillsPage() {
             </SelectContent>
           </Select>
 
-          <div className="flex items-center gap-1.5">
-            <Input
-              type="date"
-              value={filters.dateFrom}
-              onChange={(e) => updateFilters({ dateFrom: e.target.value })}
-              className="w-[140px]"
-              aria-label="Da data"
-            />
-            <span className="text-xs text-muted-foreground">→</span>
-            <Input
-              type="date"
-              value={filters.dateTo}
-              onChange={(e) => updateFilters({ dateTo: e.target.value })}
-              className="w-[140px]"
-              aria-label="A data"
-            />
-          </div>
+          <Input
+            type="date"
+            value={filters.dateFrom}
+            onChange={(e) => updateFilters({ dateFrom: e.target.value })}
+            className="w-[145px]"
+            aria-label="Da data"
+          />
+          <Input
+            type="date"
+            value={filters.dateTo}
+            onChange={(e) => updateFilters({ dateTo: e.target.value })}
+            className="w-[145px]"
+            aria-label="A data"
+          />
 
           {hasActiveFilters && (
             <Button variant="ghost" size="sm" onClick={resetFilters}>
               <RotateCcw className="h-3.5 w-3.5" /> Reset
             </Button>
           )}
-        </div>
+
+          <SummaryPill
+            className="ml-auto"
+            label="Totale filtrato"
+            value={formatCurrency(total)}
+            tone="neutral"
+          />
+        </CardContent>
       </Card>
 
-      {/* Tabella */}
-      <Card>
+      <Card className="overflow-hidden">
         {isLoading ? (
           <div className="space-y-2 p-5">
             {Array.from({ length: 10 }).map((_, i) => (
@@ -235,17 +230,17 @@ export function SellingBillsPage() {
                 {rows.map((b) => (
                   <TableRow key={b.uuid}>
                     <TableCell className="tnum whitespace-nowrap">{formatDate(b.date)}</TableCell>
-                    <TableCell className="max-w-[240px] truncate font-medium">
-                      <Link to={`/vendite/${b.uuid}`} className="hover:text-primary hover:underline">
+                    <TableCell className="max-w-[240px] truncate">
+                      <Link to={`/vendite/${b.uuid}`} className="data-link">
                         {b.client || '—'}
                       </Link>
                     </TableCell>
-                    <TableCell>{b.seller}</TableCell>
+                    <TableCell className="font-medium">{b.seller}</TableCell>
                     <TableCell className="hidden max-w-[260px] truncate text-muted-foreground md:table-cell">
                       {(b.items ?? []).map((i) => i.name).join(', ') || '—'}
                     </TableCell>
                     <TableCell><StatusBadge status={b.status} /></TableCell>
-                    <TableCell className="tnum text-right font-medium">
+                    <TableCell className="tnum text-right font-bold">
                       {formatCurrency(b.totalPrice)}
                     </TableCell>
                   </TableRow>
@@ -253,21 +248,22 @@ export function SellingBillsPage() {
               </TableBody>
             </Table>
 
-            {/* Paginazione */}
-            <div className="flex items-center justify-between border-t px-4 py-3">
+            <div className="flex items-center justify-between border-t border-[#ebe4dc] bg-[#fcfaf7] px-4 py-3">
               <p className="text-xs text-muted-foreground">
                 Pagina {safePage + 1} di {pages} · {sorted.length} risultati
               </p>
-              <div className="flex items-center gap-1">
+              <div className="flex items-center gap-1.5">
                 <Button
-                  variant="outline" size="sm"
+                  variant="outline"
+                  size="sm"
                   disabled={safePage === 0}
                   onClick={() => setPage(safePage - 1)}
                 >
                   <ChevronLeft className="h-4 w-4" /> Prec.
                 </Button>
                 <Button
-                  variant="outline" size="sm"
+                  variant="outline"
+                  size="sm"
                   disabled={safePage >= pages - 1}
                   onClick={() => setPage(safePage + 1)}
                 >

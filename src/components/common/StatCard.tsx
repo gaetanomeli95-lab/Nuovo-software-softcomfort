@@ -15,43 +15,49 @@ interface StatCardProps {
 }
 
 const TONE_ICON: Record<NonNullable<StatCardProps['tone']>, string> = {
-  default: 'border-primary/20 bg-primary/10 text-primary',
-  warning: 'border-brand-gold/20 bg-brand-gold/10 text-brand-gold',
-  success: 'border-success/20 bg-success/10 text-success',
-  info: 'border-info/20 bg-info/10 text-info',
-  destructive: 'border-destructive/20 bg-destructive/10 text-destructive',
+  default: 'border-[#f6c7ca] bg-[#fff0f1] text-primary',
+  warning: 'border-[#ead8b9] bg-[#fbf3e5] text-[#9a6b24]',
+  success: 'border-[#c8e2d3] bg-[#edf7f1] text-success',
+  info: 'border-[#cadbea] bg-[#eef5fa] text-info',
+  destructive: 'border-[#efcbd0] bg-[#fff0f2] text-destructive',
 };
 
 export function StatCard({ label, value, sub, icon: Icon, to, tone = 'default', loading }: StatCardProps) {
   const inner = (
     <Card
       className={cn(
-        'group relative overflow-hidden transition-all duration-200',
-        to && 'hover:-translate-y-0.5 hover:border-primary/25 hover:shadow-[0_18px_50px_rgba(0,0,0,0.36)]',
+        'group relative overflow-hidden',
+        to && 'transition-all duration-200 hover:-translate-y-0.5 hover:border-[#d6ccc1] hover:shadow-[var(--shadow-card-hover)]',
       )}
     >
-      <div className="brand-divider absolute inset-x-0 top-0 h-px opacity-65" />
-      <CardContent className="flex items-center gap-4 p-4">
-        <div className={cn('rounded-xl border p-2.5', TONE_ICON[tone])}>
+      <CardContent className="flex min-h-[104px] items-center gap-4 p-5">
+        <div className={cn('grid h-11 w-11 shrink-0 place-items-center rounded-xl border', TONE_ICON[tone])}>
           <Icon className="h-5 w-5" />
         </div>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-[11px] font-semibold uppercase tracking-[0.08em] text-muted-foreground">
+          <p className="truncate text-[10px] font-bold uppercase tracking-[0.11em] text-muted-foreground">
             {label}
           </p>
           {loading ? (
-            <Skeleton className="mt-1 h-6 w-20" />
+            <Skeleton className="mt-2 h-7 w-24" />
           ) : (
-            <p className="tnum mt-0.5 truncate text-xl font-semibold leading-tight text-foreground">{value}</p>
+            <p className="tnum mt-1 truncate text-[23px] font-bold leading-none tracking-[-0.02em] text-foreground">
+              {value}
+            </p>
           )}
-          {sub && !loading && <p className="mt-0.5 truncate text-xs text-muted-foreground">{sub}</p>}
+          {sub && !loading && (
+            <p className="mt-1.5 truncate text-xs text-muted-foreground">{sub}</p>
+          )}
         </div>
       </CardContent>
     </Card>
   );
 
   return to ? (
-    <Link to={to} className="block rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+    <Link
+      to={to}
+      className="block rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+    >
       {inner}
     </Link>
   ) : (

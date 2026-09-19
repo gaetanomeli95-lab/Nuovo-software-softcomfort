@@ -2,58 +2,61 @@
 @import "tailwindcss";
 
 /*
- * Soft Comfort Design System
- * Fonte visiva ufficiale: repo SITO-SOFT-COMFORT / styles.css
- * Brand: fondo #050505, rosso #f20f1f, rosso scuro #9c0610,
- * oro #d9a858, testo caldo #f8f4ee.
+ * Soft Comfort UI V2
+ * Brand ufficiale invariato, ma con doppia superficie:
+ * shell scura + workspace caldo e luminoso.
  */
 @theme {
-  --color-background: #050505;
-  --color-foreground: #f8f4ee;
+  --color-background: #f5f2ed;
+  --color-foreground: #272120;
 
-  --color-card: #0d0d0e;
-  --color-card-foreground: #f8f4ee;
-  --color-popover: #111112;
-  --color-popover-foreground: #f8f4ee;
+  --color-card: #fffefd;
+  --color-card-foreground: #272120;
+  --color-popover: #fffefd;
+  --color-popover-foreground: #272120;
 
   --color-primary: #f20f1f;
-  --color-primary-foreground: #fff9f4;
-  --color-secondary: #181719;
-  --color-secondary-foreground: #f8f4ee;
-  --color-muted: #171719;
-  --color-muted-foreground: #aaa39b;
-  --color-accent: #251315;
-  --color-accent-foreground: #f8f4ee;
+  --color-primary-foreground: #fffaf7;
+  --color-secondary: #f0ebe4;
+  --color-secondary-foreground: #4d4541;
+  --color-muted: #eee8e0;
+  --color-muted-foreground: #7b726c;
+  --color-accent: #fff0ef;
+  --color-accent-foreground: #8f171d;
 
-  --color-destructive: #d83a46;
-  --color-destructive-foreground: #fff9f4;
-  --color-border: #292426;
-  --color-input: #342d2f;
+  --color-destructive: #c93a45;
+  --color-destructive-foreground: #fffaf7;
+  --color-border: #e1d9d0;
+  --color-input: #d7cec4;
   --color-ring: #f20f1f;
 
   --color-brand-red: #f20f1f;
   --color-brand-red-dark: #9c0610;
   --color-brand-gold: #d9a858;
+  --color-brand-gold-ink: #8a6428;
   --color-brand-ivory: #f8f4ee;
+  --color-brand-ink: #272120;
+  --color-brand-warm: #f7f2eb;
 
-  --color-success: #4fba79;
-  --color-success-foreground: #f5fff8;
-  --color-warning: #d9a858;
-  --color-warning-foreground: #f4d39b;
-  --color-info: #72a8d8;
-  --color-info-foreground: #f5fbff;
+  --color-success: #2f8b5c;
+  --color-success-foreground: #185b3b;
+  --color-warning: #b47c27;
+  --color-warning-foreground: #6f4a16;
+  --color-info: #3f78a8;
+  --color-info-foreground: #2b5d85;
 
-  --radius-sm: 0.45rem;
-  --radius-md: 0.65rem;
-  --radius-lg: 0.85rem;
-  --radius-xl: 1.15rem;
+  --radius-sm: 0.5rem;
+  --radius-md: 0.7rem;
+  --radius-lg: 0.9rem;
+  --radius-xl: 1.1rem;
 
   --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI",
     Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-display: "Playfair Display", Georgia, serif;
 
-  --shadow-card: 0 1px 0 rgba(255, 255, 255, 0.035), 0 14px 42px rgba(0, 0, 0, 0.26);
-  --shadow-pop: 0 24px 70px -16px rgba(0, 0, 0, 0.72), 0 0 0 1px rgba(255, 255, 255, 0.04);
+  --shadow-card: 0 1px 2px rgba(51, 39, 32, 0.04), 0 10px 30px rgba(77, 59, 47, 0.06);
+  --shadow-card-hover: 0 2px 4px rgba(51, 39, 32, 0.05), 0 18px 44px rgba(77, 59, 47, 0.10);
+  --shadow-pop: 0 24px 70px -18px rgba(55, 42, 34, 0.24), 0 0 0 1px rgba(71, 53, 43, 0.05);
 }
 
 @layer base {
@@ -64,26 +67,25 @@
   html {
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
-    background: var(--color-background);
+    background: #f5f2ed;
   }
 
   body {
     min-height: 100vh;
     margin: 0;
     background:
-      radial-gradient(circle at 8% -8%, rgba(242, 15, 31, 0.14), transparent 31rem),
-      radial-gradient(circle at 96% 2%, rgba(217, 168, 88, 0.09), transparent 34rem),
-      linear-gradient(180deg, #080707 0%, #050505 52%, #070606 100%);
-    background-attachment: fixed;
+      radial-gradient(circle at 14% -10%, rgba(217, 168, 88, 0.10), transparent 34rem),
+      radial-gradient(circle at 88% 0%, rgba(242, 15, 31, 0.055), transparent 30rem),
+      linear-gradient(180deg, #f8f5f1 0%, #f4f0ea 100%);
     color: var(--color-foreground);
     font-family: var(--font-sans);
     font-size: 0.875rem;
-    line-height: 1.45;
+    line-height: 1.48;
   }
 
   ::selection {
-    background: rgba(242, 15, 31, 0.34);
-    color: #fff9f4;
+    background: rgba(242, 15, 31, 0.16);
+    color: #6f0a11;
   }
 
   .tnum {
@@ -99,25 +101,40 @@
 
   .scrollbar-thin {
     scrollbar-width: thin;
-    scrollbar-color: #3b3335 transparent;
+    scrollbar-color: #c9bfb5 transparent;
   }
 
-  .softcomfort-grid {
-    background-image:
-      linear-gradient(rgba(255, 255, 255, 0.018) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255, 255, 255, 0.018) 1px, transparent 1px);
-    background-size: 34px 34px;
+  .softcomfort-workspace {
+    background:
+      radial-gradient(circle at 18% 0%, rgba(217, 168, 88, 0.07), transparent 26rem),
+      radial-gradient(circle at 90% 10%, rgba(242, 15, 31, 0.04), transparent 28rem),
+      #f5f2ed;
   }
 
   .softcomfort-panel {
-    background:
-      linear-gradient(145deg, rgba(255, 255, 255, 0.035), transparent 42%),
-      rgba(13, 13, 14, 0.9);
+    background: rgba(255, 254, 253, 0.96);
     box-shadow: var(--shadow-card);
-    backdrop-filter: blur(14px);
+  }
+
+  .softcomfort-shell {
+    background:
+      radial-gradient(circle at 12% -8%, rgba(242, 15, 31, 0.18), transparent 19rem),
+      radial-gradient(circle at 85% 20%, rgba(217, 168, 88, 0.08), transparent 18rem),
+      linear-gradient(180deg, #181313 0%, #110e0e 100%);
   }
 
   .brand-divider {
-    background: linear-gradient(90deg, #f20f1f 0%, #d9a858 56%, transparent 100%);
+    background: linear-gradient(90deg, #f20f1f 0%, #d9a858 52%, transparent 100%);
+  }
+
+  .data-link {
+    color: var(--color-foreground);
+    font-weight: 600;
+    text-decoration: none;
+    transition: color 160ms ease;
+  }
+
+  .data-link:hover {
+    color: var(--color-primary);
   }
 }
