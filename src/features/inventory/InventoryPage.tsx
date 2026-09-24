@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { CheckCircle2, MapPin, Package, Pencil, Plus, Search } from 'lucide-react';
+import { CheckCircle2, Download, MapPin, Package, Pencil, Plus, Search } from 'lucide-react';
 import { PageHeader } from '@/components/common/PageHeader';
 import { SummaryPill } from '@/components/common/SummaryPill';
 import { ErrorState } from '@/components/common/ErrorState';
@@ -29,6 +29,7 @@ import {
   useSetItemLocation,
 } from '@/hooks/useMutations';
 import { formatCurrency } from '@/lib/format';
+import { downloadTextFile, toCsv } from '@/lib/export';
 import type { InventoryItem } from '@/types/domain';
 
 function matches(i: InventoryItem, q: string): boolean {
@@ -305,12 +306,53 @@ export function InventoryPage() {
   const error = available.error ?? delivered.error;
   const unlocated = availableRows.filter((item) => !item.location).length;
 
+  const exportCsv = () => {
+    const csv = toCsv([
+      ['Stato', 'Marca / ditta', 'Riferimento', 'Articolo', 'Quantità', 'Posizione', 'Prezzo acquisto'],
+      ...availableRows.map((item) => [
+        'Disponibile',
+        item.make,
+        item.ref,
+        item.name,
+        item.quantity ?? '',
+        item.location ?? '',
+        item.bPrice ?? '',
+      ]),
+      ...deliveredRows.map((item) => [
+        'Consegnato',
+        item.make,
+        item.ref,
+        item.name,
+        item.quantity ?? '',
+        item.location ?? '',
+        item.bPrice ?? '',
+      ]),
+    ]);
+
+    downloadTextFile(
+      `softcomfort-magazzino-${new Date().toISOString().slice(0, 10)}.csv`,
+      '\uFEFF' + csv,
+      'text/csv;charset=utf-8',
+    );
+  };
+
   return (
     <div className="space-y-5">
       <PageHeader
         title="Giacenze di magazzino"
         description="Articoli disponibili, ubicazioni e storico consegnato"
-        actions={<AddInventoryDialog />}
+        actions={
+          <div className="flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              onClick={exportCsv}
+              disabled={availableRows.length + deliveredRows.length === 0}
+            >
+              <Download className="h-4 w-4" /> Esporta CSV
+            </Button>
+            <AddInventoryDialog />
+          </div>
+        }
       />
 
       <Card>
