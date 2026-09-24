@@ -351,7 +351,36 @@ export function useSetItemLocation() {
       inventoryApi.updateLocation(uuid, location),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: queryKeys.inventoryAvailable });
+      void qc.invalidateQueries({ queryKey: queryKeys.inventoryDelivered });
       ok('Posizione aggiornata');
+    },
+    onError: ko,
+  });
+}
+
+export function useSetInventoryName() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ uuid, name }: { uuid: string; name: string }) =>
+      inventoryApi.updateName(uuid, name),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: queryKeys.inventoryAvailable });
+      void qc.invalidateQueries({ queryKey: queryKeys.inventoryDelivered });
+      ok('Nome articolo aggiornato');
+    },
+    onError: ko,
+  });
+}
+
+export function useSetInventoryRef() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ uuid, ref }: { uuid: string; ref: string }) =>
+      inventoryApi.updateRef(uuid, ref),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: queryKeys.inventoryAvailable });
+      void qc.invalidateQueries({ queryKey: queryKeys.inventoryDelivered });
+      ok('Riferimento aggiornato');
     },
     onError: ko,
   });
