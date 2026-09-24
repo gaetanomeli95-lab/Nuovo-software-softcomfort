@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import {
-  ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight,
+  ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight, Download,
   Plus, Printer, ReceiptText, RotateCcw, Search, Truck,
 } from 'lucide-react';
 import { PageHeader } from '@/components/common/PageHeader';
@@ -30,6 +30,7 @@ import { getPaymentSummary, type PaymentStatus } from './paymentStatus';
 import { SELLING_BILL_STATUSES, type SellingBillStatus } from '@/types/domain';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { cn } from '@/lib/utils';
+import { downloadTextFile, toCsv } from '@/lib/export';
 
 const PAGE_SIZE = 25;
 const PAYMENT_STATES: PaymentStatus[] = ['Da pagare', 'Parziale', 'Pagata'];
@@ -126,22 +127,54 @@ export function SellingBillsPage() {
     filters.dateFrom !== '' ||
     filters.dateTo !== '';
 
+  const exportCsv = () => {
+    const csv = toCsv([
+      ['Data', 'Cliente', 'Venditore', 'Stato operativo', 'Stato pagamento', 'Totale', 'Versato', 'Residuo', 'Telefono', 'Indirizzo'],
+      ...sorted.map((bill) => {
+        const payment = getPaymentSummary(bill);
+        return [
+          bill.date,
+          bill.client,
+          bill.seller,
+          bill.status,
+          payment.status,
+          bill.totalPrice,
+          payment.paidTotal,
+          payment.balance,
+          bill.phone,
+          bill.address,
+        ];
+      }),
+    ]);
+    downloadTextFile(
+      `softcomfort-vendite-${new Date().toISOString().slice(0, 10)}.csv`,
+      '\uFEFF' + csv,
+      'text/csv;charset=utf-8',
+    );
+  };
+
   return (
     <div className="space-y-5">
       <PageHeader
-        title="Fatture di vendita"
+        title="Vendite"
         description={
           data
             ? `${filtered.length} risultati su ${data.length} vendite · clicca una riga per aprirla`
             : 'Elenco delle vendite'
         }
         actions={
-          <Button asChild className="shadow-[0_8px_22px_rgba(242,15,31,0.18)]">
-            <Link to="/vendite/nuova">
-              <Plus className="h-4 w-4" />
-              Nuova fattura
-            </Link>
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" onClick={exportCsv} disabled={sorted.length === 0}>
+              <Download className="h-4 w-4" />
+              Esporta CSV
+            </Button>
+            <Button asChild className="shadow-[0_8px_22px_rgba(242,15,31,0.18)]">
+              <Link to="/vendite/nuova">
+                <Plus className="h-4 w-4" />
+                Nuova vendita
+              </Link>
+            </Button>
+          </div>
         }
       />
 
@@ -154,7 +187,7 @@ export function SellingBillsPage() {
               onChange={(e) => updateFilters({ search: e.target.value })}
               placeholder="Cerca cliente, articolo, note…"
               className="pl-9"
-              aria-label="Cerca fatture"
+              aria-label="Cerca vendite"
             />
           </div>
 
