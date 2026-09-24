@@ -90,7 +90,16 @@ function AddCheckDialog() {
 export function ChecksPage() {
   const { data, isLoading, error, refetch } = useChecks();
   const del = useDeleteCheck();
-  const [q, setQ] = useState('');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [q, setQ] = useState(() => searchParams.get('q') ?? '');
+
+  const updateSearch = (value: string) => {
+    setQ(value);
+    const params = new URLSearchParams(searchParams);
+    if (value.trim()) params.set('q', value);
+    else params.delete('q');
+    setSearchParams(params, { replace: true });
+  };
 
   const rows = useMemo(() => {
     const list = data ?? [];
