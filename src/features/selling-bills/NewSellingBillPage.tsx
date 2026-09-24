@@ -209,7 +209,7 @@ export function NewSellingBillPage() {
           <Link to="/vendite"><ArrowLeft className="h-4 w-4" /></Link>
         </Button>
         <PageHeader
-          title="Nuova fattura"
+          title="Nuova vendita"
           description="Proposta di commissione digitale: cliente, consegna, articoli, acconto e programmazione in un unico flusso."
           className="flex-1"
         />
@@ -660,7 +660,7 @@ export function NewSellingBillPage() {
                 onClick={submit}
               >
                 <Save className="h-4 w-4" />
-                {create.isPending ? 'Salvataggio…' : 'Salva fattura'}
+                {create.isPending ? 'Salvataggio…' : 'Salva vendita'}
               </Button>
 
               <Button variant="outline" className="w-full" asChild>

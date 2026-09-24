@@ -4,9 +4,12 @@ import {
   AlertTriangle,
   CalendarCheck2,
   CalendarDays,
+  CalendarPlus,
   ChevronRight,
+  Download,
   Clock3,
   MapPin,
+  MessageCircle,
   Phone,
   Search,
   Truck,
@@ -23,6 +26,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useSellingBills } from '@/hooks/useQueries';
 import { formatDate } from '@/lib/format';
 import { cn } from '@/lib/utils';
+import { buildIcsCalendar, downloadTextFile, toCsv, whatsappUrl } from '@/lib/export';
 import {
   deliveryCounts,
   getDeliveryEntries,
@@ -59,6 +63,7 @@ function stateClass(state: DeliveryState) {
 function DeliveryCard({ entry }: { entry: DeliveryEntry }) {
   const { bill, metadata } = entry;
   const address = [bill.address, metadata.city].filter(Boolean).join(' · ');
+  const whatsapp = whatsappUrl(bill.phone ?? '');
 
   return (
     <Card className="group overflow-hidden border-[#ded5cd] bg-[#fffefd] transition-all hover:-translate-y-0.5 hover:border-[#cfc1b6] hover:shadow-[0_18px_44px_rgba(67,51,42,0.10)]">
@@ -126,7 +131,14 @@ function DeliveryCard({ entry }: { entry: DeliveryEntry }) {
             </div>
           </div>
 
-          <div className="flex items-center justify-end border-t border-[#eee7e0] p-4 md:border-l md:border-t-0">
+          <div className="flex flex-wrap items-center justify-end gap-2 border-t border-[#eee7e0] p-4 md:border-l md:border-t-0">
+            {whatsapp && (
+              <Button variant="outline" size="icon" asChild aria-label="Apri WhatsApp">
+                <a href={whatsapp} target="_blank" rel="noreferrer">
+                  <MessageCircle className="h-4 w-4" />
+                </a>
+              </Button>
+            )}
             <Button variant="outline" asChild>
               <Link to={`/vendite/${bill.uuid}`}>
                 Apri vendita <ChevronRight className="h-4 w-4" />
@@ -166,6 +178,51 @@ export function DeliveryPlanningPage() {
     });
   }, [entries, filter, query]);
 
+  const exportCsv = () => {
+    const csv = toCsv([
+      ['Data', 'Ora', 'Cliente', 'Telefono', 'Indirizzo', 'Città', 'Piano', 'Scala', 'Ascensore', 'Autoscala', 'Stato'],
+      ...visible.map(({ bill, metadata, state }) => [
+        metadata.scheduledDate,
+        metadata.scheduledTime,
+        bill.client,
+        bill.phone,
+        bill.address,
+        metadata.city,
+        metadata.floor,
+        metadata.staircase,
+        yesNoLabel(metadata.elevator),
+        yesNoLabel(metadata.hoist),
+        stateLabel(state),
+      ]),
+    ]);
+    downloadTextFile(
+      `softcomfort-consegne-${todayISO}.csv`,
+      '\uFEFF' + csv,
+      'text/csv;charset=utf-8',
+    );
+  };
+
+  const exportCalendar = () => {
+    const ics = buildIcsCalendar(
+      visible
+        .filter((entry) => entry.state !== 'completed')
+        .map(({ bill, metadata }) => ({
+          uid: `${bill.uuid}@softcomfort`,
+          date: metadata.scheduledDate,
+          time: metadata.scheduledTime || undefined,
+          summary: `Consegna Soft Comfort · ${bill.client}`,
+          description: [
+            bill.phone ? `Tel. ${bill.phone}` : '',
+            metadata.floor ? `Piano ${metadata.floor}` : '',
+            metadata.elevator ? `Ascensore: ${yesNoLabel(metadata.elevator)}` : '',
+            metadata.hoist ? `Autoscala: ${yesNoLabel(metadata.hoist)}` : '',
+          ].filter(Boolean).join(' · '),
+          location: [bill.address, metadata.city].filter(Boolean).join(', '),
+        })),
+    );
+    downloadTextFile(`softcomfort-consegne-${todayISO}.ics`, ics, 'text/calendar;charset=utf-8');
+  };
+
   if (isLoading) {
     return (
       <div className="space-y-5">
@@ -185,6 +242,16 @@ export function DeliveryPlanningPage() {
       <PageHeader
         title="Planning consegne"
         description="Consegne programmate, ritardi e informazioni logistiche raccolte nelle vendite."
+        actions={
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" onClick={exportCsv} disabled={visible.length === 0}>
+              <Download className="h-4 w-4" /> CSV
+            </Button>
+            <Button variant="outline" onClick={exportCalendar} disabled={!visible.some((entry) => entry.state !== 'completed')}>
+              <CalendarPlus className="h-4 w-4" /> Calendario
+            </Button>
+          </div>
+        }
       />
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">

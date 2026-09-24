@@ -60,7 +60,7 @@ export const NAV_SECTIONS: NavSection[] = [
     items: [
       {
         to: '/vendite',
-        label: 'Fatture vendita',
+        label: 'Vendite',
         description: 'Consulta, cerca e gestisci tutte le vendite.',
         icon: ReceiptText,
       },

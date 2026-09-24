@@ -4,6 +4,7 @@ import {
   CircleAlert,
   Database,
   FileCheck2,
+  FileDown,
   LockKeyhole,
   Printer,
   ServerCog,
@@ -140,7 +141,14 @@ export function AdministrationPage() {
             <StatusRow
               icon={Printer}
               title="Stampe vendita"
-              description="Documento di vendita e bolla A4 mantengono il layout familiare Soft Comfort con ottimizzazione per stampa in bianco e nero."
+              description="Documento di vendita, bolla e proposta di commissione A4 mantengono un layout familiare Soft Comfort con ottimizzazione per stampa in bianco e nero."
+              status="Operativo"
+              tone="success"
+            />
+            <StatusRow
+              icon={FileDown}
+              title="Esportazioni operative"
+              description="Vendite e magazzino possono essere esportati in CSV; il planning consegne può essere esportato anche in calendario ICS."
               status="Operativo"
               tone="success"
             />

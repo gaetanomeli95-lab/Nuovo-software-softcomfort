@@ -8,7 +8,7 @@ L'obiettivo del progetto è mantenere i flussi familiari del gestionale storico,
 
 - Home operativa e navigazione desktop/mobile.
 - Dashboard con KPI, vendite, scadenze e priorità consegne.
-- **Da fare**: inbox prioritaria di urgenze, vendite, incassi e provvigioni.
+- Inbox prioritaria "Da fare" con urgenze, consegne, incassi e provvigioni.
 - Vendite: lista, filtri, dettaglio e workflow articoli.
 - Nuova vendita / proposta di commissione.
 - Dati consegna: piano, scala, ascensore, autoscala, rilievo misure, allegati, data/ora.
@@ -20,7 +20,9 @@ L'obiettivo del progetto è mantenere i flussi familiari del gestionale storico,
 - Fatture di acquisto e registrazione pagamenti.
 - Magazzino: carico, modifica ubicazione/riferimento/nome e consegna.
 - Anagrafiche derivate di clienti e fornitori.
-- Documento di vendita e bolla A4.
+- Documento di vendita, bolla e proposta di commissione A4.
+- Esportazioni operative: vendite e magazzino in CSV, planning consegne in CSV e calendario ICS.
+- Contatto WhatsApp rapido da vendita e planning quando il recapito è compatibile.
 - Amministrazione / readiness produzione.
 - Modalità demo stateful per verificare i flussi senza toccare dati reali.
 
