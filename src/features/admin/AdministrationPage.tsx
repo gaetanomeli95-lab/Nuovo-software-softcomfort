@@ -8,6 +8,7 @@ import {
   Printer,
   ServerCog,
   ShieldCheck,
+  type LucideIcon,
 } from 'lucide-react';
 import { PageHeader } from '@/components/common/PageHeader';
 import { Badge } from '@/components/ui/badge';
@@ -26,7 +27,7 @@ function StatusRow({
   status,
   tone = 'outline',
 }: {
-  icon: typeof ServerCog;
+  icon: LucideIcon;
   title: string;
   description: string;
   status: string;
