@@ -10,6 +10,12 @@ const sectionStyles: Record<string, {
   glow: string;
   eyebrow: string;
 }> = {
+  Operatività: {
+    accent: 'bg-[#f20f1f]',
+    icon: 'border-[#f2c8cb] bg-[#fff1f2] text-[#bd0c16]',
+    glow: 'bg-[#f20f1f]/[0.055]',
+    eyebrow: 'text-[#a40b13]',
+  },
   Vendite: {
     accent: 'bg-[#f20f1f]',
     icon: 'border-[#f2c8cb] bg-[#fff1f2] text-[#bd0c16]',
