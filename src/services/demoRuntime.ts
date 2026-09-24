@@ -20,6 +20,7 @@ import type {
 
 let sales: SellingBill[] = structuredClone(demoSellingBills);
 let buyingBills: BuyingBill[] = structuredClone(demoBuyingBills);
+const buyingPayments = new Map<string, number>();
 let checks: Check[] = structuredClone(demoChecks);
 const inventoryAvailable: InventoryItem[] = structuredClone(demoInventoryAvailable);
 const inventoryDelivered: InventoryItem[] = structuredClone(demoInventoryDelivered);
@@ -472,15 +473,19 @@ export async function handleDemoRequest<T>(
       items,
     };
     buyingBills.unshift(created);
+    buyingPayments.set(created.uuid, Math.max(0, Number(data.payed ?? 0)));
     return undefined as T;
   }
 
   if (path === '/buyingBill/addPayment' && method === 'POST') {
     const bill = buyingBills.find((candidate) => candidate.uuid === data.uuid);
-    if (bill && Number(data.payment ?? 0) > 0) {
-      // Il backend demo non espone il totale pagato: la registrazione serve
-      // a rendere interattivo il flusso senza inventare campi nel contratto.
-      if (bill.status === 'Aperta') bill.status = 'Chiusa';
+    const payment = Math.max(0, Number(data.payment ?? 0));
+    if (bill && payment > 0) {
+      const current = buyingPayments.get(bill.uuid) ?? 0;
+      const next = current + payment;
+      buyingPayments.set(bill.uuid, next);
+      const total = (bill.items ?? []).reduce((sum, item) => sum + Number(item.price ?? 0), 0);
+      if (total > 0 && next >= total - 0.01) bill.status = 'Chiusa';
     }
     return undefined as T;
   }
@@ -488,6 +493,7 @@ export async function handleDemoRequest<T>(
   if (path.startsWith('/buyingBill/delete/') && method === 'DELETE') {
     const uuid = path.split('/').pop();
     buyingBills = buyingBills.filter((bill) => bill.uuid !== uuid);
+    if (uuid) buyingPayments.delete(uuid);
     return undefined as T;
   }
 
