@@ -21,6 +21,7 @@ import { InventoryPage } from '@/features/inventory/InventoryPage';
 import { BuyingBillsPage } from '@/features/buying-bills/BuyingBillsPage';
 import { BuyingBillDetailPage } from '@/features/buying-bills/BuyingBillDetailPage';
 import { AdministrationPage } from '@/features/admin/AdministrationPage';
+import { DirectoriesPage } from '@/features/directories/DirectoriesPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -69,6 +70,7 @@ export default function App() {
                 <Route path="vendite/:uuid" element={<SellingBillDetailPage />} />
                 <Route path="consegne" element={<DeliveryPlanningPage />} />
                 <Route path="ordini" element={<PendingPage />} />
+                <Route path="anagrafiche" element={<DirectoriesPage />} />
                 <Route path="acquisti" element={<BuyingBillsPage />} />
                 <Route path="acquisti/:uuid" element={<BuyingBillDetailPage />} />
                 <Route path="magazzino" element={<InventoryPage />} />
