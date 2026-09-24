@@ -20,6 +20,7 @@ import type {
 
 let sales: SellingBill[] = structuredClone(demoSellingBills);
 let buyingBills: BuyingBill[] = structuredClone(demoBuyingBills);
+const buyingPayments = new Map<string, number>();
 let checks: Check[] = structuredClone(demoChecks);
 const inventoryAvailable: InventoryItem[] = structuredClone(demoInventoryAvailable);
 const inventoryDelivered: InventoryItem[] = structuredClone(demoInventoryDelivered);
@@ -451,9 +452,48 @@ export async function handleDemoRequest<T>(
     return undefined as T;
   }
 
+  if (path === '/buyingBill/add' && method === 'POST') {
+    const rawItems = Array.isArray(data.itemsRequest) ? data.itemsRequest : [];
+    const items = rawItems.map((raw) => {
+      const item = bodyObject(raw);
+      return {
+        uuid: nextId('demo-buy-item'),
+        name: String(item.name ?? item.item ?? 'Articolo'),
+        price: Number(item.price ?? 0),
+      };
+    });
+
+    const created: BuyingBill = {
+      uuid: nextId('demo-buy'),
+      date: new Date().toISOString().slice(0, 10),
+      make: String(data.make ?? '') || null,
+      status: Number(data.payed ?? 0) >= Number(data.totalPrice ?? 0) && Number(data.totalPrice ?? 0) > 0
+        ? 'Chiusa'
+        : 'Aperta',
+      items,
+    };
+    buyingBills.unshift(created);
+    buyingPayments.set(created.uuid, Math.max(0, Number(data.payed ?? 0)));
+    return undefined as T;
+  }
+
+  if (path === '/buyingBill/addPayment' && method === 'POST') {
+    const bill = buyingBills.find((candidate) => candidate.uuid === data.uuid);
+    const payment = Math.max(0, Number(data.payment ?? 0));
+    if (bill && payment > 0) {
+      const current = buyingPayments.get(bill.uuid) ?? 0;
+      const next = current + payment;
+      buyingPayments.set(bill.uuid, next);
+      const total = (bill.items ?? []).reduce((sum, item) => sum + Number(item.price ?? 0), 0);
+      if (total > 0 && next >= total - 0.01) bill.status = 'Chiusa';
+    }
+    return undefined as T;
+  }
+
   if (path.startsWith('/buyingBill/delete/') && method === 'DELETE') {
     const uuid = path.split('/').pop();
     buyingBills = buyingBills.filter((bill) => bill.uuid !== uuid);
+    if (uuid) buyingPayments.delete(uuid);
     return undefined as T;
   }
 

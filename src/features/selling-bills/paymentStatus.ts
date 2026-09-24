@@ -28,3 +28,34 @@ export function getPaymentSummary(bill: SellingBill): PaymentSummary {
 
   return { paidTotal, balance, status };
 }
+
+
+export interface SaleClosureReadiness {
+  ready: boolean;
+  itemsDelivered: boolean;
+  paymentComplete: boolean;
+  reasons: string[];
+}
+
+/**
+ * Readiness UI-only: non cambia lo stato legacy e non chiama /sellingBill/update.
+ * Serve a mostrare all'operatore cosa manca prima della chiusura.
+ */
+export function getSaleClosureReadiness(bill: SellingBill): SaleClosureReadiness {
+  const payment = getPaymentSummary(bill);
+  const items = bill.items ?? [];
+  const itemsDelivered = items.length > 0 && items.every((item) => item.delivered);
+  const paymentComplete = payment.status === 'Pagata';
+
+  const reasons: string[] = [];
+  if (!itemsDelivered) reasons.push('Merce non ancora interamente consegnata');
+  if (!paymentComplete) reasons.push('Pagamento non ancora completato');
+  if (bill.status === 'Annullata') reasons.push('Vendita annullata');
+
+  return {
+    ready: itemsDelivered && paymentComplete && bill.status !== 'Annullata',
+    itemsDelivered,
+    paymentComplete,
+    reasons,
+  };
+}
