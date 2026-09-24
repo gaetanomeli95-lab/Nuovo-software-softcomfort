@@ -20,7 +20,7 @@ import { PendingPage } from '@/features/pending/PendingPage';
 import { InventoryPage } from '@/features/inventory/InventoryPage';
 import { BuyingBillsPage } from '@/features/buying-bills/BuyingBillsPage';
 import { BuyingBillDetailPage } from '@/features/buying-bills/BuyingBillDetailPage';
-import { ComingSoon } from '@/components/common/ComingSoon';
+import { AdministrationPage } from '@/features/admin/AdministrationPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -79,7 +79,7 @@ export default function App() {
                   path="amministrazione"
                   element={
                     <RequireAdmin>
-                      <ComingSoon title="Amministrazione" />
+                      <AdministrationPage />
                     </RequireAdmin>
                   }
                 />
