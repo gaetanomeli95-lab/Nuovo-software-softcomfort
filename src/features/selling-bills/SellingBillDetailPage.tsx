@@ -295,6 +295,204 @@ function EditNotesDialog({ billUuid, notes }: { billUuid: string; notes: string 
   );
 }
 
+function EditCommissionDialog({
+  billUuid,
+  notes,
+}: {
+  billUuid: string;
+  notes: string;
+}) {
+  const update = useUpdateNotes(billUuid);
+  const parsed = parseCommissionNotes(notes);
+  const emptyMetadata = {
+    city: '',
+    floor: '',
+    staircase: '',
+    elevator: '' as const,
+    measureSource: '' as const,
+    hoist: '' as const,
+    attachments: '' as const,
+    attachmentPages: null,
+    scheduledDate: '',
+    scheduledTime: '',
+  };
+  const [open, setOpen] = useState(false);
+  const [draft, setDraft] = useState(parsed.metadata ?? emptyMetadata);
+
+  const openChange = (nextOpen: boolean) => {
+    setOpen(nextOpen);
+    if (nextOpen) setDraft(parseCommissionNotes(notes).metadata ?? emptyMetadata);
+  };
+
+  const save = async () => {
+    await update.mutateAsync(composeCommissionNotes(draft, parsed.visibleNotes));
+    setOpen(false);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={openChange}>
+      <DialogTrigger asChild>
+        <Button size="sm" variant="outline">
+          <Pencil className="h-4 w-4" />
+          {parsed.metadata ? 'Modifica' : 'Aggiungi dati'}
+        </Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-3xl">
+        <DialogHeader>
+          <DialogTitle>Dati consegna e rilievo</DialogTitle>
+          <DialogDescription>
+            Aggiorna le informazioni operative usate anche nel planning consegne.
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="space-y-1.5 sm:col-span-2">
+            <Label htmlFor="commission-city">Città</Label>
+            <Input
+              id="commission-city"
+              value={draft.city}
+              onChange={(e) => setDraft((current) => ({ ...current, city: e.target.value }))}
+              placeholder="Es. Palermo"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="commission-floor">Piano</Label>
+            <Input
+              id="commission-floor"
+              value={draft.floor}
+              onChange={(e) => setDraft((current) => ({ ...current, floor: e.target.value }))}
+              placeholder="Es. 3"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="commission-staircase">Scala</Label>
+            <Input
+              id="commission-staircase"
+              value={draft.staircase}
+              onChange={(e) => setDraft((current) => ({ ...current, staircase: e.target.value }))}
+              placeholder="Es. B"
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label>Ascensore</Label>
+            <Select
+              value={draft.elevator || undefined}
+              onValueChange={(value) => setDraft((current) => ({
+                ...current,
+                elevator: value as 'yes' | 'no',
+              }))}
+            >
+              <SelectTrigger><SelectValue placeholder="Seleziona" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="yes">Sì</SelectItem>
+                <SelectItem value="no">No</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label>Autoscala</Label>
+            <Select
+              value={draft.hoist || undefined}
+              onValueChange={(value) => setDraft((current) => ({
+                ...current,
+                hoist: value as 'yes' | 'no',
+              }))}
+            >
+              <SelectTrigger><SelectValue placeholder="Seleziona" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="yes">Sì</SelectItem>
+                <SelectItem value="no">No</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-1.5 sm:col-span-2">
+            <Label>Misure</Label>
+            <Select
+              value={draft.measureSource || undefined}
+              onValueChange={(value) => setDraft((current) => ({
+                ...current,
+                measureSource: value as 'seller' | 'buyer',
+              }))}
+            >
+              <SelectTrigger><SelectValue placeholder="Responsabilità misure" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="seller">A carico del venditore</SelectItem>
+                <SelectItem value="buyer">Comunicate dall'acquirente</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label>Allegati / disegni</Label>
+            <Select
+              value={draft.attachments || undefined}
+              onValueChange={(value) => setDraft((current) => ({
+                ...current,
+                attachments: value as 'yes' | 'no',
+                attachmentPages: value === 'yes' ? current.attachmentPages : null,
+              }))}
+            >
+              <SelectTrigger><SelectValue placeholder="Seleziona" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="yes">Sì</SelectItem>
+                <SelectItem value="no">No</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="commission-pages">N. pagine</Label>
+            <Input
+              id="commission-pages"
+              type="number"
+              min="0"
+              step="1"
+              disabled={draft.attachments !== 'yes'}
+              value={draft.attachmentPages ?? ''}
+              onChange={(e) => setDraft((current) => ({
+                ...current,
+                attachmentPages: e.target.value ? Math.max(0, Math.floor(Number(e.target.value))) : null,
+              }))}
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="commission-date">Data consegna</Label>
+            <Input
+              id="commission-date"
+              type="date"
+              value={draft.scheduledDate}
+              onChange={(e) => setDraft((current) => ({ ...current, scheduledDate: e.target.value }))}
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="commission-time">Ora consegna</Label>
+            <Input
+              id="commission-time"
+              type="time"
+              value={draft.scheduledTime}
+              onChange={(e) => setDraft((current) => ({ ...current, scheduledTime: e.target.value }))}
+            />
+          </div>
+        </div>
+
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setOpen(false)}>Annulla</Button>
+          <Button onClick={save} disabled={update.isPending}>
+            {update.isPending ? 'Salvataggio…' : 'Salva dati consegna'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export function SellingBillDetailPage() {
   const { uuid } = useParams<{ uuid: string }>();
   const { data: bill, isLoading, error, refetch } = useSellingBill(uuid);
@@ -461,60 +659,74 @@ export function SellingBillDetailPage() {
             </CardContent>
           </Card>
 
-          {commission && (
-            <Card className="overflow-hidden">
-              <CardHeader className="border-b border-[#eee6de] bg-[#fffefd]">
+          <Card className="overflow-hidden">
+            <CardHeader className="flex-row items-start justify-between gap-4 space-y-0 border-b border-[#eee6de] bg-[#fffefd]">
+              <div>
                 <CardTitle className="flex items-center gap-2">
                   <Truck className="h-4 w-4 text-primary" />
                   Dati consegna e rilievo
                 </CardTitle>
-                <CardDescription>Informazioni operative raccolte nella proposta di commissione.</CardDescription>
-              </CardHeader>
-              <CardContent className="grid gap-x-6 gap-y-4 pt-5 text-sm sm:grid-cols-2 lg:grid-cols-3">
-                <div>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground">Città</p>
-                  <p className="mt-1 font-semibold">{commission.city || '—'}</p>
+                <CardDescription>
+                  Informazioni operative collegate anche al planning consegne.
+                </CardDescription>
+              </div>
+              <EditCommissionDialog billUuid={bill.uuid} notes={bill.notes ?? ''} />
+            </CardHeader>
+            <CardContent className="pt-5">
+              {commission ? (
+                <div className="grid gap-x-6 gap-y-4 text-sm sm:grid-cols-2 lg:grid-cols-3">
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground">Città</p>
+                    <p className="mt-1 font-semibold">{commission.city || '—'}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground">Piano / scala</p>
+                    <p className="mt-1 font-semibold">
+                      {[commission.floor ? `Piano ${commission.floor}` : '', commission.staircase ? `Scala ${commission.staircase}` : '']
+                        .filter(Boolean).join(' · ') || '—'}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground">Ascensore</p>
+                    <p className="mt-1 font-semibold">{yesNoLabel(commission.elevator)}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground">Misure</p>
+                    <p className="mt-1 font-semibold">{measureSourceLabel(commission.measureSource)}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground">Autoscala</p>
+                    <p className="mt-1 font-semibold">{yesNoLabel(commission.hoist)}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground">Allegati / disegni</p>
+                    <p className="mt-1 font-semibold">
+                      {yesNoLabel(commission.attachments)}
+                      {commission.attachments === 'yes' && commission.attachmentPages !== null
+                        ? ` · ${commission.attachmentPages} pag.`
+                        : ''}
+                    </p>
+                  </div>
+                  <div className="sm:col-span-2 lg:col-span-3">
+                    <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground">Consegna programmata</p>
+                    <p className="mt-1 font-semibold">
+                      {[
+                        commission.scheduledDate ? formatDate(commission.scheduledDate) : '',
+                        commission.scheduledTime ? `ore ${commission.scheduledTime}` : '',
+                      ].filter(Boolean).join(' · ') || 'Da programmare'}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground">Piano / scala</p>
-                  <p className="mt-1 font-semibold">
-                    {[commission.floor ? `Piano ${commission.floor}` : '', commission.staircase ? `Scala ${commission.staircase}` : '']
-                      .filter(Boolean).join(' · ') || '—'}
+              ) : (
+                <div className="rounded-xl border border-dashed border-[#d8cec5] bg-[#faf7f3] px-4 py-5">
+                  <p className="text-sm font-semibold text-[#514843]">Dati logistici non ancora inseriti.</p>
+                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                    Aggiungi piano, ascensore, autoscala, responsabilità misure e data di consegna.
                   </p>
                 </div>
-                <div>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground">Ascensore</p>
-                  <p className="mt-1 font-semibold">{yesNoLabel(commission.elevator)}</p>
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground">Misure</p>
-                  <p className="mt-1 font-semibold">{measureSourceLabel(commission.measureSource)}</p>
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground">Autoscala</p>
-                  <p className="mt-1 font-semibold">{yesNoLabel(commission.hoist)}</p>
-                </div>
-                <div>
-                  <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground">Allegati / disegni</p>
-                  <p className="mt-1 font-semibold">
-                    {yesNoLabel(commission.attachments)}
-                    {commission.attachments === 'yes' && commission.attachmentPages !== null
-                      ? ` · ${commission.attachmentPages} pag.`
-                      : ''}
-                  </p>
-                </div>
-                <div className="sm:col-span-2 lg:col-span-3">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground">Consegna programmata</p>
-                  <p className="mt-1 font-semibold">
-                    {[
-                      commission.scheduledDate ? formatDate(commission.scheduledDate) : '',
-                      commission.scheduledTime ? `ore ${commission.scheduledTime}` : '',
-                    ].filter(Boolean).join(' · ') || 'Da programmare'}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          )}
+              )}
+            </CardContent>
+          </Card>
 
           <Card className="overflow-hidden">
             <CardHeader className="flex-row items-center justify-between space-y-0 border-b border-[#eee6de] bg-[#fffefd]">
