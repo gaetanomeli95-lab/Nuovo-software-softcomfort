@@ -1,4 +1,5 @@
 import { Outlet, useNavigate } from 'react-router-dom';
+import { Sidebar } from './Sidebar';
 import { Topbar } from './Topbar';
 
 export function AppLayout() {
@@ -11,6 +12,10 @@ export function AppLayout() {
 
   return (
     <div className="flex h-screen overflow-hidden bg-background text-foreground">
+      <div className="hidden h-full shrink-0 lg:block">
+        <Sidebar />
+      </div>
+
       <div className="flex min-w-0 flex-1 flex-col">
         <Topbar onSearch={handleGlobalSearch} />
         <main className="softcomfort-workspace relative flex-1 overflow-y-auto scrollbar-thin">
