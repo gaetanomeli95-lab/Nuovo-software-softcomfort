@@ -1,11 +1,12 @@
 import { Link, useParams, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, FileText, Info, Printer, Truck } from 'lucide-react';
+import { ArrowLeft, ClipboardSignature, FileText, Info, Printer, Truck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useSellingBill } from '@/hooks/useQueries';
 import { LegacyDeliveryNote } from './LegacyDeliveryNote';
 import { FamiliarSalesDocument } from './FamiliarSalesDocument';
+import { CommissionPrintDocument } from './CommissionPrintDocument';
 
-type PrintType = 'documento' | 'bolla';
+type PrintType = 'documento' | 'bolla' | 'commissione';
 
 function PrintToolbar({ type, uuid }: { type: PrintType; uuid: string }) {
   return (
@@ -38,6 +39,12 @@ function PrintToolbar({ type, uuid }: { type: PrintType; uuid: string }) {
               Bolla
             </Link>
           </Button>
+          <Button variant={type === 'commissione' ? 'default' : 'outline'} asChild>
+            <Link to={`/vendite/${uuid}/stampa?tipo=commissione`}>
+              <ClipboardSignature className="h-4 w-4" />
+              Commissione
+            </Link>
+          </Button>
           <Button onClick={() => window.print()}>
             <Printer className="h-4 w-4" />
             Stampa / Salva PDF
@@ -51,7 +58,13 @@ function PrintToolbar({ type, uuid }: { type: PrintType; uuid: string }) {
 export function SellingBillPrintPage() {
   const { uuid } = useParams<{ uuid: string }>();
   const [params] = useSearchParams();
-  const type: PrintType = params.get('tipo') === 'bolla' ? 'bolla' : 'documento';
+  const requestedType = params.get('tipo');
+  const type: PrintType =
+    requestedType === 'bolla'
+      ? 'bolla'
+      : requestedType === 'commissione'
+        ? 'commissione'
+        : 'documento';
   const { data: bill, isLoading, error } = useSellingBill(uuid);
 
   if (isLoading) {
@@ -154,6 +167,8 @@ export function SellingBillPrintPage() {
       <PrintToolbar type={type} uuid={uuid} />
       {type === 'bolla' ? (
         <LegacyDeliveryNote bill={bill} />
+      ) : type === 'commissione' ? (
+        <CommissionPrintDocument bill={bill} />
       ) : (
         <FamiliarSalesDocument bill={bill} />
       )}
