@@ -43,7 +43,7 @@ import { useAuth } from '@/features/auth/AuthContext';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { SELLING_BILL_WORKFLOW, type SellingBillItem, type SellingBillStatus } from '@/types/domain';
 import { cn } from '@/lib/utils';
-import { getPaymentSummary } from './paymentStatus';
+import { getPaymentSummary, getSaleClosureReadiness } from './paymentStatus';
 import {
   composeCommissionNotes,
   measureSourceLabel,
@@ -130,39 +130,102 @@ function ItemProgress({ billUuid, item }: { billUuid: string; item: SellingBillI
 function AddItemDialog({ billUuid }: { billUuid: string }) {
   const add = useAddBillItem(billUuid);
   const [open, setOpen] = useState(false);
-  const [name, setName] = useState('');
-  const [price, setPrice] = useState('');
+  const [code, setCode] = useState('');
+  const [description, setDescription] = useState('');
+  const [quantity, setQuantity] = useState('1');
+  const [unitPrice, setUnitPrice] = useState('');
+
+  const qty = Math.max(1, Math.floor(Number(quantity || 1)));
+  const unit = Math.max(0, Number(unitPrice || 0));
+  const lineTotal = qty * unit;
+
+  const reset = () => {
+    setCode('');
+    setDescription('');
+    setQuantity('1');
+    setUnitPrice('');
+  };
 
   const submit = async () => {
-    await add.mutateAsync({ name: name.trim(), price: Number(price) });
+    const name = [
+      code.trim() ? `Art. ${code.trim()}` : '',
+      description.trim(),
+      `Q.tà ${qty}`,
+    ].filter(Boolean).join(' · ');
+
+    await add.mutateAsync({ name, price: lineTotal });
     setOpen(false);
-    setName('');
-    setPrice('');
+    reset();
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(next) => {
+        setOpen(next);
+        if (!next && !add.isPending) reset();
+      }}
+    >
       <DialogTrigger asChild>
         <Button size="sm" variant="outline"><Plus className="h-4 w-4" /> Articolo</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Aggiungi articolo</DialogTitle>
-          <DialogDescription>Nuova riga sulla fattura di vendita.</DialogDescription>
+          <DialogDescription>
+            Codice, descrizione, quantità e prezzo unitario con totale riga automatico.
+          </DialogDescription>
         </DialogHeader>
-        <div className="space-y-3">
+        <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-1.5">
-            <Label htmlFor="it-name">Descrizione</Label>
-            <Input id="it-name" value={name} onChange={(e) => setName(e.target.value)} />
+            <Label htmlFor="it-code">Codice articolo</Label>
+            <Input id="it-code" value={code} onChange={(e) => setCode(e.target.value)} placeholder="Opzionale" />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="it-price">Prezzo (€)</Label>
-            <Input id="it-price" type="number" min="0" step="0.01" value={price} onChange={(e) => setPrice(e.target.value)} />
+            <Label htmlFor="it-quantity">Quantità</Label>
+            <Input
+              id="it-quantity"
+              type="number"
+              min="1"
+              step="1"
+              value={quantity}
+              onChange={(e) => setQuantity(e.target.value)}
+            />
+          </div>
+          <div className="space-y-1.5 sm:col-span-2">
+            <Label htmlFor="it-name">Descrizione</Label>
+            <Input
+              id="it-name"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Descrizione merce"
+              autoFocus
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="it-price">Prezzo unitario (€)</Label>
+            <Input
+              id="it-price"
+              type="number"
+              min="0"
+              step="0.01"
+              value={unitPrice}
+              onChange={(e) => setUnitPrice(e.target.value)}
+            />
+          </div>
+          <div className="rounded-xl border border-[#dfd5cc] bg-[#faf7f3] px-4 py-3">
+            <p className="text-[10px] font-extrabold uppercase tracking-[0.1em] text-muted-foreground">Totale riga</p>
+            <p className="tnum mt-1 text-lg font-black">{formatCurrency(lineTotal)}</p>
           </div>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)}>Annulla</Button>
-          <Button onClick={submit} disabled={!name.trim() || !(Number(price) >= 0) || add.isPending}>Aggiungi</Button>
+          <Button
+            onClick={submit}
+            disabled={!description.trim() || !(unit >= 0) || add.isPending}
+          >
+            {add.isPending ? 'Aggiunta…' : 'Aggiungi'}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -537,6 +600,7 @@ export function SellingBillDetailPage() {
   }
 
   const payment = getPaymentSummary(bill);
+  const closure = getSaleClosureReadiness(bill);
   const { paidTotal, balance } = payment;
   const commissionNotes = parseCommissionNotes(bill.notes);
   const commission = commissionNotes.metadata;
@@ -631,6 +695,30 @@ export function SellingBillDetailPage() {
             Avanzamento vendita
           </div>
           <WorkflowStepper status={bill.status} />
+
+          {bill.status !== 'Chiusa' && bill.status !== 'Annullata' && (
+            <div className={cn(
+              'mt-4 flex flex-col gap-2 rounded-xl border px-3.5 py-3 text-xs sm:flex-row sm:items-center sm:justify-between',
+              closure.ready
+                ? 'border-[#c7e0d1] bg-[#eff7f2] text-[#245f42]'
+                : 'border-[#e7ded5] bg-white text-[#6d625c]',
+            )}>
+              <div>
+                <p className="font-extrabold">
+                  {closure.ready ? 'Vendita pronta per la chiusura' : 'Controllo pre-chiusura'}
+                </p>
+                <p className="mt-0.5 leading-relaxed">
+                  {closure.ready
+                    ? 'Merce consegnata e pagamento completato.'
+                    : closure.reasons.join(' · ')}
+                </p>
+              </div>
+              <div className="flex shrink-0 gap-2">
+                <Badge variant={closure.itemsDelivered ? 'success' : 'outline'}>Merce</Badge>
+                <Badge variant={closure.paymentComplete ? 'success' : 'outline'}>Pagamento</Badge>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
