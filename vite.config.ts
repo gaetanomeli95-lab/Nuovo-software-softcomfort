@@ -9,7 +9,7 @@ import path from 'node:path';
  * In dev proxiamo solo i path noti verso il server legacy, così il
  * frontend usa sempre URL relativi (stessa origine in produzione).
  */
-const LEGACY_TARGET = process.env.VITE_LEGACY_BACKEND ?? 'http://192.168.194.58:8080';
+const LEGACY_TARGET = process.env.VITE_LEGACY_BACKEND ?? 'http://localhost:8080';
 
 const LEGACY_API_PATHS = [
   '/login',
