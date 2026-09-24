@@ -4,6 +4,7 @@ import { PageHeader } from '@/components/common/PageHeader';
 import { SummaryPill } from '@/components/common/SummaryPill';
 import { ErrorState } from '@/components/common/ErrorState';
 import { EmptyState } from '@/components/common/EmptyState';
+import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -249,16 +250,23 @@ function InventoryTable({
               <div className="flex justify-end gap-1">
                 <EditInventoryDialog item={i} />
                 {actionable && (
-                  <Button
-                    size="icon"
-                    variant="outline"
-                    disabled={deliver.isPending}
-                    onClick={() => deliver.mutate(i.uuid)}
-                    aria-label="Segna articolo consegnato"
-                    title="Segna consegnato"
-                  >
-                    <CheckCircle2 className="h-4 w-4" />
-                  </Button>
+                  <ConfirmDialog
+                    trigger={
+                      <Button
+                        size="icon"
+                        variant="outline"
+                        disabled={deliver.isPending}
+                        aria-label="Segna articolo consegnato"
+                        title="Segna consegnato"
+                      >
+                        <CheckCircle2 className="h-4 w-4" />
+                      </Button>
+                    }
+                    title="Segnare l'articolo come consegnato?"
+                    description={`${i.name}${i.location ? ` · ${i.location}` : ''}. Questa azione sposta l'articolo nello storico consegnati.`}
+                    confirmLabel="Conferma consegna"
+                    onConfirm={() => deliver.mutateAsync(i.uuid)}
+                  />
                 )}
               </div>
             </TableCell>
