@@ -21,7 +21,10 @@ vendita → ordine → arrivo → consegna → incasso → chiusura.
 - Ordini in sospeso.
 - Fatture di acquisto.
 - Magazzino: carico, ubicazione, modifica e consegna.
-- Documento di vendita e bolla A4.
+- Documento di vendita, bolla e proposta di commissione A4.
+- Esportazioni CSV per vendite e magazzino.
+- Esportazione planning consegne in CSV e calendario ICS.
+- Azioni rapide di contatto WhatsApp per clienti con recapito compatibile.
 - Area amministrazione e stato configurazione.
 - Modalità demo stateful per validare i flussi senza toccare i dati reali.
 
