@@ -44,6 +44,7 @@ import { formatCurrency, formatDate } from '@/lib/format';
 import { SELLING_BILL_WORKFLOW, type SellingBillItem, type SellingBillStatus } from '@/types/domain';
 import { cn } from '@/lib/utils';
 import { getPaymentSummary, getSaleClosureReadiness } from './paymentStatus';
+import { getSellingItemView } from './sellingItemView';
 import {
   composeCommissionNotes,
   measureSourceLabel,
@@ -835,37 +836,55 @@ export function SellingBillDetailPage() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Articolo</TableHead>
+                      <TableHead className="hidden text-center xl:table-cell">Q.tà</TableHead>
+                      <TableHead className="hidden text-right xl:table-cell">Unitario</TableHead>
                       <TableHead className="hidden md:table-cell">Ditta</TableHead>
                       <TableHead>Avanzamento</TableHead>
-                      <TableHead className="text-right">Prezzo</TableHead>
+                      <TableHead className="text-right">Totale</TableHead>
                       <TableHead className="w-[50px]" />
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {bill.items.map((item) => (
-                      <TableRow key={item.uuid}>
-                        <TableCell className="font-semibold">{item.name}</TableCell>
-                        <TableCell className="hidden text-muted-foreground md:table-cell">
-                          <EditCompanyDialog billUuid={bill.uuid} item={item} />
-                        </TableCell>
-                        <TableCell><ItemProgress billUuid={bill.uuid} item={item} /></TableCell>
-                        <TableCell className="tnum text-right font-bold">{formatCurrency(item.price)}</TableCell>
-                        <TableCell>
-                          <ConfirmDialog
-                            trigger={
-                              <Button variant="ghost" size="icon" aria-label="Rimuovi articolo">
-                                <Trash2 className="h-4 w-4 text-destructive" />
-                              </Button>
-                            }
-                            title="Rimuovere l'articolo?"
-                            description={item.name}
-                            confirmLabel="Rimuovi"
-                            destructive
-                            onConfirm={() => removeItem.mutateAsync(item.uuid)}
-                          />
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                    {bill.items.map((item) => {
+                      const view = getSellingItemView(item);
+                      return (
+                        <TableRow key={item.uuid}>
+                          <TableCell>
+                            <p className="font-semibold">{view.description || '—'}</p>
+                            {view.code && (
+                              <p className="mt-0.5 text-[10px] font-bold uppercase tracking-[0.08em] text-muted-foreground">
+                                Art. {view.code}
+                              </p>
+                            )}
+                          </TableCell>
+                          <TableCell className="tnum hidden text-center font-semibold xl:table-cell">
+                            {view.quantity}
+                          </TableCell>
+                          <TableCell className="tnum hidden text-right text-muted-foreground xl:table-cell">
+                            {formatCurrency(view.unitPrice)}
+                          </TableCell>
+                          <TableCell className="hidden text-muted-foreground md:table-cell">
+                            <EditCompanyDialog billUuid={bill.uuid} item={item} />
+                          </TableCell>
+                          <TableCell><ItemProgress billUuid={bill.uuid} item={item} /></TableCell>
+                          <TableCell className="tnum text-right font-bold">{formatCurrency(view.lineTotal)}</TableCell>
+                          <TableCell>
+                            <ConfirmDialog
+                              trigger={
+                                <Button variant="ghost" size="icon" aria-label="Rimuovi articolo">
+                                  <Trash2 className="h-4 w-4 text-destructive" />
+                                </Button>
+                              }
+                              title="Rimuovere l'articolo?"
+                              description={view.description || item.name}
+                              confirmLabel="Rimuovi"
+                              destructive
+                              onConfirm={() => removeItem.mutateAsync(item.uuid)}
+                            />
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
                   </TableBody>
                 </Table>
               )}
