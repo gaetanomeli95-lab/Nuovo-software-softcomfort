@@ -80,12 +80,12 @@ describe('operations inbox', () => {
     const checks: Check[] = [{
       uuid: 'c1',
       make: 'Mario',
-      expireDate: new Date().toISOString().slice(0, 10),
+      expireDate: '2026-09-25',
       amount: 100,
       billNumbers: null,
     }];
 
-    const out = buildOperationsInbox([], deposits, provisions, checks);
+    const out = buildOperationsInbox([], deposits, provisions, checks, '2026-09-25');
     expect(out.collections).toHaveLength(1);
     expect(out.administration).toHaveLength(1);
     expect(out.urgent.some((item) => item.id === 'check-c1')).toBe(true);
