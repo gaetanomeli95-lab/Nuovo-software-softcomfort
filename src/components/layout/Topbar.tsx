@@ -105,10 +105,7 @@ export function Topbar({ onSearch }: TopbarProps) {
         <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8e8178]" />
         <Input
           value={q}
-          onChange={(e) => {
-            setQ(e.target.value);
-            onSearch(e.target.value);
-          }}
+          onChange={(e) => setQ(e.target.value)}
           placeholder="Cerca cliente, venditore, articolo…"
           className="h-10 border-[#ddd5cc] bg-[#faf8f5] pl-9 shadow-none"
           aria-label="Ricerca"
