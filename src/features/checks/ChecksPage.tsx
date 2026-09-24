@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Landmark, Plus, Search, Trash2 } from 'lucide-react';
 import { PageHeader } from '@/components/common/PageHeader';
 import { SummaryPill } from '@/components/common/SummaryPill';
@@ -120,7 +121,7 @@ export function ChecksPage() {
               placeholder="Cerca emittente o n. fattura…"
               className="pl-9"
               value={q}
-              onChange={(e) => setQ(e.target.value)}
+              onChange={(e) => updateSearch(e.target.value)}
             />
           </div>
           <SummaryPill label="Totale assegni" value={formatCurrency(total)} tone="neutral" />
