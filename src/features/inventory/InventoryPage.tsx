@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { CheckCircle2, Package, Search } from 'lucide-react';
+import { CheckCircle2, MapPin, Package, Pencil, Plus, Search } from 'lucide-react';
 import { PageHeader } from '@/components/common/PageHeader';
 import { SummaryPill } from '@/components/common/SummaryPill';
 import { ErrorState } from '@/components/common/ErrorState';
@@ -7,14 +7,25 @@ import { EmptyState } from '@/components/common/EmptyState';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import {
+  Dialog, DialogContent, DialogDescription, DialogFooter,
+  DialogHeader, DialogTitle, DialogTrigger,
+} from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
 import { useInventoryAvailable, useInventoryDelivered } from '@/hooks/useQueries';
-import { useSetInventoryDelivered } from '@/hooks/useMutations';
+import {
+  useAddInventoryItems,
+  useSetInventoryDelivered,
+  useSetInventoryName,
+  useSetInventoryRef,
+  useSetItemLocation,
+} from '@/hooks/useMutations';
 import { formatCurrency } from '@/lib/format';
 import type { InventoryItem } from '@/types/domain';
 
@@ -29,7 +40,177 @@ function matches(i: InventoryItem, q: string): boolean {
   );
 }
 
-function InventoryTable({ rows, actionable }: { rows: InventoryItem[]; actionable?: boolean }) {
+function AddInventoryDialog() {
+  const add = useAddInventoryItems();
+  const [open, setOpen] = useState(false);
+  const [make, setMake] = useState('');
+  const [ref, setRef] = useState('');
+  const [name, setName] = useState('');
+  const [quantity, setQuantity] = useState('1');
+
+  const valid = Boolean(name.trim()) && Math.max(1, Math.floor(Number(quantity || 1))) > 0 && !add.isPending;
+
+  const reset = () => {
+    setMake('');
+    setRef('');
+    setName('');
+    setQuantity('1');
+  };
+
+  const submit = async () => {
+    if (!valid) return;
+    await add.mutateAsync([{
+      make: make.trim(),
+      ref: ref.trim(),
+      item: name.trim(),
+      quantity: Math.max(1, Math.floor(Number(quantity || 1))),
+    }]);
+    setOpen(false);
+    reset();
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={(next) => { setOpen(next); if (!next && !add.isPending) reset(); }}>
+      <DialogTrigger asChild>
+        <Button><Plus className="h-4 w-4" /> Carica merce</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Carica articoli in magazzino</DialogTitle>
+          <DialogDescription>
+            Inserisci il prodotto e la quantità. La posizione può essere assegnata dopo il carico.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-1.5">
+            <Label htmlFor="stock-make">Marca / ditta</Label>
+            <Input id="stock-make" value={make} onChange={(e) => setMake(e.target.value)} placeholder="Es. AD Sofa" />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="stock-ref">Riferimento</Label>
+            <Input id="stock-ref" value={ref} onChange={(e) => setRef(e.target.value)} placeholder="Codice articolo" />
+          </div>
+          <div className="space-y-1.5 sm:col-span-2">
+            <Label htmlFor="stock-name">Articolo</Label>
+            <Input id="stock-name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Descrizione prodotto" autoFocus />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="stock-quantity">Quantità</Label>
+            <Input
+              id="stock-quantity"
+              type="number"
+              min="1"
+              step="1"
+              value={quantity}
+              onChange={(e) => setQuantity(e.target.value)}
+            />
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setOpen(false)} disabled={add.isPending}>Annulla</Button>
+          <Button onClick={submit} disabled={!valid}>{add.isPending ? 'Caricamento…' : 'Carica in magazzino'}</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function EditInventoryDialog({ item }: { item: InventoryItem }) {
+  const rename = useSetInventoryName();
+  const setRef = useSetInventoryRef();
+  const setLocation = useSetItemLocation();
+  const [open, setOpen] = useState(false);
+  const [name, setName] = useState(item.name ?? '');
+  const [ref, setRefValue] = useState(item.ref ?? '');
+  const [location, setLocationValue] = useState(item.location ?? '');
+
+  const busy = rename.isPending || setRef.isPending || setLocation.isPending;
+
+  const onOpenChange = (next: boolean) => {
+    setOpen(next);
+    if (next) {
+      setName(item.name ?? '');
+      setRefValue(item.ref ?? '');
+      setLocationValue(item.location ?? '');
+    }
+  };
+
+  const submit = async () => {
+    const operations: Promise<unknown>[] = [];
+    if (name.trim() !== (item.name ?? '')) {
+      operations.push(rename.mutateAsync({ uuid: item.uuid, name: name.trim() }));
+    }
+    if (ref.trim() !== (item.ref ?? '')) {
+      operations.push(setRef.mutateAsync({ uuid: item.uuid, ref: ref.trim() }));
+    }
+    if (location.trim() !== (item.location ?? '')) {
+      operations.push(setLocation.mutateAsync({ uuid: item.uuid, location: location.trim() }));
+    }
+    await Promise.all(operations);
+    setOpen(false);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogTrigger asChild>
+        <Button variant="ghost" size="icon" aria-label="Modifica articolo">
+          <Pencil className="h-4 w-4" />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Modifica articolo</DialogTitle>
+          <DialogDescription>
+            Aggiorna descrizione, riferimento e posizione di magazzino.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="space-y-4">
+          <div className="space-y-1.5">
+            <Label htmlFor={`stock-edit-name-${item.uuid}`}>Articolo</Label>
+            <Input
+              id={`stock-edit-name-${item.uuid}`}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-1.5">
+              <Label htmlFor={`stock-edit-ref-${item.uuid}`}>Riferimento</Label>
+              <Input
+                id={`stock-edit-ref-${item.uuid}`}
+                value={ref}
+                onChange={(e) => setRefValue(e.target.value)}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor={`stock-edit-location-${item.uuid}`}>Posizione</Label>
+              <Input
+                id={`stock-edit-location-${item.uuid}`}
+                value={location}
+                onChange={(e) => setLocationValue(e.target.value)}
+                placeholder="Es. Bagheria · Zona A"
+              />
+            </div>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setOpen(false)} disabled={busy}>Annulla</Button>
+          <Button onClick={submit} disabled={!name.trim() || busy}>
+            {busy ? 'Salvataggio…' : 'Salva modifiche'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function InventoryTable({
+  rows,
+  actionable,
+}: {
+  rows: InventoryItem[];
+  actionable?: boolean;
+}) {
   const deliver = useSetInventoryDelivered();
 
   if (rows.length === 0) {
@@ -44,8 +225,9 @@ function InventoryTable({ rows, actionable }: { rows: InventoryItem[]; actionabl
           <TableHead className="hidden md:table-cell">Marca</TableHead>
           <TableHead className="hidden lg:table-cell">Rif.</TableHead>
           <TableHead className="hidden sm:table-cell">Posizione</TableHead>
+          <TableHead className="hidden text-center xl:table-cell">Colli</TableHead>
           <TableHead className="text-right">Prezzo</TableHead>
-          {actionable && <TableHead className="w-[120px]" />}
+          <TableHead className="w-[110px]" />
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -55,21 +237,31 @@ function InventoryTable({ rows, actionable }: { rows: InventoryItem[]; actionabl
             <TableCell className="hidden text-muted-foreground md:table-cell">{i.make || '—'}</TableCell>
             <TableCell className="hidden text-muted-foreground lg:table-cell">{i.ref || '—'}</TableCell>
             <TableCell className="hidden sm:table-cell">
-              {i.location ? <Badge variant="outline">{i.location}</Badge> : '—'}
+              {i.location ? (
+                <Badge variant="outline"><MapPin className="h-3 w-3" /> {i.location}</Badge>
+              ) : (
+                <span className="text-muted-foreground">Da assegnare</span>
+              )}
             </TableCell>
+            <TableCell className="hidden text-center text-muted-foreground xl:table-cell">{i.necks || '—'}</TableCell>
             <TableCell className="tnum text-right font-bold">{formatCurrency(i.bPrice)}</TableCell>
-            {actionable && (
-              <TableCell className="text-right">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  disabled={deliver.isPending}
-                  onClick={() => deliver.mutate(i.uuid)}
-                >
-                  <CheckCircle2 className="h-4 w-4" /> Consegna
-                </Button>
-              </TableCell>
-            )}
+            <TableCell>
+              <div className="flex justify-end gap-1">
+                <EditInventoryDialog item={i} />
+                {actionable && (
+                  <Button
+                    size="icon"
+                    variant="outline"
+                    disabled={deliver.isPending}
+                    onClick={() => deliver.mutate(i.uuid)}
+                    aria-label="Segna articolo consegnato"
+                    title="Segna consegnato"
+                  >
+                    <CheckCircle2 className="h-4 w-4" />
+                  </Button>
+                )}
+              </div>
+            </TableCell>
           </TableRow>
         ))}
       </TableBody>
@@ -93,10 +285,15 @@ export function InventoryPage() {
 
   const isLoading = available.isLoading || delivered.isLoading;
   const error = available.error ?? delivered.error;
+  const unlocated = availableRows.filter((item) => !item.location).length;
 
   return (
     <div className="space-y-5">
-      <PageHeader title="Giacenze di magazzino" description="Articoli disponibili e consegnati" />
+      <PageHeader
+        title="Giacenze di magazzino"
+        description="Articoli disponibili, ubicazioni e storico consegnato"
+        actions={<AddInventoryDialog />}
+      />
 
       <Card>
         <CardContent className="flex flex-wrap items-center gap-3 p-3.5">
@@ -110,6 +307,7 @@ export function InventoryPage() {
             />
           </div>
           <SummaryPill label="Disponibili" value={String(availableRows.length)} tone="green" />
+          <SummaryPill label="Senza posizione" value={String(unlocated)} tone={unlocated > 0 ? 'gold' : 'neutral'} />
         </CardContent>
       </Card>
 
