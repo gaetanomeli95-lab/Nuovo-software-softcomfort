@@ -26,6 +26,7 @@ import { cn } from '@/lib/utils';
 import {
   deliveryCounts,
   getDeliveryEntries,
+  localISODate,
   type DeliveryEntry,
   type DeliveryState,
 } from './deliveryPlanning';
@@ -143,7 +144,7 @@ export function DeliveryPlanningPage() {
   const [filter, setFilter] = useState<FilterState>('all');
   const [query, setQuery] = useState('');
 
-  const todayISO = new Date().toISOString().slice(0, 10);
+  const todayISO = localISODate();
   const entries = useMemo(() => getDeliveryEntries(data ?? [], todayISO), [data, todayISO]);
   const counts = useMemo(() => deliveryCounts(entries), [entries]);
 
