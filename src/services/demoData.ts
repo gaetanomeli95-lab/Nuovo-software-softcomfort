@@ -79,7 +79,7 @@ export const demoSellingBills: SellingBill[] = [
       transport: 120,
       address: 'Via Libertà 112, Palermo',
       phone: '333 555 1920',
-      notes: 'Consegna da concordare dopo il completamento lavori.',
+      notes: '[[SC_COMMISSION_V1:{"city":"Palermo","floor":"3","staircase":"A","elevator":"yes","measureSource":"seller","hoist":"no","attachments":"yes","attachmentPages":2,"scheduledDate":"2026-09-25","scheduledTime":"10:30"}]]\nConsegna da concordare dopo il completamento lavori.',
       deposits: [
         { uuid: 'demo-dep-001', date: '2026-09-19', seller: 'Benedetto', method: 'Pos', amount: 900, collected: true },
         { uuid: 'demo-dep-002', date: '2026-10-05', seller: 'Benedetto', method: 'Bonifico', amount: 600, collected: false },
@@ -98,6 +98,7 @@ export const demoSellingBills: SellingBill[] = [
     {
       address: 'Bagheria (PA)',
       phone: '328 100 2020',
+      notes: '[[SC_COMMISSION_V1:{"city":"Bagheria","floor":"1","staircase":"","elevator":"no","measureSource":"buyer","hoist":"yes","attachments":"no","attachmentPages":null,"scheduledDate":"2026-09-26","scheduledTime":"15:00"}]]\nContattare il cliente un’ora prima.',
       deposits: [
         { uuid: 'demo-dep-003', date: '2026-09-18', seller: 'Stefania', method: 'Contanti', amount: 500, collected: true },
       ],
@@ -113,6 +114,9 @@ export const demoSellingBills: SellingBill[] = [
     'Pronta',
     [item('demo-item-005', 'Cucina Mirta 03', 2890, 'Soft Comfort', true, true, false)],
     {
+      address: 'Via Messina Marine 88, Palermo',
+      phone: '329 222 1144',
+      notes: '[[SC_COMMISSION_V1:{"city":"Palermo","floor":"4","staircase":"C","elevator":"no","measureSource":"seller","hoist":"yes","attachments":"yes","attachmentPages":1,"scheduledDate":"2026-09-23","scheduledTime":"09:00"}]]\nVerificare accesso autoscala prima della partenza.',
       deposits: [
         { uuid: 'demo-dep-004', date: '2026-09-16', seller: 'Benedetto', method: 'Bonifico', amount: 1000, collected: true },
       ],
@@ -133,6 +137,9 @@ export const demoSellingBills: SellingBill[] = [
     ],
     {
       assistance: true,
+      address: 'Via Dante 25, Bagheria',
+      phone: '333 414 8810',
+      notes: '[[SC_COMMISSION_V1:{"city":"Bagheria","floor":"2","staircase":"","elevator":"yes","measureSource":"seller","hoist":"no","attachments":"no","attachmentPages":null,"scheduledDate":"2026-09-20","scheduledTime":"11:00"}]]\nConsegna completata senza anomalie.',
       deposits: [
         { uuid: 'demo-dep-005', date: '2026-09-01', seller: 'Stefania', method: 'Pos', amount: 1200, collected: true },
         { uuid: 'demo-dep-006', date: '2026-09-14', seller: 'Stefania', method: 'Bonifico', amount: 4590, collected: true },
