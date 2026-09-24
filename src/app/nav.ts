@@ -9,6 +9,7 @@ import {
   Landmark,
   HandCoins,
   Settings,
+  Users,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -61,6 +62,18 @@ export const NAV_SECTIONS: NavSection[] = [
         label: 'Planning consegne',
         description: 'Programma consegne, orari e condizioni logistiche dei clienti.',
         icon: CalendarDays,
+      },
+    ],
+  },
+  {
+    title: 'Anagrafiche',
+    description: 'Clienti e fornitori in un’unica vista.',
+    items: [
+      {
+        to: '/anagrafiche',
+        label: 'Clienti e fornitori',
+        description: 'Consulta lo storico clienti e i fornitori ricavati dai dati operativi.',
+        icon: Users,
       },
     ],
   },

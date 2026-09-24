@@ -4,6 +4,7 @@ import { getPaymentSummary } from './paymentStatus';
 import { PrintBrandHeader } from './PrintBrandHeader';
 import type { SellingBill } from '@/types/domain';
 import { parseCommissionNotes } from './commissionMetadata';
+import { getSellingItemView } from './sellingItemView';
 
 function SectionLabel({ children }: { children: string }) {
   return (
@@ -121,25 +122,36 @@ export function FamiliarSalesDocument({ bill }: { bill: SellingBill }) {
           <table className="w-full border-collapse text-[9.5px]">
             <thead>
               <tr className="border-b-2 border-[#555] bg-[#dfdfdf] text-left text-[#161616]">
-                <th className="px-4 py-2 font-extrabold">Articolo</th>
-                <th className="w-[25%] px-4 py-2 font-extrabold">Ditta</th>
-                <th className="w-[22%] px-4 py-2 text-right font-extrabold">Prezzo</th>
+                <th className="px-3 py-2 font-extrabold">Articolo</th>
+                <th className="w-[9%] px-2 py-2 text-center font-extrabold">Q.tà</th>
+                <th className="w-[18%] px-3 py-2 text-right font-extrabold">Unitario</th>
+                <th className="w-[20%] px-3 py-2 font-extrabold">Ditta</th>
+                <th className="w-[18%] px-3 py-2 text-right font-extrabold">Totale</th>
               </tr>
             </thead>
             <tbody>
-              {(bill.items ?? []).map((item) => (
-                <tr key={item.uuid} className="border-b border-[#777] last:border-b-0">
-                  <td className="px-4 py-2.5 font-medium uppercase">{item.name}</td>
-                  <td className="px-4 py-2.5 font-medium text-[#343434]">{item.company || '—'}</td>
-                  <td className="px-4 py-2.5 text-right font-bold">{formatCurrency(item.price)}</td>
-                </tr>
-              ))}
+              {(bill.items ?? []).map((item) => {
+                const view = getSellingItemView(item);
+                return (
+                  <tr key={item.uuid} className="border-b border-[#777] last:border-b-0">
+                    <td className="px-3 py-2.5 font-medium uppercase">
+                      {view.code ? `${view.code} · ` : ''}{view.description}
+                    </td>
+                    <td className="px-2 py-2.5 text-center font-bold">{view.quantity}</td>
+                    <td className="px-3 py-2.5 text-right">{formatCurrency(view.unitPrice)}</td>
+                    <td className="px-3 py-2.5 font-medium text-[#343434]">{item.company || '—'}</td>
+                    <td className="px-3 py-2.5 text-right font-bold">{formatCurrency(view.lineTotal)}</td>
+                  </tr>
+                );
+              })}
               {(bill.items?.length ?? 0) < 4 &&
                 Array.from({ length: 4 - (bill.items?.length ?? 0) }).map((_, index) => (
                   <tr key={`empty-${index}`} className="border-b border-[#777] last:border-b-0">
-                    <td className="h-[31px] px-4 py-2.5">&nbsp;</td>
-                    <td className="px-4 py-2.5">&nbsp;</td>
-                    <td className="px-4 py-2.5">&nbsp;</td>
+                    <td className="h-[31px] px-3 py-2.5">&nbsp;</td>
+                    <td className="px-2 py-2.5">&nbsp;</td>
+                    <td className="px-3 py-2.5">&nbsp;</td>
+                    <td className="px-3 py-2.5">&nbsp;</td>
+                    <td className="px-3 py-2.5">&nbsp;</td>
                   </tr>
                 ))}
             </tbody>

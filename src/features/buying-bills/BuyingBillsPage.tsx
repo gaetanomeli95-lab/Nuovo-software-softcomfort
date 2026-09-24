@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Plus, Search, ShoppingCart, Trash2 } from 'lucide-react';
 import { PageHeader } from '@/components/common/PageHeader';
 import { SummaryPill } from '@/components/common/SummaryPill';
@@ -210,7 +210,16 @@ function NewBuyingBillDialog() {
 
 export function BuyingBillsPage() {
   const { data, isLoading, error, refetch } = useBuyingBills();
-  const [q, setQ] = useState('');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [q, setQ] = useState(() => searchParams.get('q') ?? '');
+
+  const updateSearch = (value: string) => {
+    setQ(value);
+    const params = new URLSearchParams(searchParams);
+    if (value.trim()) params.set('q', value);
+    else params.delete('q');
+    setSearchParams(params, { replace: true });
+  };
 
   const rows = useMemo(() => {
     const list = data ?? [];
@@ -242,7 +251,7 @@ export function BuyingBillsPage() {
               placeholder="Cerca fornitore, stato, articolo…"
               className="pl-9"
               value={q}
-              onChange={(e) => setQ(e.target.value)}
+              onChange={(e) => updateSearch(e.target.value)}
             />
           </div>
           <SummaryPill label="Visibili" value={String(rows.length)} tone="neutral" />
