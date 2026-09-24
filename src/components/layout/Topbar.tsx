@@ -1,9 +1,10 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Home, LogOut, Search, User } from 'lucide-react';
+import { Home, LogOut, Menu, Search, User } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { SoftComfortBrand } from '@/components/common/SoftComfortBrand';
+import { NAV_SECTIONS } from '@/app/nav';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,11 +28,53 @@ export function Topbar({ onSearch }: TopbarProps) {
   const isHome = location.pathname === '/';
 
   return (
-    <header className="flex min-h-[68px] shrink-0 items-center gap-3 border-b border-[#ddd5cc] bg-[#fffefd]/95 px-4 py-2.5 shadow-[0_1px_0_rgba(64,47,38,0.02)] backdrop-blur-xl sm:px-6">
+    <header className="flex min-h-[68px] shrink-0 items-center gap-2 border-b border-[#ddd5cc] bg-[#fffefd]/95 px-3 py-2.5 shadow-[0_1px_0_rgba(64,47,38,0.02)] backdrop-blur-xl sm:gap-3 sm:px-6">
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button
+            variant="outline"
+            size="icon"
+            className="shrink-0 border-[#d9d0c6] bg-white lg:hidden"
+            aria-label="Apri menu"
+          >
+            <Menu className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" className="w-72">
+          <DropdownMenuLabel>Gestionale Soft Comfort</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          {NAV_SECTIONS.map((section, sectionIndex) => {
+            const items = section.items.filter((item) => !item.adminOnly || user?.isAdmin);
+            if (items.length === 0) return null;
+            return (
+              <div key={section.title}>
+                {sectionIndex > 0 && <DropdownMenuSeparator />}
+                <DropdownMenuLabel className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                  {section.title}
+                </DropdownMenuLabel>
+                {items.map((item) => (
+                  <DropdownMenuItem
+                    key={item.to}
+                    onClick={() => navigate(item.to)}
+                    className="gap-2"
+                  >
+                    <item.icon className="h-4 w-4" />
+                    <div>
+                      <p className="font-semibold">{item.label}</p>
+                      <p className="text-[10px] text-muted-foreground">{item.description}</p>
+                    </div>
+                  </DropdownMenuItem>
+                ))}
+              </div>
+            );
+          })}
+        </DropdownMenuContent>
+      </DropdownMenu>
+
       <button
         type="button"
         onClick={() => navigate('/')}
-        className="hidden rounded-xl text-left transition-opacity hover:opacity-80 sm:block"
+        className="hidden rounded-xl text-left transition-opacity hover:opacity-80 sm:block lg:hidden"
         aria-label="Torna alla home"
       >
         <SoftComfortBrand
@@ -44,16 +87,16 @@ export function Topbar({ onSearch }: TopbarProps) {
       {!isHome && (
         <Button
           variant="outline"
-          className="shrink-0 border-[#d9d0c6] bg-white"
+          className="hidden shrink-0 border-[#d9d0c6] bg-white md:inline-flex lg:hidden"
           onClick={() => navigate('/')}
         >
           <Home className="h-4 w-4" />
-          <span className="hidden md:inline">Home</span>
+          Home
         </Button>
       )}
 
       <form
-        className="relative ml-0 w-full max-w-xl sm:ml-2"
+        className="relative min-w-0 flex-1 lg:max-w-2xl"
         onSubmit={(e) => {
           e.preventDefault();
           onSearch(q);
@@ -78,7 +121,7 @@ export function Topbar({ onSearch }: TopbarProps) {
             Modalità demo
           </Badge>
         )}
-        <div className="hidden text-right lg:block">
+        <div className="hidden text-right xl:block">
           <p className="text-xs font-semibold text-foreground">{user?.username}</p>
           <p className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
             {isDemo ? 'Dati dimostrativi' : user?.isAdmin ? 'Amministratore' : 'Utente'}
