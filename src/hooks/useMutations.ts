@@ -43,7 +43,7 @@ export function useCreateSellingBill() {
       void qc.invalidateQueries({ queryKey: queryKeys.sellingBills });
       void qc.invalidateQueries({ queryKey: queryKeys.depositsToCollect });
       void qc.invalidateQueries({ queryKey: queryKeys.depositsCollected });
-      ok('Fattura creata');
+      ok('Vendita creata');
     },
     onError: ko,
   });
@@ -176,7 +176,7 @@ export function useCancelBill(uuid: string) {
   const invalidate = useInvalidateBill(uuid);
   return useMutation({
     mutationFn: () => sellingBillsApi.cancel(uuid),
-    onSuccess: () => { invalidate(); ok('Fattura annullata'); },
+    onSuccess: () => { invalidate(); ok('Vendita annullata'); },
     onError: ko,
   });
 }
@@ -187,7 +187,7 @@ export function useDeleteBill(uuid: string) {
     mutationFn: () => sellingBillsApi.delete(uuid),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: queryKeys.sellingBills });
-      ok('Fattura eliminata');
+      ok('Vendita eliminata');
     },
     onError: ko,
   });
@@ -324,7 +324,7 @@ export function useDeleteBuyingBill() {
     mutationFn: (uuid: string) => buyingBillsApi.delete(uuid),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: queryKeys.buyingBills });
-      ok('Fattura eliminata');
+      ok('Vendita eliminata');
     },
     onError: ko,
   });
