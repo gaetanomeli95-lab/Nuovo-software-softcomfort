@@ -1,5 +1,6 @@
 import {
   LayoutDashboard,
+  BarChart3,
   ClipboardCheck,
   ReceiptText,
   ShoppingCart,
@@ -39,6 +40,18 @@ export const NAV_SECTIONS: NavSection[] = [
         label: 'Dashboard',
         description: 'Numeri, vendite, scadenze e andamento dell’attività in un’unica vista.',
         icon: LayoutDashboard,
+      },
+    ],
+  },
+  {
+    title: 'Analisi',
+    description: 'Report, performance ed esportazione dati.',
+    items: [
+      {
+        to: '/report',
+        label: 'Report e export',
+        description: 'Analizza vendite e venditori, poi esporta i dati in CSV.',
+        icon: BarChart3,
       },
     ],
   },
