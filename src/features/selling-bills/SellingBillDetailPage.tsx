@@ -49,6 +49,7 @@ import {
   measureSourceLabel,
   parseCommissionNotes,
   yesNoLabel,
+  type CommissionMetadata,
 } from './commissionMetadata';
 
 function WorkflowStepper({ status }: { status: SellingBillStatus }) {
@@ -304,14 +305,14 @@ function EditCommissionDialog({
 }) {
   const update = useUpdateNotes(billUuid);
   const parsed = parseCommissionNotes(notes);
-  const emptyMetadata = {
+  const emptyMetadata: CommissionMetadata = {
     city: '',
     floor: '',
     staircase: '',
-    elevator: '' as const,
-    measureSource: '' as const,
-    hoist: '' as const,
-    attachments: '' as const,
+    elevator: '',
+    measureSource: '',
+    hoist: '',
+    attachments: '',
     attachmentPages: null,
     scheduledDate: '',
     scheduledTime: '',
