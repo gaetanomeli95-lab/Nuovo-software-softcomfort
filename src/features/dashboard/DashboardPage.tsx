@@ -1,8 +1,10 @@
 import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import {
+  AlertTriangle,
   Banknote,
   CalendarClock,
+  CalendarDays,
   ClipboardList,
   HandCoins,
   PackageCheck,
@@ -37,6 +39,11 @@ import {
   useSellingBills,
 } from '@/hooks/useQueries';
 import { computeDashboardMetrics } from './dashboardMetrics';
+import {
+  deliveryCounts,
+  getDeliveryEntries,
+  localISODate,
+} from '@/features/selling-bills/deliveryPlanning';
 import { formatCurrency, formatDate, formatDateShort, monthLabel } from '@/lib/format';
 
 function SectionHeading({ title, description }: { title: string; description?: string }) {
@@ -67,6 +74,12 @@ export function DashboardPage() {
       checks.data ?? [],
     );
   }, [bills.data, deposits.data, provisions.data, checks.data]);
+
+  const deliveryEntries = useMemo(
+    () => getDeliveryEntries(bills.data ?? [], localISODate()),
+    [bills.data],
+  );
+  const deliverySummary = useMemo(() => deliveryCounts(deliveryEntries), [deliveryEntries]);
 
   const retry = () => {
     bills.refetch();
@@ -170,6 +183,44 @@ export function DashboardPage() {
             icon={PackageCheck}
             loading={isLoading}
             to="/vendite?status=Pronta"
+          />
+        </div>
+      </section>
+
+      <section className="space-y-3">
+        <div className="flex items-end justify-between gap-4">
+          <SectionHeading
+            title="Consegne"
+            description="Priorità logistiche ricavate dalle vendite programmate."
+          />
+          <Link to="/consegne" className="text-xs font-bold text-primary hover:text-brand-red-dark">
+            Apri planning →
+          </Link>
+        </div>
+        <div className="grid gap-4 md:grid-cols-3">
+          <StatCard
+            label="In ritardo"
+            value={deliverySummary.late}
+            icon={AlertTriangle}
+            tone={deliverySummary.late > 0 ? 'destructive' : 'default'}
+            loading={isLoading}
+            to="/consegne"
+          />
+          <StatCard
+            label="Consegne oggi"
+            value={deliverySummary.today}
+            icon={Truck}
+            tone={deliverySummary.today > 0 ? 'warning' : 'default'}
+            loading={isLoading}
+            to="/consegne"
+          />
+          <StatCard
+            label="Prossime"
+            value={deliverySummary.upcoming}
+            icon={CalendarDays}
+            tone="info"
+            loading={isLoading}
+            to="/consegne"
           />
         </div>
       </section>
