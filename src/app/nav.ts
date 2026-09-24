@@ -1,5 +1,6 @@
 import {
   LayoutDashboard,
+  ClipboardCheck,
   ReceiptText,
   ShoppingCart,
   Package,
@@ -38,6 +39,18 @@ export const NAV_SECTIONS: NavSection[] = [
         label: 'Dashboard',
         description: 'Numeri, vendite, scadenze e andamento dell’attività in un’unica vista.',
         icon: LayoutDashboard,
+      },
+    ],
+  },
+  {
+    title: 'Operatività',
+    description: 'Le attività che richiedono attenzione oggi.',
+    items: [
+      {
+        to: '/attivita',
+        label: 'Da fare',
+        description: 'Urgenze, consegne, incassi e attività aperte in ordine di priorità.',
+        icon: ClipboardCheck,
       },
     ],
   },
