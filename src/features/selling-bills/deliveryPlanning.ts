@@ -24,9 +24,16 @@ function deliveryState(
   return 'upcoming';
 }
 
+export function localISODate(date = new Date()): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
 export function getDeliveryEntries(
   bills: SellingBill[],
-  todayISO = new Date().toISOString().slice(0, 10),
+  todayISO = localISODate(),
 ): DeliveryEntry[] {
   return bills
     .flatMap((bill) => {
@@ -44,7 +51,16 @@ export function getDeliveryEntries(
         sortKey: `${metadata.scheduledDate}T${metadata.scheduledTime || '23:59'}`,
       }];
     })
-    .sort((a, b) => a.sortKey.localeCompare(b.sortKey));
+    .sort((a, b) => {
+      const rank: Record<DeliveryState, number> = {
+        late: 0,
+        today: 1,
+        upcoming: 2,
+        completed: 3,
+      };
+      const byState = rank[a.state] - rank[b.state];
+      return byState || a.sortKey.localeCompare(b.sortKey);
+    });
 }
 
 export function deliveryCounts(entries: DeliveryEntry[]) {
