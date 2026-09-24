@@ -24,6 +24,7 @@ import { AdministrationPage } from '@/features/admin/AdministrationPage';
 import { DirectoriesPage } from '@/features/directories/DirectoriesPage';
 import { OperationsPage } from '@/features/operations/OperationsPage';
 import { GlobalSearchPage } from '@/features/search/GlobalSearchPage';
+import { ReportsPage } from '@/features/reports/ReportsPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -69,6 +70,7 @@ export default function App() {
                 <Route path="dashboard" element={<DashboardPage />} />
                 <Route path="attivita" element={<OperationsPage />} />
                 <Route path="cerca" element={<GlobalSearchPage />} />
+                <Route path="report" element={<ReportsPage />} />
                 <Route path="vendite" element={<SellingBillsPage />} />
                 <Route path="vendite/nuova" element={<NewSellingBillPage />} />
                 <Route path="vendite/:uuid" element={<SellingBillDetailPage />} />
