@@ -451,6 +451,40 @@ export async function handleDemoRequest<T>(
     return undefined as T;
   }
 
+  if (path === '/buyingBill/add' && method === 'POST') {
+    const rawItems = Array.isArray(data.itemsRequest) ? data.itemsRequest : [];
+    const items = rawItems.map((raw) => {
+      const item = bodyObject(raw);
+      return {
+        uuid: nextId('demo-buy-item'),
+        name: String(item.name ?? item.item ?? 'Articolo'),
+        price: Number(item.price ?? 0),
+      };
+    });
+
+    const created: BuyingBill = {
+      uuid: nextId('demo-buy'),
+      date: new Date().toISOString().slice(0, 10),
+      make: String(data.make ?? '') || null,
+      status: Number(data.payed ?? 0) >= Number(data.totalPrice ?? 0) && Number(data.totalPrice ?? 0) > 0
+        ? 'Chiusa'
+        : 'Aperta',
+      items,
+    };
+    buyingBills.unshift(created);
+    return undefined as T;
+  }
+
+  if (path === '/buyingBill/addPayment' && method === 'POST') {
+    const bill = buyingBills.find((candidate) => candidate.uuid === data.uuid);
+    if (bill && Number(data.payment ?? 0) > 0) {
+      // Il backend demo non espone il totale pagato: la registrazione serve
+      // a rendere interattivo il flusso senza inventare campi nel contratto.
+      if (bill.status === 'Aperta') bill.status = 'Chiusa';
+    }
+    return undefined as T;
+  }
+
   if (path.startsWith('/buyingBill/delete/') && method === 'DELETE') {
     const uuid = path.split('/').pop();
     buyingBills = buyingBills.filter((bill) => bill.uuid !== uuid);
