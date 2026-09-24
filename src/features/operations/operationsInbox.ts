@@ -4,7 +4,6 @@ import type {
   ProvisionResponse,
   SellingBill,
 } from '@/types/domain';
-import { daysUntil } from '@/lib/format';
 import { getDeliveryEntries, localISODate } from '@/features/selling-bills/deliveryPlanning';
 import { getSaleClosureReadiness } from '@/features/selling-bills/paymentStatus';
 
@@ -55,24 +54,24 @@ export function buildOperationsInbox(
     });
   }
 
+  const today = new Date(`${todayISO}T00:00:00`);
+
   for (const check of checks) {
-    const days = daysUntil(check.expireDate);
-    if (days > 30) continue;
+    const target = new Date(`${check.expireDate}T00:00:00`);
+    const days = Math.round((target.getTime() - today.getTime()) / 86_400_000);
+
+    // Il modello legacy non espone uno stato "incassato" per gli assegni.
+    // Per evitare falsi allarmi su storico vecchio mostriamo solo scadenze future/odierne.
+    if (days < 0 || days > 30) continue;
 
     urgent.push({
       id: `check-${check.uuid}`,
-      title: days < 0
-        ? `Assegno scaduto · ${check.make}`
-        : days === 0
-          ? `Assegno in scadenza oggi · ${check.make}`
-          : `Assegno in scadenza · ${check.make}`,
-      detail: days < 0
-        ? `${Math.abs(days)} giorni oltre la scadenza`
-        : days === 0
-          ? 'Scadenza odierna'
-          : `Scade tra ${days} giorni`,
+      title: days === 0
+        ? `Assegno in scadenza oggi · ${check.make}`
+        : `Assegno in scadenza · ${check.make}`,
+      detail: days === 0 ? 'Scadenza odierna' : `Scade tra ${days} giorni`,
       to: '/assegni',
-      priority: days <= 0 ? 'critical' : 'warning',
+      priority: days === 0 ? 'critical' : 'warning',
       date: check.expireDate,
     });
   }
