@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { CheckCircle2, MapPin, Package, Pencil, Plus, Search } from 'lucide-react';
 import { PageHeader } from '@/components/common/PageHeader';
 import { SummaryPill } from '@/components/common/SummaryPill';
@@ -280,7 +281,16 @@ function InventoryTable({
 export function InventoryPage() {
   const available = useInventoryAvailable();
   const delivered = useInventoryDelivered();
-  const [q, setQ] = useState('');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [q, setQ] = useState(() => searchParams.get('q') ?? '');
+
+  const updateSearch = (value: string) => {
+    setQ(value);
+    const params = new URLSearchParams(searchParams);
+    if (value.trim()) params.set('q', value);
+    else params.delete('q');
+    setSearchParams(params, { replace: true });
+  };
 
   const availableRows = useMemo(
     () => (available.data ?? []).filter((i) => matches(i, q)),
@@ -311,7 +321,7 @@ export function InventoryPage() {
               placeholder="Cerca articolo, marca, rif., posizione…"
               className="pl-9"
               value={q}
-              onChange={(e) => setQ(e.target.value)}
+              onChange={(e) => updateSearch(e.target.value)}
             />
           </div>
           <SummaryPill label="Disponibili" value={String(availableRows.length)} tone="green" />
