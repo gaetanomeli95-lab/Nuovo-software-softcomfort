@@ -12,6 +12,7 @@ import { SellingBillsPage } from '@/features/selling-bills/SellingBillsPage';
 import { NewSellingBillPage } from '@/features/selling-bills/NewSellingBillPage';
 import { SellingBillDetailPage } from '@/features/selling-bills/SellingBillDetailPage';
 import { SellingBillPrintPage } from '@/features/selling-bills/SellingBillPrintPage';
+import { DeliveryPlanningPage } from '@/features/selling-bills/DeliveryPlanningPage';
 import { DepositsPage } from '@/features/deposits/DepositsPage';
 import { ChecksPage } from '@/features/checks/ChecksPage';
 import { ProvisionsPage } from '@/features/provisions/ProvisionsPage';
@@ -66,6 +67,7 @@ export default function App() {
                 <Route path="vendite" element={<SellingBillsPage />} />
                 <Route path="vendite/nuova" element={<NewSellingBillPage />} />
                 <Route path="vendite/:uuid" element={<SellingBillDetailPage />} />
+                <Route path="consegne" element={<DeliveryPlanningPage />} />
                 <Route path="ordini" element={<PendingPage />} />
                 <Route path="acquisti" element={<BuyingBillsPage />} />
                 <Route path="acquisti/:uuid" element={<BuyingBillDetailPage />} />
