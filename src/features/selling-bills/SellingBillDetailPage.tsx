@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
-  ArrowLeft, Ban, CheckCircle2, Circle, HandCoins, MoreHorizontal, Package,
-  Pencil, Phone, MapPin, Plus, Printer, StickyNote, Trash2, Truck, Wrench,
+  ArrowLeft, Ban, CheckCircle2, Circle, ClipboardSignature, HandCoins, MessageCircle,
+  MoreHorizontal, Package, Pencil, Phone, MapPin, Plus, Printer, StickyNote, Trash2, Truck, Wrench,
 } from 'lucide-react';
 import { PageHeader } from '@/components/common/PageHeader';
 import { PaymentStatusBadge } from '@/components/common/PaymentStatusBadge';
@@ -43,6 +43,7 @@ import { useAuth } from '@/features/auth/AuthContext';
 import { formatCurrency, formatDate } from '@/lib/format';
 import { SELLING_BILL_WORKFLOW, type SellingBillItem, type SellingBillStatus } from '@/types/domain';
 import { cn } from '@/lib/utils';
+import { whatsappUrl } from '@/lib/export';
 import { getPaymentSummary, getSaleClosureReadiness } from './paymentStatus';
 import { getSellingItemView } from './sellingItemView';
 import {
@@ -605,6 +606,7 @@ export function SellingBillDetailPage() {
   const { paidTotal, balance } = payment;
   const commissionNotes = parseCommissionNotes(bill.notes);
   const commission = commissionNotes.metadata;
+  const clientWhatsApp = whatsappUrl(bill.phone ?? '');
 
   return (
     <div className="space-y-5">
@@ -627,6 +629,18 @@ export function SellingBillDetailPage() {
                   <Truck className="h-4 w-4" /> Bolla
                 </Link>
               </Button>
+              <Button size="sm" variant="outline" asChild>
+                <Link to={`/vendite/${bill.uuid}/stampa?tipo=commissione`}>
+                  <ClipboardSignature className="h-4 w-4" /> Commissione
+                </Link>
+              </Button>
+              {clientWhatsApp && (
+                <Button size="sm" variant="outline" asChild>
+                  <a href={clientWhatsApp} target="_blank" rel="noreferrer">
+                    <MessageCircle className="h-4 w-4" /> WhatsApp
+                  </a>
+                </Button>
+              )}
               <StatusBadge status={bill.status} />
               {bill.status !== 'Annullata' && <PaymentStatusBadge status={payment.status} />}
               <DropdownMenu>
