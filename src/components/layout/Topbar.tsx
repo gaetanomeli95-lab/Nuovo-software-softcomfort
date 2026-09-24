@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useAuth } from '@/features/auth/AuthContext';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 interface TopbarProps {
   onSearch: (q: string) => void;
@@ -25,7 +25,20 @@ export function Topbar({ onSearch }: TopbarProps) {
   const navigate = useNavigate();
   const location = useLocation();
   const [q, setQ] = useState('');
+  const searchRef = useRef<HTMLInputElement>(null);
   const isHome = location.pathname === '/';
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault();
+        searchRef.current?.focus();
+        searchRef.current?.select();
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, []);
 
   return (
     <header className="flex min-h-[68px] shrink-0 items-center gap-2 border-b border-[#ddd5cc] bg-[#fffefd]/95 px-3 py-2.5 shadow-[0_1px_0_rgba(64,47,38,0.02)] backdrop-blur-xl sm:gap-3 sm:px-6">
@@ -104,12 +117,16 @@ export function Topbar({ onSearch }: TopbarProps) {
       >
         <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8e8178]" />
         <Input
+          ref={searchRef}
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="Cerca cliente, venditore, articolo…"
-          className="h-10 border-[#ddd5cc] bg-[#faf8f5] pl-9 shadow-none"
-          aria-label="Ricerca"
+          className="h-10 border-[#ddd5cc] bg-[#faf8f5] pl-9 pr-16 shadow-none"
+          aria-label="Ricerca globale"
         />
+        <span className="pointer-events-none absolute right-2.5 top-1/2 hidden -translate-y-1/2 rounded-md border border-[#ddd5cc] bg-white px-1.5 py-0.5 text-[9px] font-bold text-[#8d8179] sm:inline">
+          Ctrl K
+        </span>
       </form>
 
       <div className="ml-auto flex items-center gap-2">
