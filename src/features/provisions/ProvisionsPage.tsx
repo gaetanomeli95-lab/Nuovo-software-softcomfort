@@ -5,6 +5,7 @@ import { PageHeader } from '@/components/common/PageHeader';
 import { SummaryPill } from '@/components/common/SummaryPill';
 import { ErrorState } from '@/components/common/ErrorState';
 import { EmptyState } from '@/components/common/EmptyState';
+import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -59,14 +60,17 @@ function ProvisionsTable({ rows, actionable }: { rows: ProvisionResponse[]; acti
             <TableCell className="tnum text-right font-bold">{formatCurrency(r.provision.amount)}</TableCell>
             {actionable && (
               <TableCell className="text-right">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  disabled={pay.isPending}
-                  onClick={() => pay.mutate(r.provision.uuid)}
-                >
-                  <CheckCircle2 className="h-4 w-4" /> Paga
-                </Button>
+                <ConfirmDialog
+                  trigger={
+                    <Button size="sm" variant="outline" disabled={pay.isPending}>
+                      <CheckCircle2 className="h-4 w-4" /> Paga
+                    </Button>
+                  }
+                  title="Confermare il pagamento?"
+                  description={`${r.provision.seller} · ${formatCurrency(r.provision.amount)} · vendita ${r.client}. Nel backend legacy non è disponibile un comando di annullamento pagamento.`}
+                  confirmLabel="Conferma pagamento"
+                  onConfirm={() => pay.mutateAsync(r.provision.uuid)}
+                />
               </TableCell>
             )}
           </TableRow>

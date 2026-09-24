@@ -1,76 +1,125 @@
-# Gestionale Web
+# Gestionale Soft Comfort
 
-Frontend moderno (React + TypeScript + Vite + Tailwind v4 + shadcn/ui-style)
-che lavora sopra il backend legacy Spring Boot esistente, invariato.
+Frontend operativo moderno per Soft Comfort Arredamenti, costruito in React + TypeScript + Vite + Tailwind v4 sopra il backend legacy Spring Boot esistente.
 
-## Requisiti
+L'obiettivo del progetto è mantenere i flussi familiari del gestionale storico, rendendoli più chiari, veloci e sicuri senza introdurre scritture non verificate sul backend reale.
 
-- Node.js 20+ (sviluppato su Node 24)
-- Backend legacy raggiungibile (default `http://192.168.194.58:8080`)
+## Moduli disponibili
 
-## Avvio
+- Home operativa e navigazione desktop/mobile.
+- Dashboard con KPI, vendite, scadenze e priorità consegne.
+- **Da fare**: inbox prioritaria di urgenze, vendite, incassi e provvigioni.
+- Vendite: lista, filtri, dettaglio e workflow articoli.
+- Nuova vendita / proposta di commissione.
+- Dati consegna: piano, scala, ascensore, autoscala, rilievo misure, allegati, data/ora.
+- Planning consegne.
+- Acconti e stato pagamento separato dallo stato operativo.
+- Provvigioni.
+- Assegni.
+- Ordini in sospeso.
+- Fatture di acquisto e registrazione pagamenti.
+- Magazzino: carico, modifica ubicazione/riferimento/nome e consegna.
+- Anagrafiche derivate di clienti e fornitori.
+- Documento di vendita e bolla A4.
+- Amministrazione / readiness produzione.
+- Modalità demo stateful per verificare i flussi senza toccare dati reali.
+
+## Stack
+
+- React 18
+- TypeScript
+- Vite
+- Tailwind CSS v4
+- TanStack Query
+- React Router
+- Recharts
+- Vitest / Testing Library
+- Playwright
+
+## Avvio locale
+
+Requisiti: Node.js 20+.
 
 ```bash
 npm install
-npm run dev        # http://localhost:5173
+cp .env.example .env.local
+npm run dev
 ```
 
-In dev, il proxy Vite inoltra i path API (`/login`, `/sellingBill`, `/item`,
-`/buyingBill`, `/checks`, `/deposits`, `/provisions`, `/pending`) al backend
-legacy — nessun URL hardcoded nel codice. Per cambiare target:
+Imposta in `.env.local` il backend legacy della tua rete:
 
-```bash
-# .env.development oppure variabile ambiente
-VITE_LEGACY_BACKEND=http://altro-host:8080   # usato dal proxy dev
-VITE_API_BASE_URL=                            # base URL API (vuoto = stessa origine)
+```env
+VITE_LEGACY_BACKEND=http://host-locale:8080
 ```
 
-In produzione il frontend usa URL relativi: basta servire `dist/` dallo stesso
-origin del backend (come già fa Spring Boot con il vecchio frontend Angular).
+In sviluppo Vite inoltra i path legacy noti al backend tramite proxy.
+
+## Modalità produzione
+
+### Backend HTTPS separato
+
+```env
+VITE_API_BASE_URL=https://api.example.com
+VITE_DEMO_MODE=false
+```
+
+### Frontend e backend sulla stessa origine
+
+```env
+VITE_API_BASE_URL=
+VITE_DEMO_MODE=false
+```
+
+### Demo / preview
+
+```env
+VITE_DEMO_MODE=true
+```
+
+Senza override, una build produzione priva di `VITE_API_BASE_URL` mantiene il fallback demo per evitare chiamate accidentali verso un backend inesistente.
 
 ## Script
 
 | Comando | Descrizione |
 |---|---|
-| `npm run dev` | Dev server con proxy al legacy |
+| `npm run dev` | Avvia Vite con proxy API |
 | `npm run build` | Type-check + build produzione |
-| `npm run test` | Unit test (Vitest + Testing Library) |
+| `npm run test` | Unit test |
 | `npm run lint` | ESLint |
-| `npm run test:e2e` | Playwright (richiede `npx playwright install chromium` e credenziali `E2E_USER`/`E2E_PASSWORD`) |
+| `npm run test:e2e` | Test Playwright |
 
 ## Architettura
 
 ```
 src/
-  app/            router guards, navigazione
-  components/     ui/ (primitives shadcn-style), layout/, common/
-  features/       auth, dashboard, selling-bills, ...
-  hooks/          query hooks TanStack
-  lib/            utils, formattazione
-  services/api/   config, http client, token store, adapter per dominio
-  types/          modelli di dominio (contratto osservato dal legacy)
+  app/                 router, guards, error boundary, navigazione
+  components/          UI, layout e componenti condivisi
+  features/            moduli di dominio
+  hooks/               query e mutation hooks
+  lib/                 formattazione e utility
+  services/api/        adapter verso il backend legacy
+  services/demoRuntime demo stateful
+  types/               contratto di dominio osservato
 ```
 
-Punti chiave:
+La UI non chiama direttamente URL legacy: tutte le API passano dagli adapter in `services/api`.
 
-- **Adapter layer**: la UI non conosce i path legacy (`/sellingBill/getAll` ecc.),
-  usa solo `services/api/*`. Sostituire il backend in futuro = riscrivere gli adapter.
-- **Auth**: JWT Bearer in `sessionStorage` (come il legacy), gestito da
-  `tokenStore` + `AuthContext`. 401 → logout automatico.
-- **Server state**: TanStack Query con chiavi centralizzate (`queryKeys.ts`).
-- **Logica di business** fuori dai componenti: `dashboardMetrics.ts`,
-  `billFilters.ts` sono puri e coperti da test.
+## Regole di sicurezza e correttezza
 
-## Stato migrazione (Fase 1)
+- Nessuna credenziale o token deve essere committato.
+- Le azioni legacy senza undo (incasso, pagamento provvigione, consegna magazzino) richiedono conferma.
+- Stato pagamento e stato operativo della vendita restano distinti.
+- `settlement` non viene interpretato come incasso finché la sua semantica non viene verificata.
+- `PUT /sellingBill/update` non viene usato per chiudere/modificare vendite finché il contratto esatto non è dimostrato.
+- Il documento stampato è un **Documento di vendita gestionale**, non una fattura fiscale elettronica.
+- I dati fiscali aziendali devono essere verificati prima dell'uso documentale definitivo.
 
-Implementato e collegato al backend reale:
+Per i gate completi di go-live: `docs/PRODUCTION_READINESS.md`.
 
-- Login (POST `/login/signin`)
-- Dashboard con KPI reali
-- Lista fatture vendita (ricerca, sort, filtri stato/venditore/date, paginazione)
-- Dettaglio vendita read-only (workflow, articoli, acconti, provvigione, note)
+## Quality gate
 
-In migrazione (placeholder): ordini, acquisti, magazzino, acconti, assegni,
-provvigioni, amministrazione.
+Ogni blocco segue:
 
-Vedi `../app-analysis/API_SPEC.md` per il contratto API completo.
+**branch → build/typecheck → lint → unit test → preview Vercel verde → merge**
+
+Il deploy verde conferma compilazione e distribuzione del frontend; le mutazioni sul backend reale vanno comunque collaudate in un ambiente controllato.

@@ -5,6 +5,7 @@ import { PageHeader } from '@/components/common/PageHeader';
 import { SummaryPill } from '@/components/common/SummaryPill';
 import { ErrorState } from '@/components/common/ErrorState';
 import { EmptyState } from '@/components/common/EmptyState';
+import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -70,14 +71,17 @@ function DepositsTable({ rows, actionable }: { rows: DepositResponse[]; actionab
             <TableCell className="tnum text-right font-bold">{formatCurrency(r.deposit.amount)}</TableCell>
             {actionable && (
               <TableCell className="text-right">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  disabled={collect.isPending}
-                  onClick={() => collect.mutate(r.deposit.uuid)}
-                >
-                  <CheckCircle2 className="h-4 w-4" /> Incassa
-                </Button>
+                <ConfirmDialog
+                  trigger={
+                    <Button size="sm" variant="outline" disabled={collect.isPending}>
+                      <CheckCircle2 className="h-4 w-4" /> Incassa
+                    </Button>
+                  }
+                  title="Confermare l'incasso?"
+                  description={`${r.client} · ${formatCurrency(r.deposit.amount)} · ${r.deposit.method}. Nel backend legacy non è disponibile un comando di annullamento incasso.`}
+                  confirmLabel="Conferma incasso"
+                  onConfirm={() => collect.mutateAsync(r.deposit.uuid)}
+                />
               </TableCell>
             )}
           </TableRow>
