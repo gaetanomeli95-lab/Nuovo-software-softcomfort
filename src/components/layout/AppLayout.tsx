@@ -7,7 +7,7 @@ export function AppLayout() {
 
   const handleGlobalSearch = (q: string) => {
     const query = q.trim();
-    if (query) navigate(`/vendite?q=${encodeURIComponent(query)}`);
+    if (query) navigate(`/cerca?q=${encodeURIComponent(query)}`);
   };
 
   return (

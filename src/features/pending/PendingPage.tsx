@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Clock, Pencil, Plus, Search, Trash2 } from 'lucide-react';
 import { PageHeader } from '@/components/common/PageHeader';
 import { SummaryPill } from '@/components/common/SummaryPill';
@@ -154,7 +155,16 @@ export function PendingPage() {
   const { data, isLoading, error, refetch } = usePendingOrders();
   const update = useUpdatePending();
   const del = useDeletePending();
-  const [q, setQ] = useState('');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [q, setQ] = useState(() => searchParams.get('q') ?? '');
+
+  const updateSearch = (value: string) => {
+    setQ(value);
+    const params = new URLSearchParams(searchParams);
+    if (value.trim()) params.set('q', value);
+    else params.delete('q');
+    setSearchParams(params, { replace: true });
+  };
 
   const rows = useMemo(() => {
     const list = data ?? [];
@@ -212,7 +222,7 @@ export function PendingPage() {
               placeholder="Cerca articolo o ditta…"
               className="pl-9"
               value={q}
-              onChange={(e) => setQ(e.target.value)}
+              onChange={(e) => updateSearch(e.target.value)}
             />
           </div>
           <SummaryPill label="Da ordinare" value={String(toOrder)} tone="gold" />
