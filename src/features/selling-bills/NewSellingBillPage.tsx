@@ -15,7 +15,7 @@ import {
   UserRound,
   WalletCards,
 } from 'lucide-react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { PageHeader } from '@/components/common/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -25,6 +25,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/features/auth/AuthContext';
+import { customerDirectoryKey } from '@/features/directories/directories';
 import { useSellingBills } from '@/hooks/useQueries';
 import { useCreateSellingBill } from '@/hooks/useMutations';
 import { formatCurrency, formatDate } from '@/lib/format';
@@ -76,7 +77,9 @@ function YesNoField({
 
 export function NewSellingBillPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user } = useAuth();
+  const presetCustomerName = searchParams.get('cliente')?.trim() ?? '';
   const existingBills = useSellingBills();
   const create = useCreateSellingBill();
 
@@ -87,7 +90,7 @@ export function NewSellingBillPage() {
     restoredDraft?.date || new Date().toISOString().slice(0, 10),
   );
   const [seller, setSeller] = useState(restoredDraft?.seller || user?.username || '');
-  const [client, setClient] = useState(restoredDraft?.client || '');
+  const [client, setClient] = useState(restoredDraft?.client || presetCustomerName || '');
   const [phone, setPhone] = useState(restoredDraft?.phone || '');
 
   const [address, setAddress] = useState(restoredDraft?.address || '');
@@ -128,6 +131,30 @@ export function NewSellingBillPage() {
     if (suggestion.phone) setPhone(suggestion.phone);
     if (suggestion.address) setAddress(suggestion.address);
   };
+
+  useEffect(() => {
+    if (restoredDraft || !presetCustomerName || !existingBills.data?.length) return;
+
+    const key = customerDirectoryKey(presetCustomerName);
+    const latest = [...existingBills.data]
+      .filter(
+        (bill) =>
+          bill.status !== 'Annullata' &&
+          customerDirectoryKey(bill.client) === key,
+      )
+      .sort((a, b) => (b.date ?? '').localeCompare(a.date ?? ''))[0];
+
+    if (!latest) return;
+
+    if (!phone.trim() && latest.phone) setPhone(latest.phone.trim());
+    if (!address.trim() && latest.address) setAddress(latest.address.trim());
+  }, [
+    address,
+    existingBills.data,
+    phone,
+    presetCustomerName,
+    restoredDraft,
+  ]);
 
   const normalizedItems = useMemo(
     () =>
