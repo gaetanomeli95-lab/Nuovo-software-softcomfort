@@ -58,7 +58,7 @@ test.describe('critical operator flows', () => {
     await page.goto('/amministrazione');
 
     await page.getByRole('button', { name: 'Esegui controllo' }).click();
-    await expect(page.getByText(/Tutti gli 8 controlli di lettura sono riusciti/)).toBeVisible();
+    await expect(page.getByText('OK', { exact: true })).toHaveCount(8);
 
     const downloadPromise = page.waitForEvent('download');
     await page.getByRole('button', { name: 'Esporta backup' }).click();
