@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { ApiError, http } from './http';
+import { http } from './http';
 
 const originalOnline = navigator.onLine;
 
@@ -19,7 +19,7 @@ describe('http connectivity safeguards', () => {
     });
     const fetchSpy = vi.spyOn(globalThis, 'fetch');
 
-    await expect(http.get('/sellingBill/getAll')).rejects.toMatchObject<ApiError>({
+    await expect(http.get('/sellingBill/getAll')).rejects.toMatchObject({
       status: 0,
       message: 'Connessione assente. Riprova quando il dispositivo è di nuovo online.',
     });
