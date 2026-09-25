@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  isExpiredNewSaleDraft,
   isMeaningfulNewSaleDraft,
   parseNewSaleDraft,
   type NewSaleDraft,
@@ -56,5 +57,16 @@ describe('new sale draft persistence', () => {
     const draft = baseDraft();
     draft.phone = '3929952453';
     expect(isMeaningfulNewSaleDraft(draft)).toBe(true);
+  });
+
+  it('expires old drafts to avoid retaining stale customer data indefinitely', () => {
+    const draft = baseDraft();
+    const now = Date.parse('2026-09-25T00:00:00.000Z');
+
+    draft.savedAt = '2026-09-20T00:00:00.000Z';
+    expect(isExpiredNewSaleDraft(draft, now)).toBe(false);
+
+    draft.savedAt = '2026-08-01T00:00:00.000Z';
+    expect(isExpiredNewSaleDraft(draft, now)).toBe(true);
   });
 });

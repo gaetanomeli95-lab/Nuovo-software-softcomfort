@@ -1,6 +1,7 @@
 import type { MeasureSource, YesNo } from './commissionMetadata';
 
 export const NEW_SALE_DRAFT_KEY = 'softcomfort:new-sale-draft:v1';
+export const NEW_SALE_DRAFT_MAX_AGE_MS = 14 * 24 * 60 * 60 * 1000;
 
 export interface SaleDraftItem {
   id: string;
@@ -118,9 +119,28 @@ export function isMeaningfulNewSaleDraft(draft: NewSaleDraft): boolean {
   );
 }
 
+export function isExpiredNewSaleDraft(
+  draft: NewSaleDraft,
+  nowMs = Date.now(),
+  maxAgeMs = NEW_SALE_DRAFT_MAX_AGE_MS,
+): boolean {
+  const savedAt = Date.parse(draft.savedAt);
+  if (!Number.isFinite(savedAt)) return true;
+  return nowMs - savedAt > maxAgeMs;
+}
+
 export function loadNewSaleDraft(): NewSaleDraft | null {
   if (typeof window === 'undefined') return null;
-  return parseNewSaleDraft(window.localStorage.getItem(NEW_SALE_DRAFT_KEY));
+
+  const draft = parseNewSaleDraft(window.localStorage.getItem(NEW_SALE_DRAFT_KEY));
+  if (!draft) return null;
+
+  if (isExpiredNewSaleDraft(draft)) {
+    window.localStorage.removeItem(NEW_SALE_DRAFT_KEY);
+    return null;
+  }
+
+  return draft;
 }
 
 export function saveNewSaleDraft(draft: NewSaleDraft) {

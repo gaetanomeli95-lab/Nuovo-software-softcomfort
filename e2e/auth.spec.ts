@@ -77,6 +77,33 @@ test.describe('critical operator flows', () => {
     await expect(page.getByLabel('Descrizione merce').first()).toHaveValue('Divano test E2E');
   });
 
+  test('crea una vendita demo completa e apre i tre documenti di stampa', async ({ page }) => {
+    await enterDemo(page);
+    await page.goto('/vendite/nuova');
+
+    await page.getByLabel('Cliente').fill('CLIENTE E2E NUOVA VENDITA');
+    await page.getByLabel('Cellulare').fill('3331234567');
+    await page.getByLabel('Descrizione merce').fill('Divano E2E');
+    await page.getByLabel('Prezzo unitario (€)').fill('1290');
+
+    await page.getByRole('button', { name: 'Salva vendita' }).click();
+    await expect(page).toHaveURL(/\/vendite\/demo-sale-/);
+    await expect(page.getByRole('heading', { name: 'CLIENTE E2E NUOVA VENDITA' })).toBeVisible();
+
+    const saleUrl = page.url();
+    const uuid = saleUrl.split('/').pop();
+    expect(uuid).toBeTruthy();
+
+    await page.goto(`/vendite/${uuid}/stampa?tipo=documento`);
+    await expect(page.getByText('Documento di vendita').first()).toBeVisible();
+
+    await page.goto(`/vendite/${uuid}/stampa?tipo=bolla`);
+    await expect(page.getByText('Bolla di consegna').first()).toBeVisible();
+
+    await page.goto(`/vendite/${uuid}/stampa?tipo=commissione`);
+    await expect(page.getByText('Proposta di commissione').first()).toBeVisible();
+  });
+
   test('amministrazione esegue diagnostica read-only e backup demo', async ({ page }) => {
     await enterDemo(page);
     await page.goto('/amministrazione');
