@@ -1,18 +1,24 @@
+import { useState } from 'react';
 import {
+  Activity,
   BadgeCheck,
   Building2,
+  CheckCircle2,
   CircleAlert,
   Database,
   FileCheck2,
   FileDown,
   LockKeyhole,
   Printer,
+  RefreshCw,
   ServerCog,
   ShieldCheck,
+  XCircle,
   type LucideIcon,
 } from 'lucide-react';
 import { PageHeader } from '@/components/common/PageHeader';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { SOFT_COMFORT_COMPANY } from '@/config/company';
 import { useAuth } from '@/features/auth/AuthContext';
@@ -20,6 +26,11 @@ import {
   API_CONNECTION_MODE,
   AUTOMATIC_DEMO_MODE,
 } from '@/services/api/config';
+import {
+  runReadinessDiagnostics,
+  summarizeDiagnostics,
+  type DiagnosticResult,
+} from '@/services/readinessDiagnostics';
 
 function StatusRow({
   icon: Icon,
@@ -50,8 +61,35 @@ function StatusRow({
   );
 }
 
+function DiagnosticRow({ result }: { result: DiagnosticResult }) {
+  const ok = result.status === 'ok';
+
+  return (
+    <div className="flex items-center gap-3 border-b border-[#eee6de] py-3 last:border-b-0">
+      <div className={
+        ok
+          ? 'grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[#eff7f2] text-success'
+          : 'grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[#fff0f1] text-destructive'
+      }>
+        {ok ? <CheckCircle2 className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-extrabold text-[#302925]">{result.label}</p>
+        <p className="mt-0.5 truncate text-xs text-muted-foreground">
+          {ok
+            ? String(result.records ?? '—') + ' record letti · ' + result.durationMs + ' ms'
+            : result.message || 'Controllo non riuscito'}
+        </p>
+      </div>
+      <Badge variant={ok ? 'success' : 'warning'}>{ok ? 'OK' : 'Errore'}</Badge>
+    </div>
+  );
+}
+
 export function AdministrationPage() {
   const { user, isDemo } = useAuth();
+  const [diagnostics, setDiagnostics] = useState<DiagnosticResult[]>([]);
+  const [checking, setChecking] = useState(false);
 
   const connectionLabel =
     API_CONNECTION_MODE === 'demo'
@@ -59,6 +97,17 @@ export function AdministrationPage() {
       : API_CONNECTION_MODE === 'remote'
         ? 'Backend remoto'
         : 'Stessa origine';
+
+  const diagnosticSummary = summarizeDiagnostics(diagnostics);
+
+  const runDiagnostics = async () => {
+    setChecking(true);
+    try {
+      setDiagnostics(await runReadinessDiagnostics());
+    } finally {
+      setChecking(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -123,6 +172,56 @@ export function AdministrationPage() {
           </CardContent>
         </Card>
       </div>
+
+      <Card className="overflow-hidden border-[#d9cfc6]">
+        <CardHeader className="flex-row items-start justify-between gap-4 space-y-0 border-b border-[#eee6de] bg-[#fffefd]">
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              <Activity className="h-4 w-4 text-primary" />
+              Diagnostica dati
+            </CardTitle>
+            <CardDescription>
+              Controllo di sola lettura dei moduli principali. Non modifica né elimina dati.
+            </CardDescription>
+          </div>
+          <Button onClick={runDiagnostics} disabled={checking}>
+            <RefreshCw className={checking ? 'h-4 w-4 animate-spin' : 'h-4 w-4'} />
+            {checking ? 'Controllo…' : diagnostics.length ? 'Ripeti controllo' : 'Esegui controllo'}
+          </Button>
+        </CardHeader>
+        <CardContent>
+          {diagnostics.length === 0 ? (
+            <div className="py-8 text-center">
+              <p className="text-sm font-bold text-[#3d3531]">Nessun controllo eseguito</p>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Avvia il test per verificare lettura vendite, acquisti, magazzino, assegni, acconti, provvigioni e ordini.
+              </p>
+            </div>
+          ) : (
+            <>
+              <div className={
+                diagnosticSummary.healthy
+                  ? 'my-4 rounded-xl border border-[#c7e0d1] bg-[#eff7f2] px-4 py-3 text-sm text-[#245f42]'
+                  : 'my-4 rounded-xl border border-[#f1c7ca] bg-[#fff0f1] px-4 py-3 text-sm text-[#8d1720]'
+              }>
+                <p className="font-extrabold">
+                  {diagnosticSummary.healthy
+                    ? 'Tutti i ' + diagnosticSummary.total + ' controlli di lettura sono riusciti.'
+                    : diagnosticSummary.failed + ' controlli su ' + diagnosticSummary.total + ' richiedono attenzione.'}
+                </p>
+                <p className="mt-0.5 text-xs opacity-80">
+                  {AUTOMATIC_DEMO_MODE || isDemo
+                    ? 'Il test è stato eseguito sui dati demo.'
+                    : 'Il test ha interrogato il backend configurato per questa installazione.'}
+                </p>
+              </div>
+              <div>
+                {diagnostics.map((result) => <DiagnosticRow key={result.id} result={result} />)}
+              </div>
+            </>
+          )}
+        </CardContent>
+      </Card>
 
       <div className="grid gap-5 xl:grid-cols-2">
         <Card className="overflow-hidden">

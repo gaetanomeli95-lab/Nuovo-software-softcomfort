@@ -187,7 +187,7 @@ export function useDeleteBill(uuid: string) {
     mutationFn: () => sellingBillsApi.delete(uuid),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: queryKeys.sellingBills });
-      ok('Vendita eliminata');
+      ok('Fattura di acquisto eliminata');
     },
     onError: ko,
   });
