@@ -157,6 +157,82 @@ export function NewSellingBillPage() {
     normalizedItems.every((item) => item.unitPrice >= 0 && item.quantity >= 1) &&
     !create.isPending;
 
+  useEffect(() => {
+    const draft: NewSaleDraft = {
+      version: 1,
+      savedAt: new Date().toISOString(),
+      date,
+      seller,
+      client,
+      phone,
+      address,
+      city,
+      floor,
+      staircase,
+      elevator,
+      measureSource,
+      hoist,
+      attachments,
+      attachmentPages,
+      scheduledDate,
+      scheduledTime,
+      notes,
+      transport,
+      settlement,
+      method,
+      items,
+    };
+
+    const timer = window.setTimeout(() => saveNewSaleDraft(draft), 350);
+    return () => window.clearTimeout(timer);
+  }, [
+    date,
+    seller,
+    client,
+    phone,
+    address,
+    city,
+    floor,
+    staircase,
+    elevator,
+    measureSource,
+    hoist,
+    attachments,
+    attachmentPages,
+    scheduledDate,
+    scheduledTime,
+    notes,
+    transport,
+    settlement,
+    method,
+    items,
+  ]);
+
+  const discardDraft = () => {
+    clearNewSaleDraft();
+    setDraftRecovered(false);
+    setDate(new Date().toISOString().slice(0, 10));
+    setSeller(user?.username ?? '');
+    setClient('');
+    setPhone('');
+    setAddress('');
+    setCity('');
+    setFloor('');
+    setStaircase('');
+    setElevator('');
+    setMeasureSource('');
+    setHoist('');
+    setAttachments('');
+    setAttachmentPages('');
+    setScheduledDate('');
+    setScheduledTime('');
+    setNotes('');
+    setTransport('0');
+    setSettlement('0');
+    setMethod('Contanti');
+    setItems([newItem(Date.now())]);
+  };
+
   const updateItem = (id: string, patch: Partial<SaleDraftItem>) => {
     setItems((current) => current.map((item) => (item.id === id ? { ...item, ...patch } : item)));
   };
@@ -205,6 +281,9 @@ export function NewSellingBillPage() {
       notes: operationalNotes,
     });
 
+    clearNewSaleDraft();
+    setDraftRecovered(false);
+
     if (created?.uuid) navigate(`/vendite/${created.uuid}`);
     else navigate('/vendite');
   };
@@ -221,6 +300,35 @@ export function NewSellingBillPage() {
           className="flex-1"
         />
       </div>
+
+      {draftRecovered ? (
+        <div className="flex flex-col gap-3 rounded-2xl border border-[#d8cfbf] bg-[#fffaf0] px-4 py-3.5 text-sm sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-3">
+            <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-[#e7d6ad] bg-white text-[#8a6428]">
+              <ShieldCheck className="h-4 w-4" />
+            </div>
+            <div>
+              <p className="font-extrabold text-[#3a312b]">Bozza recuperata automaticamente</p>
+              <p className="mt-0.5 text-xs leading-relaxed text-[#74685f]">
+                I dati non salvati della vendita precedente sono stati ripristinati da questo dispositivo.
+              </p>
+            </div>
+          </div>
+          <div className="flex shrink-0 gap-2">
+            <Button variant="ghost" size="sm" onClick={() => setDraftRecovered(false)}>
+              Continua
+            </Button>
+            <Button variant="outline" size="sm" onClick={discardDraft}>
+              Scarta bozza
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <div className="flex items-center gap-2 px-1 text-[11px] font-semibold text-muted-foreground">
+          <ShieldCheck className="h-3.5 w-3.5 text-[#8a6428]" />
+          La bozza viene salvata automaticamente su questo dispositivo.
+        </div>
+      )}
 
       <div className="grid gap-5 xl:grid-cols-[1fr_350px]">
         <div className="space-y-5">
