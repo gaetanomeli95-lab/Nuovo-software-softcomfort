@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   ArrowLeft,
   CalendarClock,
@@ -9,6 +9,7 @@ import {
   ReceiptText,
   Ruler,
   Save,
+  ShieldCheck,
   Trash2,
   Truck,
   UserRound,
@@ -32,18 +33,17 @@ import {
   type MeasureSource,
   type YesNo,
 } from './commissionMetadata';
-
-type DraftItem = {
-  id: string;
-  code: string;
-  description: string;
-  quantity: string;
-  unitPrice: string;
-};
+import {
+  clearNewSaleDraft,
+  loadNewSaleDraft,
+  saveNewSaleDraft,
+  type NewSaleDraft,
+  type SaleSaleDraftItem,
+} from './saleDraft';
 
 const PAYMENT_METHODS = ['Contanti', 'Pos', 'Assegno', 'Bonifico', 'Finanziamento'];
 
-function newItem(index: number): DraftItem {
+function newItem(index: number): SaleDraftItem {
   return {
     id: `draft-${Date.now()}-${index}`,
     code: '',
@@ -101,7 +101,7 @@ export function NewSellingBillPage() {
   const [transport, setTransport] = useState('0');
   const [settlement, setSettlement] = useState('0');
   const [method, setMethod] = useState('Contanti');
-  const [items, setItems] = useState<DraftItem[]>([newItem(0)]);
+  const [items, setItems] = useState<SaleDraftItem[]>([newItem(0)]);
 
   const sellerOptions = useMemo(
     () =>
@@ -150,7 +150,7 @@ export function NewSellingBillPage() {
     normalizedItems.every((item) => item.unitPrice >= 0 && item.quantity >= 1) &&
     !create.isPending;
 
-  const updateItem = (id: string, patch: Partial<DraftItem>) => {
+  const updateItem = (id: string, patch: Partial<SaleDraftItem>) => {
     setItems((current) => current.map((item) => (item.id === id ? { ...item, ...patch } : item)));
   };
 
