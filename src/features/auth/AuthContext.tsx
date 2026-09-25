@@ -2,6 +2,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
   type ReactNode,
@@ -88,7 +89,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(toUser(DEMO_USERNAME, DEMO_ROLES));
   }, []);
 
-  useState(() => {
+  useEffect(() => {
     setOnUnauthorized(() => {
       if (AUTOMATIC_DEMO_MODE) {
         setUser(automaticDemoUser());
@@ -97,8 +98,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(null);
       }
     });
+
     return () => setOnUnauthorized(null);
-  });
+  }, []);
 
   const value = useMemo<AuthState>(
     () => ({

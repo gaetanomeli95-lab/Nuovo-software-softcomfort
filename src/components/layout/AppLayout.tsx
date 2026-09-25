@@ -27,7 +27,7 @@ export function AppLayout() {
             className="flex shrink-0 items-center justify-center gap-2 border-b border-[#ead4a8] bg-[#fff8e9] px-4 py-2 text-center text-xs font-bold text-[#7b5920]"
           >
             <WifiOff className="h-4 w-4" />
-            Il dispositivo risulta offline. Le modifiche verranno inviate solo quando la connessione sarà disponibile.
+            Il dispositivo risulta offline. Evita di salvare modifiche finché la connessione non torna disponibile; le bozze della nuova vendita restano salvate su questo dispositivo.
           </div>
         )}
         <main className="softcomfort-workspace relative flex-1 overflow-y-auto scrollbar-thin">

@@ -28,6 +28,8 @@ interface RequestOptions {
   signal?: AbortSignal;
 }
 
+const REQUEST_TIMEOUT_MS = 20_000;
+
 let onUnauthorized: (() => void) | null = null;
 export function setOnUnauthorized(cb: (() => void) | null) {
   onUnauthorized = cb;
@@ -42,6 +44,13 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
     return handleDemoRequest<T>(path, method, body);
   }
 
+  if (typeof navigator !== 'undefined' && !navigator.onLine) {
+    throw new ApiError(
+      0,
+      'Connessione assente. Riprova quando il dispositivo è di nuovo online.',
+    );
+  }
+
   const headers: Record<string, string> = {
     Accept: 'application/json',
   };
@@ -50,17 +59,29 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
   const session = loadSession();
   if (session?.token) headers['Authorization'] = `Bearer ${session.token}`;
 
+  const timeoutController = new AbortController();
+  const timeoutId = window.setTimeout(() => timeoutController.abort(), REQUEST_TIMEOUT_MS);
+  const requestSignal = signal
+    ? AbortSignal.any([signal, timeoutController.signal])
+    : timeoutController.signal;
+
   let res: Response;
   try {
     res = await fetch(`${API_BASE_URL}${path}`, {
       method,
       headers,
       body: body !== undefined ? JSON.stringify(body) : undefined,
-      signal,
+      signal: requestSignal,
     });
   } catch (err) {
+    if (signal?.aborted) throw err;
+    if (timeoutController.signal.aborted) {
+      throw new ApiError(0, 'Il server non risponde. Riprova tra qualche secondo.');
+    }
     if (err instanceof DOMException && err.name === 'AbortError') throw err;
     throw new ApiError(0, 'Impossibile raggiungere il server');
+  } finally {
+    window.clearTimeout(timeoutId);
   }
 
   if (res.status === 401 || res.status === 403) {
