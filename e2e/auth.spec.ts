@@ -40,7 +40,7 @@ test.describe('critical operator flows', () => {
     await page.getByLabel('Cliente').fill('Cliente bozza E2E');
     await page.getByLabel('Cellulare').fill('3929952453');
 
-    const articleDescription = page.getByPlaceholder('Descrizione prodotto').first();
+    const articleDescription = page.getByLabel('Descrizione merce').first();
     await articleDescription.fill('Divano test E2E');
 
     // L'autosave è volutamente debounced.
@@ -50,7 +50,7 @@ test.describe('critical operator flows', () => {
     await expect(page.getByText('Bozza recuperata automaticamente')).toBeVisible();
     await expect(page.getByLabel('Cliente')).toHaveValue('Cliente bozza E2E');
     await expect(page.getByLabel('Cellulare')).toHaveValue('3929952453');
-    await expect(page.getByPlaceholder('Descrizione prodotto').first()).toHaveValue('Divano test E2E');
+    await expect(page.getByLabel('Descrizione merce').first()).toHaveValue('Divano test E2E');
   });
 
   test('amministrazione esegue diagnostica read-only e backup demo', async ({ page }) => {
