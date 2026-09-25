@@ -27,12 +27,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/features/auth/AuthContext';
 import { useSellingBills } from '@/hooks/useQueries';
 import { useCreateSellingBill } from '@/hooks/useMutations';
-import { formatCurrency } from '@/lib/format';
+import { formatCurrency, formatDate } from '@/lib/format';
 import {
   composeCommissionNotes,
   type MeasureSource,
   type YesNo,
 } from './commissionMetadata';
+import { buildCustomerSuggestions, type CustomerSuggestion } from './customerSuggestions';
 import {
   clearNewSaleDraft,
   loadNewSaleDraft,
@@ -116,6 +117,17 @@ export function NewSellingBillPage() {
         .sort((a, b) => a.localeCompare(b)),
     [existingBills.data],
   );
+
+  const customerSuggestions = useMemo(
+    () => buildCustomerSuggestions(existingBills.data ?? [], client),
+    [existingBills.data, client],
+  );
+
+  const reuseCustomer = (suggestion: CustomerSuggestion) => {
+    setClient(suggestion.name);
+    if (suggestion.phone) setPhone(suggestion.phone);
+    if (suggestion.address) setAddress(suggestion.address);
+  };
 
   const normalizedItems = useMemo(
     () =>
@@ -368,7 +380,38 @@ export function NewSellingBillPage() {
                   onChange={(e) => setClient(e.target.value)}
                   placeholder="Nome e cognome / ragione sociale"
                   autoFocus
+                  autoComplete="off"
                 />
+                {customerSuggestions.length > 0 && (
+                  <div className="overflow-hidden rounded-xl border border-[#dfd5cc] bg-white shadow-[0_10px_30px_rgba(62,46,38,0.08)]">
+                    <p className="border-b border-[#eee7df] bg-[#faf7f3] px-3 py-2 text-[9px] font-extrabold uppercase tracking-[0.12em] text-[#81746c]">
+                      Clienti già presenti · clicca per riutilizzare i dati
+                    </p>
+                    {customerSuggestions.map((suggestion) => (
+                      <button
+                        key={suggestion.key}
+                        type="button"
+                        onClick={() => reuseCustomer(suggestion)}
+                        className="flex w-full items-start justify-between gap-3 border-b border-[#f0e9e2] px-3 py-2.5 text-left transition-colors last:border-b-0 hover:bg-[#fff8f5]"
+                      >
+                        <span className="min-w-0">
+                          <span className="block truncate text-xs font-extrabold text-[#352e2a]">
+                            {suggestion.name}
+                          </span>
+                          <span className="mt-0.5 block truncate text-[10px] text-muted-foreground">
+                            {[suggestion.phone, suggestion.address].filter(Boolean).join(' · ') || 'Nessun recapito salvato'}
+                          </span>
+                        </span>
+                        <span className="shrink-0 text-right text-[9px] font-bold text-[#8b7d74]">
+                          {suggestion.saleCount} {suggestion.saleCount === 1 ? 'vendita' : 'vendite'}
+                          <span className="mt-0.5 block font-medium">
+                            {suggestion.lastDate ? formatDate(suggestion.lastDate) : '—'}
+                          </span>
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="space-y-1.5">

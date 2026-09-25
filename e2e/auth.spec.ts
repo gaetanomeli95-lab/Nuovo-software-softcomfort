@@ -33,6 +33,30 @@ test.describe('critical operator flows', () => {
     await expect(page.getByRole('link', { name: /Stampa vendita/i })).toBeVisible();
   });
 
+  test('la nuova vendita può riusare un cliente già presente', async ({ page }) => {
+    await enterDemo(page);
+    await page.goto('/vendite/nuova');
+
+    await page.getByLabel('Cliente').fill('AMOR');
+    const existingCustomer = page.getByRole('button', { name: /AMOROSO MARIA/i });
+    await expect(existingCustomer).toBeVisible();
+    await existingCustomer.click();
+
+    await expect(page.getByLabel('Cliente')).toHaveValue('AMOROSO MARIA');
+    await expect(page.getByLabel('Cellulare')).toHaveValue('333 555 1920');
+    await expect(page.getByLabel('Indirizzo di consegna')).toHaveValue('Via Libertà 112, Palermo');
+  });
+
+  test('se il dispositivo va offline l’operatore viene avvisato', async ({ page, context }) => {
+    await enterDemo(page);
+    await context.setOffline(true);
+
+    await expect(page.getByText(/Il dispositivo risulta offline/i)).toBeVisible();
+
+    await context.setOffline(false);
+    await expect(page.getByText(/Il dispositivo risulta offline/i)).toBeHidden();
+  });
+
   test('la nuova vendita recupera una bozza dopo il reload', async ({ page }) => {
     await enterDemo(page);
     await page.goto('/vendite/nuova');

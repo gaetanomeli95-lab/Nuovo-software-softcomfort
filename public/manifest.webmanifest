@@ -1,0 +1,19 @@
+{
+  "name": "Gestionale Soft Comfort",
+  "short_name": "Soft Comfort",
+  "description": "Gestionale operativo Soft Comfort per vendite, consegne, magazzino e contabilità.",
+  "lang": "it",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f5f2ed",
+  "theme_color": "#111010",
+  "icons": [
+    {
+      "src": "/softcomfort-logo.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
