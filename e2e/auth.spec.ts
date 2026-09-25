@@ -33,6 +33,21 @@ test.describe('critical operator flows', () => {
     await expect(page.getByRole('link', { name: /Stampa vendita/i })).toBeVisible();
   });
 
+  test('anagrafica cliente apre storico e precompila una nuova vendita', async ({ page }) => {
+    await enterDemo(page);
+    await page.goto('/anagrafiche');
+
+    await page.getByRole('link', { name: 'AMOROSO MARIA' }).click();
+    await expect(page.getByRole('heading', { name: 'AMOROSO MARIA' })).toBeVisible();
+    await expect(page.getByText('Via Libertà 112, Palermo')).toBeVisible();
+
+    await page.getByRole('link', { name: 'Nuova vendita' }).click();
+    await expect(page).toHaveURL(/\/vendite\/nuova\?cliente=/);
+    await expect(page.getByLabel('Cliente')).toHaveValue('AMOROSO MARIA');
+    await expect(page.getByLabel('Cellulare')).toHaveValue('333 555 1920');
+    await expect(page.getByLabel('Indirizzo di consegna')).toHaveValue('Via Libertà 112, Palermo');
+  });
+
   test('la nuova vendita può riusare un cliente già presente', async ({ page }) => {
     await enterDemo(page);
     await page.goto('/vendite/nuova');
