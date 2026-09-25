@@ -25,7 +25,7 @@ vendita → ordine → arrivo → consegna → incasso → chiusura.
 - Esportazioni CSV per vendite e magazzino.
 - Esportazione planning consegne in CSV e calendario ICS.
 - Azioni rapide di contatto WhatsApp per clienti con recapito compatibile.
-- Area amministrazione e stato configurazione.
+- Area amministrazione e stato configurazione con diagnostica read-only dei moduli principali.
 - Modalità demo stateful per validare i flussi senza toccare i dati reali.
 
 ## Regole di correttezza già applicate
@@ -88,6 +88,10 @@ Il QR attuale va verificato contro la destinazione Google/recensioni corrente pr
 - VITE_DEMO_MODE=true: forza la modalità demo.
 - VITE_DEMO_MODE=false: consente produzione same-origin con API relative.
 - Se in produzione non viene impostato alcun override e manca un backend URL, resta attivo il fallback demo.
+
+## Diagnostica read-only
+
+L'area amministrativa può eseguire un controllo esplicito di sola lettura su vendite, acquisti, magazzino, assegni, acconti, provvigioni e ordini. Questo controllo serve a distinguere rapidamente un problema di connettività/sessione da un problema circoscritto a un singolo modulo senza modificare dati.
 
 ## Quality gate
 
