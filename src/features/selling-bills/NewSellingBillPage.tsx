@@ -38,7 +38,7 @@ import {
   loadNewSaleDraft,
   saveNewSaleDraft,
   type NewSaleDraft,
-  type SaleSaleDraftItem,
+  type SaleDraftItem,
 } from './saleDraft';
 
 const PAYMENT_METHODS = ['Contanti', 'Pos', 'Assegno', 'Bonifico', 'Finanziamento'];
@@ -79,29 +79,36 @@ export function NewSellingBillPage() {
   const existingBills = useSellingBills();
   const create = useCreateSellingBill();
 
-  const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
-  const [seller, setSeller] = useState(user?.username ?? '');
-  const [client, setClient] = useState('');
-  const [phone, setPhone] = useState('');
+  const [restoredDraft] = useState(() => loadNewSaleDraft());
+  const [draftRecovered, setDraftRecovered] = useState(Boolean(restoredDraft));
 
-  const [address, setAddress] = useState('');
-  const [city, setCity] = useState('');
-  const [floor, setFloor] = useState('');
-  const [staircase, setStaircase] = useState('');
-  const [elevator, setElevator] = useState<YesNo>('');
-  const [measureSource, setMeasureSource] = useState<MeasureSource>('');
-  const [hoist, setHoist] = useState<YesNo>('');
+  const [date, setDate] = useState(
+    restoredDraft?.date || new Date().toISOString().slice(0, 10),
+  );
+  const [seller, setSeller] = useState(restoredDraft?.seller || user?.username || '');
+  const [client, setClient] = useState(restoredDraft?.client || '');
+  const [phone, setPhone] = useState(restoredDraft?.phone || '');
 
-  const [attachments, setAttachments] = useState<YesNo>('');
-  const [attachmentPages, setAttachmentPages] = useState('');
-  const [scheduledDate, setScheduledDate] = useState('');
-  const [scheduledTime, setScheduledTime] = useState('');
-  const [notes, setNotes] = useState('');
+  const [address, setAddress] = useState(restoredDraft?.address || '');
+  const [city, setCity] = useState(restoredDraft?.city || '');
+  const [floor, setFloor] = useState(restoredDraft?.floor || '');
+  const [staircase, setStaircase] = useState(restoredDraft?.staircase || '');
+  const [elevator, setElevator] = useState<YesNo>(restoredDraft?.elevator || '');
+  const [measureSource, setMeasureSource] = useState<MeasureSource>(restoredDraft?.measureSource || '');
+  const [hoist, setHoist] = useState<YesNo>(restoredDraft?.hoist || '');
 
-  const [transport, setTransport] = useState('0');
-  const [settlement, setSettlement] = useState('0');
-  const [method, setMethod] = useState('Contanti');
-  const [items, setItems] = useState<SaleDraftItem[]>([newItem(0)]);
+  const [attachments, setAttachments] = useState<YesNo>(restoredDraft?.attachments || '');
+  const [attachmentPages, setAttachmentPages] = useState(restoredDraft?.attachmentPages || '');
+  const [scheduledDate, setScheduledDate] = useState(restoredDraft?.scheduledDate || '');
+  const [scheduledTime, setScheduledTime] = useState(restoredDraft?.scheduledTime || '');
+  const [notes, setNotes] = useState(restoredDraft?.notes || '');
+
+  const [transport, setTransport] = useState(restoredDraft?.transport || '0');
+  const [settlement, setSettlement] = useState(restoredDraft?.settlement || '0');
+  const [method, setMethod] = useState(restoredDraft?.method || 'Contanti');
+  const [items, setItems] = useState<SaleDraftItem[]>(
+    restoredDraft?.items?.length ? restoredDraft.items : [newItem(0)],
+  );
 
   const sellerOptions = useMemo(
     () =>
