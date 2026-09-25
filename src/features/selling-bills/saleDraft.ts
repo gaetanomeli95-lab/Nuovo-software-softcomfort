@@ -64,7 +64,7 @@ export function parseNewSaleDraft(raw: string | null): NewSaleDraft | null {
 
     const measureValue = (): MeasureSource => {
       const value = parsed.measureSource;
-      return value === 'seller' || value === 'client' ? value : '';
+      return value === 'seller' || value === 'buyer' ? value : '';
     };
 
     return {
