@@ -6,13 +6,14 @@ import path from 'node:path';
 
 /**
  * Il backend legacy espone le API alla radice (senza prefisso /api).
- * In dev proxiamo solo i path noti verso il server legacy, così il
+ * In dev proxiamo solo i path API noti verso il server legacy, così il
  * frontend usa sempre URL relativi (stessa origine in produzione).
+ * /login/signin è intenzionalmente specifico: /login è una route SPA.
  */
 const LEGACY_TARGET = process.env.VITE_LEGACY_BACKEND ?? 'http://localhost:8080';
 
 const LEGACY_API_PATHS = [
-  '/login',
+  '/login/signin',
   '/item',
   '/sellingBill',
   '/buyingBill',
