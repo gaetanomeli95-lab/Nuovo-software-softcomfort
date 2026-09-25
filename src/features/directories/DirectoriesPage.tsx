@@ -143,7 +143,7 @@ export function DirectoriesPage() {
                         <TableRow key={row.key}>
                           <TableCell>
                             <Link
-                              to={`/vendite?q=${encodeURIComponent(row.name)}`}
+                              to={`/anagrafiche/clienti/${encodeURIComponent(row.name)}`}
                               className="data-link"
                             >
                               {row.name}
