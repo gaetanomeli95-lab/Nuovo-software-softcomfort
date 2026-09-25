@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   ArrowLeft,
   CalendarClock,
@@ -9,6 +9,7 @@ import {
   ReceiptText,
   Ruler,
   Save,
+  ShieldCheck,
   Trash2,
   Truck,
   UserRound,
@@ -26,24 +27,24 @@ import { Textarea } from '@/components/ui/textarea';
 import { useAuth } from '@/features/auth/AuthContext';
 import { useSellingBills } from '@/hooks/useQueries';
 import { useCreateSellingBill } from '@/hooks/useMutations';
-import { formatCurrency } from '@/lib/format';
+import { formatCurrency, formatDate } from '@/lib/format';
 import {
   composeCommissionNotes,
   type MeasureSource,
   type YesNo,
 } from './commissionMetadata';
-
-type DraftItem = {
-  id: string;
-  code: string;
-  description: string;
-  quantity: string;
-  unitPrice: string;
-};
+import { buildCustomerSuggestions, type CustomerSuggestion } from './customerSuggestions';
+import {
+  clearNewSaleDraft,
+  loadNewSaleDraft,
+  saveNewSaleDraft,
+  type NewSaleDraft,
+  type SaleDraftItem,
+} from './saleDraft';
 
 const PAYMENT_METHODS = ['Contanti', 'Pos', 'Assegno', 'Bonifico', 'Finanziamento'];
 
-function newItem(index: number): DraftItem {
+function newItem(index: number): SaleDraftItem {
   return {
     id: `draft-${Date.now()}-${index}`,
     code: '',
@@ -79,29 +80,36 @@ export function NewSellingBillPage() {
   const existingBills = useSellingBills();
   const create = useCreateSellingBill();
 
-  const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
-  const [seller, setSeller] = useState(user?.username ?? '');
-  const [client, setClient] = useState('');
-  const [phone, setPhone] = useState('');
+  const [restoredDraft] = useState(() => loadNewSaleDraft());
+  const [draftRecovered, setDraftRecovered] = useState(Boolean(restoredDraft));
 
-  const [address, setAddress] = useState('');
-  const [city, setCity] = useState('');
-  const [floor, setFloor] = useState('');
-  const [staircase, setStaircase] = useState('');
-  const [elevator, setElevator] = useState<YesNo>('');
-  const [measureSource, setMeasureSource] = useState<MeasureSource>('');
-  const [hoist, setHoist] = useState<YesNo>('');
+  const [date, setDate] = useState(
+    restoredDraft?.date || new Date().toISOString().slice(0, 10),
+  );
+  const [seller, setSeller] = useState(restoredDraft?.seller || user?.username || '');
+  const [client, setClient] = useState(restoredDraft?.client || '');
+  const [phone, setPhone] = useState(restoredDraft?.phone || '');
 
-  const [attachments, setAttachments] = useState<YesNo>('');
-  const [attachmentPages, setAttachmentPages] = useState('');
-  const [scheduledDate, setScheduledDate] = useState('');
-  const [scheduledTime, setScheduledTime] = useState('');
-  const [notes, setNotes] = useState('');
+  const [address, setAddress] = useState(restoredDraft?.address || '');
+  const [city, setCity] = useState(restoredDraft?.city || '');
+  const [floor, setFloor] = useState(restoredDraft?.floor || '');
+  const [staircase, setStaircase] = useState(restoredDraft?.staircase || '');
+  const [elevator, setElevator] = useState<YesNo>(restoredDraft?.elevator || '');
+  const [measureSource, setMeasureSource] = useState<MeasureSource>(restoredDraft?.measureSource || '');
+  const [hoist, setHoist] = useState<YesNo>(restoredDraft?.hoist || '');
 
-  const [transport, setTransport] = useState('0');
-  const [settlement, setSettlement] = useState('0');
-  const [method, setMethod] = useState('Contanti');
-  const [items, setItems] = useState<DraftItem[]>([newItem(0)]);
+  const [attachments, setAttachments] = useState<YesNo>(restoredDraft?.attachments || '');
+  const [attachmentPages, setAttachmentPages] = useState(restoredDraft?.attachmentPages || '');
+  const [scheduledDate, setScheduledDate] = useState(restoredDraft?.scheduledDate || '');
+  const [scheduledTime, setScheduledTime] = useState(restoredDraft?.scheduledTime || '');
+  const [notes, setNotes] = useState(restoredDraft?.notes || '');
+
+  const [transport, setTransport] = useState(restoredDraft?.transport || '0');
+  const [settlement, setSettlement] = useState(restoredDraft?.settlement || '0');
+  const [method, setMethod] = useState(restoredDraft?.method || 'Contanti');
+  const [items, setItems] = useState<SaleDraftItem[]>(
+    restoredDraft?.items?.length ? restoredDraft.items : [newItem(0)],
+  );
 
   const sellerOptions = useMemo(
     () =>
@@ -109,6 +117,17 @@ export function NewSellingBillPage() {
         .sort((a, b) => a.localeCompare(b)),
     [existingBills.data],
   );
+
+  const customerSuggestions = useMemo(
+    () => buildCustomerSuggestions(existingBills.data ?? [], client),
+    [existingBills.data, client],
+  );
+
+  const reuseCustomer = (suggestion: CustomerSuggestion) => {
+    setClient(suggestion.name);
+    if (suggestion.phone) setPhone(suggestion.phone);
+    if (suggestion.address) setAddress(suggestion.address);
+  };
 
   const normalizedItems = useMemo(
     () =>
@@ -150,7 +169,83 @@ export function NewSellingBillPage() {
     normalizedItems.every((item) => item.unitPrice >= 0 && item.quantity >= 1) &&
     !create.isPending;
 
-  const updateItem = (id: string, patch: Partial<DraftItem>) => {
+  useEffect(() => {
+    const draft: NewSaleDraft = {
+      version: 1,
+      savedAt: new Date().toISOString(),
+      date,
+      seller,
+      client,
+      phone,
+      address,
+      city,
+      floor,
+      staircase,
+      elevator,
+      measureSource,
+      hoist,
+      attachments,
+      attachmentPages,
+      scheduledDate,
+      scheduledTime,
+      notes,
+      transport,
+      settlement,
+      method,
+      items,
+    };
+
+    const timer = window.setTimeout(() => saveNewSaleDraft(draft), 350);
+    return () => window.clearTimeout(timer);
+  }, [
+    date,
+    seller,
+    client,
+    phone,
+    address,
+    city,
+    floor,
+    staircase,
+    elevator,
+    measureSource,
+    hoist,
+    attachments,
+    attachmentPages,
+    scheduledDate,
+    scheduledTime,
+    notes,
+    transport,
+    settlement,
+    method,
+    items,
+  ]);
+
+  const discardDraft = () => {
+    clearNewSaleDraft();
+    setDraftRecovered(false);
+    setDate(new Date().toISOString().slice(0, 10));
+    setSeller(user?.username ?? '');
+    setClient('');
+    setPhone('');
+    setAddress('');
+    setCity('');
+    setFloor('');
+    setStaircase('');
+    setElevator('');
+    setMeasureSource('');
+    setHoist('');
+    setAttachments('');
+    setAttachmentPages('');
+    setScheduledDate('');
+    setScheduledTime('');
+    setNotes('');
+    setTransport('0');
+    setSettlement('0');
+    setMethod('Contanti');
+    setItems([newItem(Date.now())]);
+  };
+
+  const updateItem = (id: string, patch: Partial<SaleDraftItem>) => {
     setItems((current) => current.map((item) => (item.id === id ? { ...item, ...patch } : item)));
   };
 
@@ -198,6 +293,9 @@ export function NewSellingBillPage() {
       notes: operationalNotes,
     });
 
+    clearNewSaleDraft();
+    setDraftRecovered(false);
+
     if (created?.uuid) navigate(`/vendite/${created.uuid}`);
     else navigate('/vendite');
   };
@@ -214,6 +312,35 @@ export function NewSellingBillPage() {
           className="flex-1"
         />
       </div>
+
+      {draftRecovered ? (
+        <div className="flex flex-col gap-3 rounded-2xl border border-[#d8cfbf] bg-[#fffaf0] px-4 py-3.5 text-sm sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-start gap-3">
+            <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl border border-[#e7d6ad] bg-white text-[#8a6428]">
+              <ShieldCheck className="h-4 w-4" />
+            </div>
+            <div>
+              <p className="font-extrabold text-[#3a312b]">Bozza recuperata automaticamente</p>
+              <p className="mt-0.5 text-xs leading-relaxed text-[#74685f]">
+                I dati non salvati della vendita precedente sono stati ripristinati da questo dispositivo.
+              </p>
+            </div>
+          </div>
+          <div className="flex shrink-0 gap-2">
+            <Button variant="ghost" size="sm" onClick={() => setDraftRecovered(false)}>
+              Continua
+            </Button>
+            <Button variant="outline" size="sm" onClick={discardDraft}>
+              Scarta bozza
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <div className="flex items-center gap-2 px-1 text-[11px] font-semibold text-muted-foreground">
+          <ShieldCheck className="h-3.5 w-3.5 text-[#8a6428]" />
+          La bozza viene salvata automaticamente su questo dispositivo.
+        </div>
+      )}
 
       <div className="grid gap-5 xl:grid-cols-[1fr_350px]">
         <div className="space-y-5">
@@ -253,7 +380,38 @@ export function NewSellingBillPage() {
                   onChange={(e) => setClient(e.target.value)}
                   placeholder="Nome e cognome / ragione sociale"
                   autoFocus
+                  autoComplete="off"
                 />
+                {customerSuggestions.length > 0 && (
+                  <div className="overflow-hidden rounded-xl border border-[#dfd5cc] bg-white shadow-[0_10px_30px_rgba(62,46,38,0.08)]">
+                    <p className="border-b border-[#eee7df] bg-[#faf7f3] px-3 py-2 text-[9px] font-extrabold uppercase tracking-[0.12em] text-[#81746c]">
+                      Clienti già presenti · clicca per riutilizzare i dati
+                    </p>
+                    {customerSuggestions.map((suggestion) => (
+                      <button
+                        key={suggestion.key}
+                        type="button"
+                        onClick={() => reuseCustomer(suggestion)}
+                        className="flex w-full items-start justify-between gap-3 border-b border-[#f0e9e2] px-3 py-2.5 text-left transition-colors last:border-b-0 hover:bg-[#fff8f5]"
+                      >
+                        <span className="min-w-0">
+                          <span className="block truncate text-xs font-extrabold text-[#352e2a]">
+                            {suggestion.name}
+                          </span>
+                          <span className="mt-0.5 block truncate text-[10px] text-muted-foreground">
+                            {[suggestion.phone, suggestion.address].filter(Boolean).join(' · ') || 'Nessun recapito salvato'}
+                          </span>
+                        </span>
+                        <span className="shrink-0 text-right text-[9px] font-bold text-[#8b7d74]">
+                          {suggestion.saleCount} {suggestion.saleCount === 1 ? 'vendita' : 'vendite'}
+                          <span className="mt-0.5 block font-medium">
+                            {suggestion.lastDate ? formatDate(suggestion.lastDate) : '—'}
+                          </span>
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="space-y-1.5">

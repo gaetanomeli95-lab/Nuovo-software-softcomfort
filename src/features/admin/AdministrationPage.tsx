@@ -6,6 +6,7 @@ import {
   CheckCircle2,
   CircleAlert,
   Database,
+  Download,
   FileCheck2,
   FileDown,
   LockKeyhole,
@@ -16,6 +17,7 @@ import {
   XCircle,
   type LucideIcon,
 } from 'lucide-react';
+import { toast } from 'sonner';
 import { PageHeader } from '@/components/common/PageHeader';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -31,6 +33,8 @@ import {
   summarizeDiagnostics,
   type DiagnosticResult,
 } from '@/services/readinessDiagnostics';
+import { buildOperationalBackup } from '@/services/operationalBackup';
+import { downloadTextFile } from '@/lib/export';
 
 function StatusRow({
   icon: Icon,
@@ -90,6 +94,7 @@ export function AdministrationPage() {
   const { user, isDemo } = useAuth();
   const [diagnostics, setDiagnostics] = useState<DiagnosticResult[]>([]);
   const [checking, setChecking] = useState(false);
+  const [backupBusy, setBackupBusy] = useState(false);
 
   const connectionLabel =
     API_CONNECTION_MODE === 'demo'
@@ -106,6 +111,24 @@ export function AdministrationPage() {
       setDiagnostics(await runReadinessDiagnostics());
     } finally {
       setChecking(false);
+    }
+  };
+
+  const exportBackup = async () => {
+    setBackupBusy(true);
+    try {
+      const backup = await buildOperationalBackup();
+      const date = new Date().toISOString().slice(0, 10);
+      downloadTextFile(
+        'softcomfort-backup-' + date + '.json',
+        JSON.stringify(backup, null, 2),
+        'application/json;charset=utf-8',
+      );
+      toast.success('Backup operativo esportato');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Impossibile esportare il backup');
+    } finally {
+      setBackupBusy(false);
     }
   };
 
@@ -172,6 +195,29 @@ export function AdministrationPage() {
           </CardContent>
         </Card>
       </div>
+
+      <Card className="overflow-hidden border-[#d9cfc6]">
+        <CardHeader className="flex-row items-start justify-between gap-4 space-y-0 border-b border-[#eee6de] bg-[#fffefd]">
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              <Download className="h-4 w-4 text-[#9a6b24]" />
+              Backup operativo
+            </CardTitle>
+            <CardDescription>
+              Esporta una copia JSON di tutti i dati leggibili dal gestionale. Non esegue scritture sul backend.
+            </CardDescription>
+          </div>
+          <Button variant="outline" onClick={exportBackup} disabled={backupBusy}>
+            <Download className="h-4 w-4" />
+            {backupBusy ? 'Esportazione…' : 'Esporta backup'}
+          </Button>
+        </CardHeader>
+        <CardContent className="py-4 text-xs leading-relaxed text-muted-foreground">
+          {AUTOMATIC_DEMO_MODE || isDemo
+            ? 'In modalità demo verranno esportati soltanto i dati dimostrativi.'
+            : 'Il file contiene vendite, acquisti, magazzino, assegni, acconti, provvigioni e ordini disponibili alla sessione corrente.'}
+        </CardContent>
+      </Card>
 
       <Card className="overflow-hidden border-[#d9cfc6]">
         <CardHeader className="flex-row items-start justify-between gap-4 space-y-0 border-b border-[#eee6de] bg-[#fffefd]">
