@@ -23,8 +23,14 @@ L'obiettivo del progetto è mantenere i flussi familiari del gestionale storico,
 - Documento di vendita, bolla e proposta di commissione A4.
 - Esportazioni operative: vendite e magazzino in CSV, planning consegne in CSV e calendario ICS.
 - Contatto WhatsApp rapido da vendita e planning quando il recapito è compatibile.
-- Amministrazione / readiness produzione.
+- Amministrazione / readiness produzione con diagnostica dati di sola lettura.
 - Modalità demo stateful per verificare i flussi senza toccare dati reali.
+
+## Prestazioni e affidabilità
+
+- Le principali aree operative sono caricate on-demand per ridurre il bundle iniziale e rendere più rapido l'avvio.
+- La diagnostica amministrativa verifica in sola lettura i moduli principali senza eseguire mutazioni.
+- Un errore in una route caricata dinamicamente resta intercettato dall'error boundary applicativo.
 
 ## Stack
 
