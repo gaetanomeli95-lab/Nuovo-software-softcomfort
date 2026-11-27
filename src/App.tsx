@@ -24,6 +24,7 @@ const BuyingBillsPage = lazy(() => import('@/features/buying-bills/BuyingBillsPa
 const BuyingBillDetailPage = lazy(() => import('@/features/buying-bills/BuyingBillDetailPage').then((module) => ({ default: module.BuyingBillDetailPage })));
 const AdministrationPage = lazy(() => import('@/features/admin/AdministrationPage').then((module) => ({ default: module.AdministrationPage })));
 const DirectoriesPage = lazy(() => import('@/features/directories/DirectoriesPage').then((module) => ({ default: module.DirectoriesPage })));
+const CustomerDetailPage = lazy(() => import('@/features/directories/CustomerDetailPage').then((module) => ({ default: module.CustomerDetailPage })));
 const OperationsPage = lazy(() => import('@/features/operations/OperationsPage').then((module) => ({ default: module.OperationsPage })));
 const GlobalSearchPage = lazy(() => import('@/features/search/GlobalSearchPage').then((module) => ({ default: module.GlobalSearchPage })));
 
@@ -89,6 +90,7 @@ export default function App() {
                   <Route path="consegne" element={<DeliveryPlanningPage />} />
                   <Route path="ordini" element={<PendingPage />} />
                   <Route path="anagrafiche" element={<DirectoriesPage />} />
+                  <Route path="anagrafiche/clienti/:customerName" element={<CustomerDetailPage />} />
                   <Route path="acquisti" element={<BuyingBillsPage />} />
                   <Route path="acquisti/:uuid" element={<BuyingBillDetailPage />} />
                   <Route path="magazzino" element={<InventoryPage />} />

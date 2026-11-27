@@ -13,6 +13,8 @@ export function useOnlineStatus() {
 
     window.addEventListener('online', handleOnline);
     window.addEventListener('offline', handleOffline);
+    // Lo stato può cambiare tra il primo render e la registrazione dei listener.
+    setOnline(browserOnlineState());
 
     return () => {
       window.removeEventListener('online', handleOnline);

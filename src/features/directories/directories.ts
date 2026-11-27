@@ -24,7 +24,7 @@ export interface SupplierDirectoryRow {
   pendingOrders: number;
 }
 
-function normalizedKey(value: string | null | undefined): string {
+export function customerDirectoryKey(value: string | null | undefined): string {
   return (value ?? '').trim().replace(/\s+/g, ' ').toLocaleUpperCase('it');
 }
 
@@ -36,7 +36,7 @@ export function buildCustomerDirectory(bills: SellingBill[]): CustomerDirectoryR
   for (const bill of sorted) {
     if (bill.status === 'Annullata') continue;
     const name = bill.client?.trim();
-    const key = normalizedKey(name);
+    const key = customerDirectoryKey(name);
     if (!key) continue;
 
     const current = map.get(key);
@@ -72,7 +72,7 @@ export function buildSupplierDirectory(
 
   const ensure = (rawName: string | null | undefined) => {
     const name = rawName?.trim() ?? '';
-    const key = normalizedKey(name);
+    const key = customerDirectoryKey(name);
     if (!key) return null;
 
     const existing = map.get(key);

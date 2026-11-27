@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { BuyingBill, InventoryItem, PendingOrder, SellingBill } from '@/types/domain';
-import { buildCustomerDirectory, buildSupplierDirectory } from './directories';
+import { buildCustomerDirectory, buildSupplierDirectory, customerDirectoryKey } from './directories';
 
 const baseSale: SellingBill = {
   uuid: 's1',
@@ -23,6 +23,11 @@ const baseSale: SellingBill = {
 };
 
 describe('customer directory', () => {
+  it('espone una chiave cliente stabile per nomi con spazi e maiuscole', () => {
+    expect(customerDirectoryKey('  Mario   Rossi ')).toBe('MARIO ROSSI');
+    expect(customerDirectoryKey('mario rossi')).toBe('MARIO ROSSI');
+  });
+
   it('raggruppa clienti ignorando maiuscole e spazi', () => {
     const rows = buildCustomerDirectory([
       baseSale,
