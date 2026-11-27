@@ -54,7 +54,8 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider delayDuration={300}>
         <AuthProvider>
-          <BrowserRouter>
+          {/* Come in v6: niente startTransition, il fallback delle route lazy appare subito. */}
+          <BrowserRouter useTransitions={false}>
             <Suspense fallback={<RouteFallback />}>
               <Routes>
                 <Route
