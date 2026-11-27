@@ -50,8 +50,8 @@ il PC principale/admin, l'unico con accesso alla **contabilità e alle cose più
 
 1. **Raggiungere il backend da tutte le sedi.** Il server deve essere accessibile in modo sicuro anche fuori dalla
    rete del negozio: VPN tra le sedi, oppure backend esposto in HTTPS. Decisione da prendere con chi gestisce il server.
-2. **Decidere cosa è "contabilità / delicato"** (domanda aperta sotto) e rendere quelle aree solo-admin: menu, route
-   (`RequireAdmin`) e azioni.
+2. **Rendere solo-admin le aree delicate** già decise (vedi "Decisione presa" sotto): menu, route (`RequireAdmin`),
+   azioni e ogni punto dove quei dati compaiono indirettamente.
 3. **Verificare la sicurezza lato backend.** Accedere con un utente non admin e controllare che le API delle aree
    delicate rispondano 401/403. Se il backend legacy non lo fa, il blocco solo-interfaccia **non basta**.
 4. **"Solo il PC principale".** Un'app web non può riconoscere in modo sicuro un PC specifico. La soluzione abituale:
@@ -60,11 +60,24 @@ il PC principale/admin, l'unico con accesso alla **contabilità e alle cose più
 5. **Collaudo in contemporanea** con 2-3 PC sugli stessi dati, su un database di prova
    (vedi `docs/PRODUCTION_READINESS.md`, sezione "Collaudo delle mutazioni").
 
+### Decisione presa (27/11/2026)
+
+Il titolare ha stabilito che sono **riservate solo all'admin**:
+
+- **Fatture di acquisto**
+- **Assegni**
+- **Provvigioni**
+- **Acconti**
+- **Fatturato** (importi e grafici economici, anche se compaiono in Dashboard, Home, "Da fare" o ricerca)
+- **Amministrazione** (già riservata)
+
+I PC operativi **non devono vederle nemmeno in sola lettura**. Va controllato ogni punto dove questi dati compaiono
+anche indirettamente: menu, route, dashboard, home, inbox "Da fare", ricerca globale, scheda cliente, esportazioni.
+
 ### Domande aperte per il titolare
 
-- Quali sezioni sono "contabilità / delicate"? Candidate: Dashboard/fatturato, Fatture di acquisto, Assegni, Acconti,
-  Provvigioni, Amministrazione. Gli altri PC devono poter **registrare un acconto** in negozio pur senza vedere la
-  contabilità?
+- Gli operatori in negozio devono comunque poter **registrare un acconto** al momento della vendita (senza vedere
+  l'elenco acconti), oppure lo fa solo l'admin?
 - Quante sedi e quanti PC per sede? Gli utenti degli altri PC hanno ognuno il proprio account?
 - Dove sta il server del vecchio gestionale (sede principale? PC dedicato?) e chi lo gestisce?
 - Quali account esistono già nel backend legacy e con quali ruoli?
@@ -77,5 +90,5 @@ il PC principale/admin, l'unico con accesso alla **contabilità e alle cose più
 
 ## Prossimo passo consigliato
 
-Rispondere alle domande aperte qui sopra. Poi, in un branch dedicato: rendere solo-admin le aree delicate scelte
-(punto 2) e preparare la verifica sul backend (punto 3).
+In un branch dedicato: rendere solo-admin le aree delicate decise (punto 2), poi preparare la verifica sul backend
+(punto 3). In parallelo, raccogliere le risposte alle domande aperte.
