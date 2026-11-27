@@ -64,6 +64,7 @@ test.describe('critical operator flows', () => {
 
   test('se il dispositivo va offline l’operatore viene avvisato', async ({ page, context }) => {
     await enterDemo(page);
+    await expect(page.getByRole('heading', { name: /Tutto quello che serve/i })).toBeVisible();
     await context.setOffline(true);
 
     await expect(page.getByText(/Il dispositivo risulta offline/i)).toBeVisible();
