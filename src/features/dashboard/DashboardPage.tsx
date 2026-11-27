@@ -294,7 +294,7 @@ export function DashboardPage() {
                       }
                     />
                     <Tooltip
-                      formatter={(value: number) => [formatCurrency(value), 'Fatturato']}
+                      formatter={(value) => [formatCurrency(Number(value ?? 0)), 'Fatturato']}
                       labelFormatter={(l) => `Mese: ${l}`}
                       cursor={{ fill: '#fff4f3' }}
                       contentStyle={{

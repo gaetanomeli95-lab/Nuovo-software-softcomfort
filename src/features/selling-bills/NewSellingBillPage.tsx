@@ -132,8 +132,11 @@ export function NewSellingBillPage() {
     if (suggestion.address) setAddress(suggestion.address);
   };
 
-  useEffect(() => {
-    if (restoredDraft || !presetCustomerName || !existingBills.data?.length) return;
+  // Precompila recapiti dall'ultima vendita del cliente una sola volta, appena i dati sono disponibili:
+  // se l'operatore poi svuota un campo, non viene riempito di nuovo.
+  const [customerPrefillDone, setCustomerPrefillDone] = useState(false);
+  if (!customerPrefillDone && !restoredDraft && presetCustomerName && existingBills.data?.length) {
+    setCustomerPrefillDone(true);
 
     const key = customerDirectoryKey(presetCustomerName);
     const latest = [...existingBills.data]
@@ -144,17 +147,11 @@ export function NewSellingBillPage() {
       )
       .sort((a, b) => (b.date ?? '').localeCompare(a.date ?? ''))[0];
 
-    if (!latest) return;
-
-    if (!phone.trim() && latest.phone) setPhone(latest.phone.trim());
-    if (!address.trim() && latest.address) setAddress(latest.address.trim());
-  }, [
-    address,
-    existingBills.data,
-    phone,
-    presetCustomerName,
-    restoredDraft,
-  ]);
+    if (latest) {
+      if (!phone.trim() && latest.phone) setPhone(latest.phone.trim());
+      if (!address.trim() && latest.address) setAddress(latest.address.trim());
+    }
+  }
 
   const normalizedItems = useMemo(
     () =>
