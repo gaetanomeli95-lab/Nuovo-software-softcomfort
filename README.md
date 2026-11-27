@@ -4,6 +4,8 @@ Frontend operativo moderno per Soft Comfort Arredamenti, costruito in React + Ty
 
 L'obiettivo del progetto è mantenere i flussi familiari del gestionale storico, rendendoli più chiari, veloci e sicuri senza introdurre scritture non verificate sul backend reale.
 
+> **Stato del lavoro e da dove ripartire:** [docs/STATO_PROGETTO.md](docs/STATO_PROGETTO.md).
+
 ## Moduli disponibili
 
 - Home operativa e navigazione desktop/mobile.
