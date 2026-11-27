@@ -46,6 +46,19 @@ test.describe('critical operator flows', () => {
     await expect(page.getByLabel('Cliente')).toHaveValue('AMOROSO MARIA');
     await expect(page.getByLabel('Cellulare')).toHaveValue('333 555 1920');
     await expect(page.getByLabel('Indirizzo di consegna')).toHaveValue('Via Libertà 112, Palermo');
+
+    // Il precompilamento avviene una sola volta: un campo svuotato dall'operatore resta vuoto.
+    await page.getByLabel('Cellulare').fill('');
+    await page.getByLabel('Note').fill('verifica');
+    await expect(page.getByLabel('Cellulare')).toHaveValue('');
+  });
+
+  test('la dashboard mostra il grafico del fatturato', async ({ page }) => {
+    await enterDemo(page);
+    await page.goto('/dashboard');
+
+    await expect(page.getByRole('heading', { name: 'Dashboard', level: 1 })).toBeVisible();
+    await expect(page.locator('.recharts-surface').first()).toBeVisible();
   });
 
   test('la nuova vendita può riusare un cliente già presente', async ({ page }) => {
