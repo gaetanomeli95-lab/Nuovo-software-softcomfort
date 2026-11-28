@@ -29,120 +29,117 @@ export interface NavSection {
   items: NavItem[];
 }
 
+/**
+ * Menu del gestionale: tre gruppi.
+ * Le aree contabili (decisione del titolare del 27/11/2026) sono riservate all'admin:
+ * i PC operativi non le vedono nel menu e le route le rimandano alla home.
+ * Il blocco reale va comunque verificato anche sul backend (vedi docs/STATO_PROGETTO.md).
+ */
 export const NAV_SECTIONS: NavSection[] = [
   {
-    title: 'Panoramica',
-    description: 'Controllo generale dell’attività.',
-    items: [
-      {
-        to: '/dashboard',
-        label: 'Dashboard',
-        description: 'Numeri, vendite, scadenze e andamento dell’attività in un’unica vista.',
-        icon: LayoutDashboard,
-      },
-    ],
-  },
-  {
-    title: 'Operatività',
-    description: 'Le attività che richiedono attenzione oggi.',
+    title: 'Negozio',
+    description: 'Il lavoro di tutti i giorni: cose da fare, vendite e clienti.',
     items: [
       {
         to: '/attivita',
         label: 'Da fare',
-        description: 'Urgenze, consegne, incassi e attività aperte in ordine di priorità.',
+        description: 'Urgenze, consegne di oggi e vendite da seguire, in ordine di priorità.',
         icon: ClipboardCheck,
       },
-    ],
-  },
-  {
-    title: 'Vendite',
-    description: 'Bolle, vendite e ordini da seguire.',
-    items: [
       {
         to: '/vendite',
         label: 'Vendite',
-        description: 'Consulta, cerca e gestisci tutte le vendite.',
+        description: 'Consulta, cerca e crea le vendite.',
         icon: ReceiptText,
       },
       {
-        to: '/ordini',
-        label: 'Ordini in sospeso',
-        description: 'Controlla ordini, arrivi e consegne ancora aperte.',
-        icon: Clock,
-      },
-      {
-        to: '/consegne',
-        label: 'Planning consegne',
-        description: 'Programma consegne, orari e condizioni logistiche dei clienti.',
-        icon: CalendarDays,
-      },
-    ],
-  },
-  {
-    title: 'Anagrafiche',
-    description: 'Clienti e fornitori in un’unica vista.',
-    items: [
-      {
         to: '/anagrafiche',
         label: 'Clienti e fornitori',
-        description: 'Consulta lo storico clienti e i fornitori ricavati dai dati operativi.',
+        description: 'Schede clienti con storico vendite e fornitori.',
         icon: Users,
       },
     ],
   },
   {
-    title: 'Acquisti e magazzino',
-    description: 'Fornitori, merce e disponibilità.',
+    title: 'Consegne e magazzino',
+    description: 'Merce da ordinare, consegne e giacenze.',
     items: [
       {
-        to: '/acquisti',
-        label: 'Fatture acquisto',
-        description: 'Consulta i documenti di acquisto dai fornitori.',
-        icon: ShoppingCart,
+        to: '/consegne',
+        label: 'Planning consegne',
+        description: 'Programma consegne, orari e note per i clienti.',
+        icon: CalendarDays,
+      },
+      {
+        to: '/ordini',
+        label: 'Ordini in sospeso',
+        description: 'Articoli da ordinare, arrivati e consegnati.',
+        icon: Clock,
       },
       {
         to: '/magazzino',
         label: 'Giacenze',
-        description: 'Controlla articoli, disponibilità e ubicazioni.',
+        description: 'Articoli in magazzino, disponibilità e ubicazioni.',
         icon: Package,
       },
     ],
   },
   {
-    title: 'Contabilità',
-    description: 'Incassi, scadenze e provvigioni.',
+    title: 'Amministratore',
+    description: 'Contabilità e numeri dell’attività. Visibile solo sul PC amministratore.',
     items: [
+      {
+        to: '/dashboard',
+        label: 'Dashboard',
+        description: 'Fatturato, vendite e andamento dell’attività.',
+        icon: LayoutDashboard,
+        adminOnly: true,
+      },
+      {
+        to: '/acquisti',
+        label: 'Fatture acquisto',
+        description: 'Documenti di acquisto dai fornitori.',
+        icon: ShoppingCart,
+        adminOnly: true,
+      },
       {
         to: '/acconti',
         label: 'Acconti',
-        description: 'Gestisci gli acconti incassati e quelli da incassare.',
+        description: 'Acconti incassati e da incassare.',
         icon: PiggyBank,
+        adminOnly: true,
       },
       {
         to: '/assegni',
         label: 'Assegni',
-        description: 'Controlla importi, riferimenti e scadenze.',
+        description: 'Importi, riferimenti e scadenze.',
         icon: Landmark,
+        adminOnly: true,
       },
       {
         to: '/provvigioni',
         label: 'Provvigioni',
-        description: 'Gestisci le provvigioni dei venditori.',
+        description: 'Provvigioni dei venditori.',
         icon: HandCoins,
+        adminOnly: true,
       },
-    ],
-  },
-  {
-    title: 'Sistema',
-    description: 'Funzioni riservate e configurazione.',
-    items: [
       {
         to: '/amministrazione',
-        label: 'Amministrazione',
-        description: 'Impostazioni e funzioni riservate agli amministratori.',
+        label: 'Impostazioni',
+        description: 'Controlli tecnici e configurazione del gestionale.',
         icon: Settings,
         adminOnly: true,
       },
     ],
   },
 ];
+
+/** Gruppi e voci visibili per l'utente: le voci admin spariscono per gli operatori. */
+export function visibleNavSections(isAdmin: boolean): NavSection[] {
+  return NAV_SECTIONS
+    .map((section) => ({
+      ...section,
+      items: section.items.filter((item) => !item.adminOnly || isAdmin),
+    }))
+    .filter((section) => section.items.length > 0);
+}

@@ -23,10 +23,11 @@ export function useSellingBill(uuid: string | undefined) {
   });
 }
 
-export function useBuyingBills() {
+export function useBuyingBills(options: { enabled?: boolean } = {}) {
   return useQuery({
     queryKey: queryKeys.buyingBills,
     queryFn: ({ signal }) => buyingBillsApi.getAll(signal),
+    enabled: options.enabled ?? true,
   });
 }
 
@@ -37,17 +38,19 @@ export function useInventoryAvailable() {
   });
 }
 
-export function useChecks() {
+export function useChecks(options: { enabled?: boolean } = {}) {
   return useQuery({
     queryKey: queryKeys.checks,
     queryFn: ({ signal }) => checksApi.getAll(signal),
+    enabled: options.enabled ?? true,
   });
 }
 
-export function useDepositsToCollect() {
+export function useDepositsToCollect(options: { enabled?: boolean } = {}) {
   return useQuery({
     queryKey: queryKeys.depositsToCollect,
     queryFn: ({ signal }) => depositsApi.getToCollect(signal),
+    enabled: options.enabled ?? true,
   });
 }
 
@@ -58,10 +61,11 @@ export function useDepositsCollected() {
   });
 }
 
-export function useProvisionsToPay() {
+export function useProvisionsToPay(options: { enabled?: boolean } = {}) {
   return useQuery({
     queryKey: queryKeys.provisionsToPay,
     queryFn: ({ signal }) => provisionsApi.getToPay(signal),
+    enabled: options.enabled ?? true,
   });
 }
 

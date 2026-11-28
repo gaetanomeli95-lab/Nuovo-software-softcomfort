@@ -1,6 +1,6 @@
 # Stato del progetto — da dove ripartire
 
-Ultimo aggiornamento: **27 novembre 2026**. Aggiorna questo file alla fine di ogni sessione di lavoro.
+Ultimo aggiornamento: **28 novembre 2026**. Aggiorna questo file alla fine di ogni sessione di lavoro.
 
 ## In due righe
 
@@ -18,6 +18,26 @@ Il prossimo lavoro importante è adattarlo all'uso **multi-sede con un solo PC a
 
 Stato verificato a fine giornata: `npm audit --omit=dev` 0 vulnerabilità; build, lint (3 warning preesistenti
 `react-refresh/only-export-components`), 56 unit test, 10 e2e verdi.
+
+## Lavoro del 28/11/2026 — menu semplificato (branch `feat/menu-semplificato`, PR in bozza)
+
+Il titolare ha trovato il gestionale con troppe voci. Proposta, **da approvare prima del merge**:
+
+- Menu da 7 gruppi a **3**: *Negozio* (Da fare, Vendite, Clienti e fornitori), *Consegne e magazzino* (Planning
+  consegne, Ordini in sospeso, Giacenze), *Amministratore* (Dashboard, Fatture acquisto, Acconti, Assegni,
+  Provvigioni, Impostazioni). "Amministrazione" è stata rinominata **Impostazioni**.
+- Home compatta: niente slogan, saluto + data, riquadro **Oggi** con le prime 5 attività di "Da fare", poi i 3 gruppi.
+  La grande card "Dashboard" in home è stata tolta (la Dashboard ora sta nel gruppo Amministratore).
+- Primo pezzo del requisito solo-admin (punto 2 sotto), **solo lato interfaccia**: voci del gruppo Amministratore
+  nascoste ai non admin, route protette con `RequireAdmin`, "Da fare" e home senza acconti/assegni/provvigioni,
+  ricerca globale senza acquisti e assegni. Per i non admin quei dati non vengono nemmeno richiesti al server.
+- Demo: pulsante **"Prova come PC operativo"** (home e menu account) per vedere il gestionale come lo vedrà il
+  negozio.
+- Nessuna voce è stata eliminata: si possono togliere/riunire altre voci quando il titolare dirà quali non usa.
+
+Restano da rendere solo-admin (prossimo blocco): **valori acquisti dei fornitori** in Clienti e fornitori,
+**situazione pagamenti/acconti** nella scheda cliente e nel dettaglio vendita, **esportazioni**. Poi la verifica sul
+backend (punto 3).
 
 ## Da fare su GitHub (pulizia, non urgente)
 
@@ -90,5 +110,7 @@ anche indirettamente: menu, route, dashboard, home, inbox "Da fare", ricerca glo
 
 ## Prossimo passo consigliato
 
-In un branch dedicato: rendere solo-admin le aree delicate decise (punto 2), poi preparare la verifica sul backend
-(punto 3). In parallelo, raccogliere le risposte alle domande aperte.
+1. Far provare al titolare l'anteprima di `feat/menu-semplificato` (anche come PC operativo) e chiedere quali voci
+   togliere o unire ancora (Ordini in sospeso, Giacenze, Planning consegne). Se ok, merge.
+2. Completare il punto 2 sulle schermate rimaste (fornitori, scheda cliente, dettaglio vendita, esportazioni).
+3. Preparare la verifica sul backend (punto 3). In parallelo, raccogliere le risposte alle domande aperte.

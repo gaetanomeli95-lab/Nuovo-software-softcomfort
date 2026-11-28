@@ -135,7 +135,7 @@ export function AdministrationPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Amministrazione"
+        title="Impostazioni"
         description="Stato del gestionale, configurazione operativa e controlli prima dell'uso definitivo."
       />
 

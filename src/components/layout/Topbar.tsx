@@ -1,10 +1,10 @@
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Home, LogOut, Menu, Search, User } from 'lucide-react';
+import { Home, LogOut, Menu, Search, ShieldCheck, Store, User } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { SoftComfortBrand } from '@/components/common/SoftComfortBrand';
-import { NAV_SECTIONS } from '@/app/nav';
+import { visibleNavSections } from '@/app/nav';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,7 +21,7 @@ interface TopbarProps {
 }
 
 export function Topbar({ onSearch }: TopbarProps) {
-  const { user, isDemo, logout } = useAuth();
+  const { user, isDemo, logout, setDemoRole } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [q, setQ] = useState('');
@@ -56,9 +56,8 @@ export function Topbar({ onSearch }: TopbarProps) {
         <DropdownMenuContent align="start" className="w-72">
           <DropdownMenuLabel>Gestionale Soft Comfort</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          {NAV_SECTIONS.map((section, sectionIndex) => {
-            const items = section.items.filter((item) => !item.adminOnly || user?.isAdmin);
-            if (items.length === 0) return null;
+          {visibleNavSections(Boolean(user?.isAdmin)).map((section, sectionIndex) => {
+            const { items } = section;
             return (
               <div key={section.title}>
                 {sectionIndex > 0 && <DropdownMenuSeparator />}
@@ -138,7 +137,9 @@ export function Topbar({ onSearch }: TopbarProps) {
         <div className="hidden text-right xl:block">
           <p className="text-xs font-semibold text-foreground">{user?.username}</p>
           <p className="text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
-            {isDemo ? 'Dati dimostrativi' : user?.isAdmin ? 'Amministratore' : 'Utente'}
+            {isDemo
+              ? `Demo · ${user?.isAdmin ? 'PC amministratore' : 'PC operativo'}`
+              : user?.isAdmin ? 'Amministratore' : 'Utente'}
           </p>
         </div>
 
@@ -163,6 +164,26 @@ export function Topbar({ onSearch }: TopbarProps) {
               ) : null}
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
+            {isDemo && (
+              <>
+                <DropdownMenuLabel className="text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                  Prova la demo come
+                </DropdownMenuLabel>
+                <DropdownMenuItem
+                  disabled={user?.isAdmin}
+                  onClick={() => setDemoRole('admin')}
+                >
+                  <ShieldCheck /> PC amministratore
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  disabled={!user?.isAdmin}
+                  onClick={() => setDemoRole('operatore')}
+                >
+                  <Store /> PC operativo (negozio)
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+              </>
+            )}
             <DropdownMenuItem
               onClick={() => {
                 logout();

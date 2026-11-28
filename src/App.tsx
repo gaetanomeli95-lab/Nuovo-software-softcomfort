@@ -82,7 +82,7 @@ export default function App() {
                   }
                 >
                   <Route index element={<HomePage />} />
-                  <Route path="dashboard" element={<DashboardPage />} />
+                  <Route path="dashboard" element={<RequireAdmin><DashboardPage /></RequireAdmin>} />
                   <Route path="attivita" element={<OperationsPage />} />
                   <Route path="cerca" element={<GlobalSearchPage />} />
                   <Route path="vendite" element={<SellingBillsPage />} />
@@ -92,12 +92,12 @@ export default function App() {
                   <Route path="ordini" element={<PendingPage />} />
                   <Route path="anagrafiche" element={<DirectoriesPage />} />
                   <Route path="anagrafiche/clienti/:customerName" element={<CustomerDetailPage />} />
-                  <Route path="acquisti" element={<BuyingBillsPage />} />
-                  <Route path="acquisti/:uuid" element={<BuyingBillDetailPage />} />
+                  <Route path="acquisti" element={<RequireAdmin><BuyingBillsPage /></RequireAdmin>} />
+                  <Route path="acquisti/:uuid" element={<RequireAdmin><BuyingBillDetailPage /></RequireAdmin>} />
                   <Route path="magazzino" element={<InventoryPage />} />
-                  <Route path="acconti" element={<DepositsPage />} />
-                  <Route path="assegni" element={<ChecksPage />} />
-                  <Route path="provvigioni" element={<ProvisionsPage />} />
+                  <Route path="acconti" element={<RequireAdmin><DepositsPage /></RequireAdmin>} />
+                  <Route path="assegni" element={<RequireAdmin><ChecksPage /></RequireAdmin>} />
+                  <Route path="provvigioni" element={<RequireAdmin><ProvisionsPage /></RequireAdmin>} />
                   <Route
                     path="amministrazione"
                     element={
