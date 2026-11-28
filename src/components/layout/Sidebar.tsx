@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { NAV_SECTIONS } from '@/app/nav';
+import { visibleNavSections } from '@/app/nav';
 import { useAuth } from '@/features/auth/AuthContext';
 import { cn } from '@/lib/utils';
 import { SoftComfortBrand } from '@/components/common/SoftComfortBrand';
@@ -18,9 +18,8 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
       </div>
 
       <nav className="flex-1 overflow-y-auto px-2.5 py-2 scrollbar-thin">
-        {NAV_SECTIONS.map((section, i) => {
-          const items = section.items.filter((it) => !it.adminOnly || user?.isAdmin);
-          if (items.length === 0) return null;
+        {visibleNavSections(Boolean(user?.isAdmin)).map((section, i) => {
+          const { items } = section;
 
           return (
             <div key={i} className={cn(i > 0 && 'mt-5')}>

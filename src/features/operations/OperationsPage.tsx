@@ -15,29 +15,11 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import {
-  useChecks,
-  useDepositsToCollect,
-  useProvisionsToPay,
-  useSellingBills,
-} from '@/hooks/useQueries';
-import { buildOperationsInbox, type WorkItem, type WorkPriority } from './operationsInbox';
+import type { WorkItem } from './operationsInbox';
+import { priorityLabel, priorityVariant } from './priority';
+import { useOperationsInbox } from './useOperationsInbox';
 
-function priorityVariant(priority: WorkPriority) {
-  if (priority === 'critical') return 'destructive' as const;
-  if (priority === 'warning') return 'warning' as const;
-  if (priority === 'positive') return 'success' as const;
-  return 'outline' as const;
-}
-
-function priorityLabel(priority: WorkPriority) {
-  if (priority === 'critical') return 'Urgente';
-  if (priority === 'warning') return 'Attenzione';
-  if (priority === 'positive') return 'Pronta';
-  return 'Da fare';
-}
-
-function WorkList({
+export function WorkList({
   items,
   emptyTitle,
   limit = 7,
@@ -87,21 +69,7 @@ function WorkList({
 }
 
 export function OperationsPage() {
-  const bills = useSellingBills();
-  const deposits = useDepositsToCollect();
-  const provisions = useProvisionsToPay();
-  const checks = useChecks();
-
-  const isLoading =
-    bills.isLoading || deposits.isLoading || provisions.isLoading || checks.isLoading;
-  const error = bills.error ?? deposits.error ?? provisions.error ?? checks.error;
-
-  const inbox = buildOperationsInbox(
-    bills.data ?? [],
-    deposits.data?.depositResponses ?? [],
-    provisions.data?.provisionResponses ?? [],
-    checks.data ?? [],
-  );
+  const { inbox, isAdmin, isLoading, error, hasBills, retry } = useOperationsInbox();
 
   const totalOpen =
     inbox.urgent.length +
@@ -109,14 +77,7 @@ export function OperationsPage() {
     inbox.collections.length +
     inbox.administration.length;
 
-  const retry = () => {
-    bills.refetch();
-    deposits.refetch();
-    provisions.refetch();
-    checks.refetch();
-  };
-
-  if (error && !bills.data) {
+  if (error && !hasBills) {
     return (
       <div className="space-y-5">
         <PageHeader title="Da fare" description="Attività operative da gestire" />
@@ -132,7 +93,7 @@ export function OperationsPage() {
         description="Un'unica vista delle cose che richiedono attenzione, senza dover controllare ogni sezione."
       />
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <div className={`grid gap-3 sm:grid-cols-2 ${isAdmin ? 'xl:grid-cols-4' : 'xl:grid-cols-3'}`}>
         <SummaryPill
           label="Attività aperte"
           value={isLoading ? '…' : String(totalOpen)}
@@ -145,12 +106,14 @@ export function OperationsPage() {
           tone={inbox.urgent.length > 0 ? 'red' : 'green'}
           className="min-w-0"
         />
-        <SummaryPill
-          label="Incassi"
-          value={isLoading ? '…' : String(inbox.collections.length)}
-          tone={inbox.collections.length > 0 ? 'gold' : 'green'}
-          className="min-w-0"
-        />
+        {isAdmin && (
+          <SummaryPill
+            label="Incassi"
+            value={isLoading ? '…' : String(inbox.collections.length)}
+            tone={inbox.collections.length > 0 ? 'gold' : 'green'}
+            className="min-w-0"
+          />
+        )}
         <SummaryPill
           label="Vendite operative"
           value={isLoading ? '…' : String(inbox.sales.length)}
@@ -174,7 +137,9 @@ export function OperationsPage() {
                   <AlertTriangle className="h-4 w-4 text-destructive" />
                   Urgenti e scadenze
                 </CardTitle>
-                <CardDescription>Consegne e assegni che richiedono priorità.</CardDescription>
+                <CardDescription>
+                  {isAdmin ? 'Consegne e assegni che richiedono priorità.' : 'Consegne in ritardo o previste per oggi.'}
+                </CardDescription>
               </div>
               <Button size="sm" variant="outline" asChild>
                 <Link to="/consegne">Planning</Link>
@@ -203,41 +168,45 @@ export function OperationsPage() {
             </CardContent>
           </Card>
 
-          <Card className="overflow-hidden">
-            <CardHeader className="flex-row items-center justify-between space-y-0 border-b border-[#eee6de] bg-[#fffefd]">
-              <div>
-                <CardTitle className="flex items-center gap-2">
-                  <PiggyBank className="h-4 w-4 text-[#9a6b24]" />
-                  Incassi
-                </CardTitle>
-                <CardDescription>Acconti registrati ma ancora da incassare.</CardDescription>
-              </div>
-              <Button size="sm" variant="outline" asChild>
-                <Link to="/acconti">Acconti</Link>
-              </Button>
-            </CardHeader>
-            <CardContent className="p-0">
-              <WorkList items={inbox.collections} emptyTitle="Nessun acconto da incassare" />
-            </CardContent>
-          </Card>
+          {isAdmin && (
+            <>
+              <Card className="overflow-hidden">
+                <CardHeader className="flex-row items-center justify-between space-y-0 border-b border-[#eee6de] bg-[#fffefd]">
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <PiggyBank className="h-4 w-4 text-[#9a6b24]" />
+                      Incassi
+                    </CardTitle>
+                    <CardDescription>Acconti registrati ma ancora da incassare.</CardDescription>
+                  </div>
+                  <Button size="sm" variant="outline" asChild>
+                    <Link to="/acconti">Acconti</Link>
+                  </Button>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <WorkList items={inbox.collections} emptyTitle="Nessun acconto da incassare" />
+                </CardContent>
+              </Card>
 
-          <Card className="overflow-hidden">
-            <CardHeader className="flex-row items-center justify-between space-y-0 border-b border-[#eee6de] bg-[#fffefd]">
-              <div>
-                <CardTitle className="flex items-center gap-2">
-                  <HandCoins className="h-4 w-4 text-[#756a63]" />
-                  Amministrazione
-                </CardTitle>
-                <CardDescription>Provvigioni e attività amministrative aperte.</CardDescription>
-              </div>
-              <Button size="sm" variant="outline" asChild>
-                <Link to="/provvigioni">Provvigioni</Link>
-              </Button>
-            </CardHeader>
-            <CardContent className="p-0">
-              <WorkList items={inbox.administration} emptyTitle="Amministrazione aggiornata" />
-            </CardContent>
-          </Card>
+              <Card className="overflow-hidden">
+                <CardHeader className="flex-row items-center justify-between space-y-0 border-b border-[#eee6de] bg-[#fffefd]">
+                  <div>
+                    <CardTitle className="flex items-center gap-2">
+                      <HandCoins className="h-4 w-4 text-[#756a63]" />
+                      Provvigioni
+                    </CardTitle>
+                    <CardDescription>Provvigioni e attività amministrative aperte.</CardDescription>
+                  </div>
+                  <Button size="sm" variant="outline" asChild>
+                    <Link to="/provvigioni">Provvigioni</Link>
+                  </Button>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <WorkList items={inbox.administration} emptyTitle="Nessuna provvigione da pagare" />
+                </CardContent>
+              </Card>
+            </>
+          )}
         </div>
       )}
     </div>

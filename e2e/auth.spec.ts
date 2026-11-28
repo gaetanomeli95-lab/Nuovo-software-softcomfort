@@ -22,7 +22,7 @@ test.describe('critical operator flows', () => {
   test('demo → home → vendite → dettaglio', async ({ page }) => {
     await enterDemo(page);
 
-    await expect(page.getByRole('heading', { name: /Tutto quello che serve/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Buon lavoro/i })).toBeVisible();
     await page.getByRole('link', { name: /^Vendite/ }).first().click();
 
     await expect(page).toHaveURL(/\/vendite$/);
@@ -77,7 +77,7 @@ test.describe('critical operator flows', () => {
 
   test('se il dispositivo va offline l’operatore viene avvisato', async ({ page, context }) => {
     await enterDemo(page);
-    await expect(page.getByRole('heading', { name: /Tutto quello che serve/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Buon lavoro/i })).toBeVisible();
     await context.setOffline(true);
 
     await expect(page.getByText(/Il dispositivo risulta offline/i)).toBeVisible();
@@ -144,5 +144,42 @@ test.describe('critical operator flows', () => {
     await page.getByRole('button', { name: 'Esporta backup' }).click();
     const download = await downloadPromise;
     expect(download.suggestedFilename()).toMatch(/^softcomfort-backup-\d{4}-\d{2}-\d{2}\.json$/);
+  });
+
+  test('la home mostra le attività di oggi e i tre gruppi del menu', async ({ page }) => {
+    await enterDemo(page);
+
+    await expect(page.getByRole('heading', { name: 'Oggi', level: 2 })).toBeVisible();
+    for (const group of ['Negozio', 'Consegne e magazzino', 'Amministratore']) {
+      await expect(page.getByRole('heading', { name: new RegExp(`^${group}`), level: 2 })).toBeVisible();
+    }
+    await expect(page.getByRole('link', { name: /^Assegni/ }).first()).toBeVisible();
+  });
+
+  test('il PC operativo non vede né apre le aree riservate all’admin', async ({ page }) => {
+    await enterDemo(page);
+    await page.getByRole('button', { name: 'Prova come PC operativo' }).click();
+
+    await expect(page.getByText('PC operativo', { exact: false }).first()).toBeVisible();
+    await expect(page.getByRole('heading', { name: /^Amministratore/, level: 2 })).toHaveCount(0);
+    for (const label of ['Dashboard', 'Fatture acquisto', 'Acconti', 'Assegni', 'Provvigioni', 'Impostazioni']) {
+      await expect(page.getByRole('link', { name: new RegExp(`^${label}`) })).toHaveCount(0);
+    }
+
+    for (const path of ['/dashboard', '/acquisti', '/acconti', '/assegni', '/provvigioni', '/amministrazione']) {
+      await page.goto(path);
+      await expect(page).toHaveURL(/\/$/);
+    }
+
+    await page.goto('/attivita');
+    await expect(page.getByRole('heading', { name: 'Da fare', level: 1 })).toBeVisible();
+    await expect(page.getByText('Acconto da incassare')).toHaveCount(0);
+    await expect(page.getByText(/Assegno in scadenza/)).toHaveCount(0);
+    await expect(page.getByText('Provvigione da pagare')).toHaveCount(0);
+
+    await page.getByRole('button', { name: 'Account' }).click();
+    await page.getByRole('menuitem', { name: /PC amministratore/ }).click();
+    await page.goto('/assegni');
+    await expect(page).toHaveURL(/\/assegni$/);
   });
 });

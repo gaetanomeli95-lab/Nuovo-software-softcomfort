@@ -1,3 +1,4 @@
+import { useAuth } from '@/features/auth/AuthContext';
 import { useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import {
@@ -70,23 +71,28 @@ export function GlobalSearchPage() {
   const [params, setParams] = useSearchParams();
   const query = params.get('q') ?? '';
 
+  // Acquisti e assegni sono riservati all'admin: sui PC operativi non vengono caricati né mostrati.
+  const { user } = useAuth();
+  const isAdmin = Boolean(user?.isAdmin);
+
   const sales = useSellingBills();
-  const purchases = useBuyingBills();
+  const purchases = useBuyingBills({ enabled: isAdmin });
   const available = useInventoryAvailable();
   const delivered = useInventoryDelivered();
   const pending = usePendingOrders();
-  const checks = useChecks();
+  const checks = useChecks({ enabled: isAdmin });
 
   const groups = useMemo(
     () => buildGlobalSearch(query, {
       sales: sales.data ?? [],
-      purchases: purchases.data ?? [],
+      purchases: isAdmin ? purchases.data ?? [] : [],
       inventory: [...(available.data ?? []), ...(delivered.data ?? [])],
       pending: pending.data ?? [],
-      checks: checks.data ?? [],
+      checks: isAdmin ? checks.data ?? [] : [],
     }),
     [
       query,
+      isAdmin,
       sales.data,
       purchases.data,
       available.data,
@@ -114,11 +120,13 @@ export function GlobalSearchPage() {
 
   const retry = () => {
     sales.refetch();
-    purchases.refetch();
     available.refetch();
     delivered.refetch();
     pending.refetch();
-    checks.refetch();
+    if (isAdmin) {
+      purchases.refetch();
+      checks.refetch();
+    }
   };
 
   return (
@@ -195,19 +203,21 @@ export function GlobalSearchPage() {
             </CardContent>
           </Card>
 
-          <Card className="overflow-hidden">
-            <CardHeader className="border-b border-[#eee6de] bg-[#fffefd]">
-              <CardTitle className="flex items-center gap-2">
-                <ShoppingCart className="h-4 w-4 text-[#9a6b24]" />
-                Acquisti
-                <Badge variant="outline">{groups.purchases.length}</Badge>
-              </CardTitle>
-              <CardDescription>Fornitore, stato e articoli acquistati.</CardDescription>
-            </CardHeader>
-            <CardContent className="p-0">
-              <ResultList rows={groups.purchases} empty="Nessun acquisto corrispondente." />
-            </CardContent>
-          </Card>
+          {isAdmin && (
+            <Card className="overflow-hidden">
+              <CardHeader className="border-b border-[#eee6de] bg-[#fffefd]">
+                <CardTitle className="flex items-center gap-2">
+                  <ShoppingCart className="h-4 w-4 text-[#9a6b24]" />
+                  Acquisti
+                  <Badge variant="outline">{groups.purchases.length}</Badge>
+                </CardTitle>
+                <CardDescription>Fornitore, stato e articoli acquistati.</CardDescription>
+              </CardHeader>
+              <CardContent className="p-0">
+                <ResultList rows={groups.purchases} empty="Nessun acquisto corrispondente." />
+              </CardContent>
+            </Card>
+          )}
 
           <Card className="overflow-hidden">
             <CardHeader className="border-b border-[#eee6de] bg-[#fffefd]">
@@ -237,19 +247,21 @@ export function GlobalSearchPage() {
             </CardContent>
           </Card>
 
-          <Card className="overflow-hidden xl:col-span-2">
-            <CardHeader className="border-b border-[#eee6de] bg-[#fffefd]">
-              <CardTitle className="flex items-center gap-2">
-                <Landmark className="h-4 w-4 text-[#6f4a16]" />
-                Assegni
-                <Badge variant="outline">{groups.checks.length}</Badge>
-              </CardTitle>
-              <CardDescription>Intestatario e riferimenti documento.</CardDescription>
-            </CardHeader>
-            <CardContent className="p-0">
-              <ResultList rows={groups.checks} empty="Nessun assegno corrispondente." />
-            </CardContent>
-          </Card>
+          {isAdmin && (
+            <Card className="overflow-hidden xl:col-span-2">
+              <CardHeader className="border-b border-[#eee6de] bg-[#fffefd]">
+                <CardTitle className="flex items-center gap-2">
+                  <Landmark className="h-4 w-4 text-[#6f4a16]" />
+                  Assegni
+                  <Badge variant="outline">{groups.checks.length}</Badge>
+                </CardTitle>
+                <CardDescription>Intestatario e riferimenti documento.</CardDescription>
+              </CardHeader>
+              <CardContent className="p-0">
+                <ResultList rows={groups.checks} empty="Nessun assegno corrispondente." />
+              </CardContent>
+            </Card>
+          )}
         </div>
       )}
     </div>

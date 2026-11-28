@@ -26,12 +26,28 @@ interface AuthState {
   login: (username: string, password: string) => Promise<void>;
   loginDemo: () => void;
   logout: () => void;
+  /** Solo in demo: prova il gestionale come PC admin o come PC operativo. */
+  setDemoRole: (role: DemoRole) => void;
 }
+
+export type DemoRole = 'admin' | 'operatore';
 
 const AuthContext = createContext<AuthState | null>(null);
 
 const DEMO_USERNAME = 'Demo Soft Comfort';
-const DEMO_ROLES = ['ROLE_ADMIN'];
+const DEMO_ROLE_KEY = 'gestionale.demoRole';
+
+function readDemoRole(): DemoRole {
+  try {
+    return sessionStorage.getItem(DEMO_ROLE_KEY) === 'operatore' ? 'operatore' : 'admin';
+  } catch {
+    return 'admin';
+  }
+}
+
+function demoRoles(role: DemoRole = readDemoRole()): string[] {
+  return role === 'admin' ? ['ROLE_ADMIN'] : ['ROLE_USER'];
+}
 
 function toUser(username: string, roles: string[]): AuthUser {
   return {
@@ -42,7 +58,7 @@ function toUser(username: string, roles: string[]): AuthUser {
 }
 
 function automaticDemoUser(): AuthUser | null {
-  return AUTOMATIC_DEMO_MODE ? toUser(DEMO_USERNAME, DEMO_ROLES) : null;
+  return AUTOMATIC_DEMO_MODE ? toUser(DEMO_USERNAME, demoRoles()) : null;
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -83,11 +99,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     saveSession({
       token: DEMO_SESSION_TOKEN,
       username: DEMO_USERNAME,
-      roles: DEMO_ROLES,
+      roles: demoRoles(),
     });
     setDemo(true);
-    setUser(toUser(DEMO_USERNAME, DEMO_ROLES));
+    setUser(toUser(DEMO_USERNAME, demoRoles()));
   }, []);
+
+  const setDemoRole = useCallback((role: DemoRole) => {
+    if (!demo) return;
+    try {
+      sessionStorage.setItem(DEMO_ROLE_KEY, role);
+    } catch {
+      // sessionStorage non disponibile: il cambio vale solo per questa pagina.
+    }
+    const roles = demoRoles(role);
+    if (!AUTOMATIC_DEMO_MODE) {
+      saveSession({ token: DEMO_SESSION_TOKEN, username: DEMO_USERNAME, roles });
+    }
+    setUser(toUser(DEMO_USERNAME, roles));
+  }, [demo]);
 
   useEffect(() => {
     setOnUnauthorized(() => {
@@ -110,8 +140,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       login,
       loginDemo,
       logout,
+      setDemoRole,
     }),
-    [user, demo, login, loginDemo, logout],
+    [user, demo, login, loginDemo, logout, setDemoRole],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
